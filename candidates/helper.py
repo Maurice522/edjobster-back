@@ -1142,6 +1142,9 @@ def createCandidatewithoutResumeParser(request):
     # These are optional fields
     exp_years = data.get('exp_years', None)
     exp_months = data.get('exp_months', None)
+    admission_date = data.get('admission_date', None)
+    graduation_date = data.get('graduation_date', None)
+    
 
 
     # FINALLY, The moment where we create our candidate
@@ -1181,6 +1184,12 @@ def createCandidatewithoutResumeParser(request):
     
     if exp_years:
         candidate.exp_years = exp_years
+    
+    if admission_date: 
+        candidate.admission_date = admission_date
+
+    if graduation_date:
+        candidate.graduation_date = graduation_date
 
     # Saveddd siuuuuuuuu
     candidate.save()
