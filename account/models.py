@@ -1,7 +1,6 @@
 from os import name
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField
 import uuid
 from common.utils import isValidUuid
 from common.models import Country, State, City
@@ -27,6 +26,8 @@ class Account(AbstractUser):
         upload_to='media/users/photos', default=None, null=True, blank=True)
     verified = models.BooleanField(default=True)
     companyId = models.UUIDField(default=None, null=True)
+    designation = models.IntegerField(default=None, null=True)
+    department = models.IntegerField(default=None, null=True)
     addedBy = models.UUIDField(default=None, null=True)
 
     def save(self, *args, **kwargs):
