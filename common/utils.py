@@ -39,3 +39,8 @@ def getDomainFromEmail(email):
     if domain:
         return domain.group()
     return None
+
+
+def generateFileName(self, filename):
+    url = "media/docs/%s/%s" % (self.domain, filename)
+    return url

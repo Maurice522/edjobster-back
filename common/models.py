@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class Country(models.Model):
@@ -63,6 +64,8 @@ class City(models.Model):
     name = models.CharField(max_length=50, null=True, blank=True)
     state = models.ForeignKey(
         State, default=1, verbose_name='State', on_delete=models.CASCADE)
+    pincodes = ArrayField(models.CharField(
+        max_length=6, blank=True), default=list)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -101,3 +104,27 @@ class City(models.Model):
         if state:
             return City.objects.filter(state=state)
         return []
+
+
+class NoteType(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.name)[:20]
+
+    class Meta:
+        verbose_name = 'NoteType'
+        verbose_name_plural = 'NoteTypes'
+
+    @staticmethod
+    def getById(countryId):
+        if NoteType.objects.filter(id=countryId).exists():
+            return NoteType.objects.get(id=countryId)
+        return None
+
+    @staticmethod
+    def getAll():
+        return NoteType.objects.all()
