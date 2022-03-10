@@ -25,10 +25,10 @@ class Account(AbstractUser):
     photo = models.ImageField(
         upload_to='media/users/photos', default=None, null=True, blank=True)
     verified = models.BooleanField(default=True)
-    companyId = models.UUIDField(default=None, null=True)
-    designation = models.IntegerField(default=None, null=True)
-    department = models.IntegerField(default=None, null=True)
-    addedBy = models.UUIDField(default=None, null=True)
+    companyId = models.UUIDField(default=None, null=True, blank=True)
+    designation = models.IntegerField(default=None, null=True, blank=True)
+    department = models.IntegerField(default=None, null=True, blank=True)
+    addedBy = models.UUIDField(default=None, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.accountId = uuid.uuid4()
