@@ -177,6 +177,8 @@ def signInAccount(request):
         'company': serialized_company.data,
     }
 
+    print ('return', data)
+
     return data
 
 
