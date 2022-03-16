@@ -31,8 +31,8 @@ class Location(models.Model):
         verbose_name_plural = 'Locations'
 
     @staticmethod
-    def getById(id):
-        if Location.objects.filter(id=id).exists():
+    def getById(id, company):
+        if Location.objects.filter(company=company, id=id).exists():
             return Location.objects.get(id=id)
         return None
 
