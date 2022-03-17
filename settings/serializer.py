@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Location, Department, Designation, Degree, Pipeline, PipelineField, PipelineStage, EmailCategory, EmailTemplate
+from .models import Location, Department, Designation, Degree, Pipeline, PipelineField, PipelineStage, EmailCategory, EmailTemplate, EmailFields
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -60,7 +60,11 @@ class PipelineStageSerializer(serializers.ModelSerializer):
         model = PipelineStage
         fields = ['id', 'name']
 
+class EmailFieldSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = EmailCategory
+        fields = ['id', 'name', 'value']
 
 class EmailCategorySerializer(serializers.ModelSerializer):
 
@@ -72,8 +76,11 @@ class EmailCategorySerializer(serializers.ModelSerializer):
 
 class EmailTemplateSerializer(serializers.ModelSerializer):
 
+    category_id = serializers.CharField(source='category.id')
+    category_name = serializers.CharField(source='category.name')
+
     class Meta:
         model = EmailTemplate
-        fields = ['id', 'name', 'subject', 'message', 'type', 'category', 'attachment', 'created' , 'updated']
+        fields = ['id', 'name', 'subject', 'message', 'type', 'category_id', 'category_name', 'attachment', 'created' , 'updated']
 
                                                  
