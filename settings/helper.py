@@ -1,6 +1,7 @@
 from collections import namedtuple
 import email
 import re
+from unicodedata import category
 from account.models import Account, Company, TokenEmailVerification, TokenResetPassword
 from rest_framework.response import Response
 from rest_framework.authentication import BaseAuthentication
@@ -8,10 +9,9 @@ from django.contrib.auth import authenticate
 from common.encoder import decode
 from common.utils import isValidUuid, getDomainFromEmail
 from common.models import Country, State, City
-import os
-
+import json
 from settings.models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineField, PipelineStage
-from settings.serializer import DegreeSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineFieldSerializer, PipelineStageSerializer
+from settings.serializer import DegreeSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineFieldSerializer, PipelineSerializer, PipelineStageSerializer
 
 
 def getCompanyByUser(user):
@@ -84,7 +84,7 @@ def deleteLocation(request):
         location = Location.getById(id, company)
         if not location:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Location not found'
             }
 
@@ -92,7 +92,7 @@ def deleteLocation(request):
         return {
             'code': 200,
             'msg': 'Location deleted succesfully!',
-            'data': getLocations()['data']
+            'data': getLocations(request)['data']
         }
 
     return {
@@ -152,7 +152,7 @@ def deleteDepartment(request):
         department = Department.getById(id, company)
         if not department:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Department not found'
             }
 
@@ -160,7 +160,7 @@ def deleteDepartment(request):
         return {
             'code': 200,
             'msg': 'Department deleted succesfully!',
-            'data': getDepartments()['data']
+            'data': getDepartments(request)['data']
         }
 
     return {
@@ -171,7 +171,7 @@ def deleteDepartment(request):
 def getDegrees(request):
 
     company = Company.getByUser(request.user)
-    degrees = Degree.getAll(company=company)
+    degrees = Degree.getForCompany(company=company)
 
     serializer = DegreeSerializer(degrees, many=True)
 
@@ -180,7 +180,7 @@ def getDegrees(request):
         'data': serializer.data
     }    
 
-def saveDepartment(request):
+def saveDegree(request):
 
     company = Company.getByUser(request.user)    
     
@@ -220,7 +220,7 @@ def deleteDegree(request):
         degree = Degree.getById(id, company)
         if not degree:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Degree not found'
             }
 
@@ -228,7 +228,7 @@ def deleteDegree(request):
         return {
             'code': 200,
             'msg': 'Degree deleted succesfully!',
-            'data': getDegrees()['data']
+            'data': getDegrees(request)['data']
         }
 
     return {
@@ -239,7 +239,7 @@ def deleteDegree(request):
 def getDesignations(request):
 
     company = Company.getByUser(request.user)
-    designation = Designation.getAll(company=company)
+    designation = Designation.getForCompany(company=company)
 
     serializer = DesignationSerializer(designation, many=True)
 
@@ -277,7 +277,7 @@ def saveDesignation(request):
     designation.name = name
     designation.save()
 
-    return getDegrees(request)
+    return getDesignations(request)
 
 def deleteDecignation(request): 
 
@@ -288,7 +288,7 @@ def deleteDecignation(request):
         designation = Designation.getById(id, company)
         if not designation:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Designation not found'
             }
 
@@ -296,7 +296,7 @@ def deleteDecignation(request):
         return {
             'code': 200,
             'msg': 'Designation deleted succesfully!',
-            'data': getDesignations()['data']
+            'data': getDesignations(request)['data']
         }
 
     return {
@@ -309,7 +309,7 @@ def deleteDecignation(request):
 def getPipelineFields(request):
 
     company = Company.getByUser(request.user)
-    pipelineFields = PipelineField.getAll(company=company)
+    pipelineFields = PipelineField.getForCompany(company=company)
 
     serializer = PipelineFieldSerializer(pipelineFields, many=True)
 
@@ -358,7 +358,7 @@ def deletePipelineField(request):
         pipelineField = PipelineField.getById(id, company)
         if not pipelineField:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Pipeline Field not found'
             }
 
@@ -366,7 +366,7 @@ def deletePipelineField(request):
         return {
             'code': 200,
             'msg': 'Pipeline Field deleted succesfully!',
-            'data': getPipelineFields()['data']
+            'data': getPipelineFields(request)['data']
         }
 
     return {
@@ -377,7 +377,7 @@ def deletePipelineField(request):
 def getPipelineStages(request):
 
     company = Company.getByUser(request.user)
-    pipelineStages = PipelineStage.getAll(company=company)
+    pipelineStages = PipelineStage.getForCompany(company=company)
 
     serializer = PipelineStageSerializer(pipelineStages, many=True)
 
@@ -415,7 +415,7 @@ def savePipelineStage(request):
     pipelineStage.name = name
     pipelineStage.save()
 
-    return getDegrees(request)
+    return getPipelineStages(request)
 
 def deletePipelineStage(request): 
 
@@ -426,7 +426,7 @@ def deletePipelineStage(request):
         pipelineStage = PipelineStage.getById(id, company)
         if not pipelineStage:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Pipeline Stage not found'
             }
 
@@ -434,7 +434,7 @@ def deletePipelineStage(request):
         return {
             'code': 200,
             'msg': 'Pipeline Stage deleted succesfully!',
-            'data': getPipelineStages()['data']
+            'data': getPipelineStages(request)['data']
         }
 
     return {
@@ -445,9 +445,9 @@ def deletePipelineStage(request):
 def getPipelines(request):
 
     company = Company.getByUser(request.user)
-    pipelines = Pipeline.getAll(company=company)
+    pipelines = Pipeline.getForCompany(company=company)
 
-    serializer = Pipeline(pipelines, many=True)
+    serializer = PipelineSerializer(pipelines, many=True)
 
     return {
         'code': 200,
@@ -460,8 +460,9 @@ def savePipeline(request):
     
     data = request.data    
     name = data.get('name', None)   
-
-    if not name:
+    fields = data.get('fields', None)   
+    
+    if not name or not fields or not isinstance(fields, list):
         return {
             'code': 400,
             'msg': 'Invalid request'
@@ -481,6 +482,7 @@ def savePipeline(request):
         pipeline.company = company
 
     pipeline.name = name
+    pipeline.fields = fields
     pipeline.save()
 
     return getPipelines(request)
@@ -494,7 +496,7 @@ def deletePipeline(request):
         pipeline = Pipeline.getById(id, company)
         if not pipeline:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Pipeline not found'
             }
 
@@ -502,7 +504,7 @@ def deletePipeline(request):
         return {
             'code': 200,
             'msg': 'Pipeline deleted succesfully!',
-            'data': getPipelines()['data']
+            'data': getPipelines(request)['data']
         }
 
     return {
@@ -514,8 +516,7 @@ def deletePipeline(request):
 
 def getEmailFileds(request):
 
-    company = Company.getByUser(request.user)
-    fields = EmailFields.getAll(company=company)
+    fields = EmailFields.getAll()
 
     serializer = EmailFieldSerializer(fields, many=True)
 
@@ -527,7 +528,7 @@ def getEmailFileds(request):
 def getEmailCategories(request):
 
     company = Company.getByUser(request.user)
-    emails = EmailCategory.getAll(company=company)
+    emails = EmailCategory.getForCompany(company=company)
 
     serializer = EmailCategorySerializer(emails, many=True)
 
@@ -559,7 +560,7 @@ def saveEmailCategory(request):
                 'msg': 'Email Category not found'
             }
     else:
-        category = Pipeline()   
+        category = EmailCategory()   
         category.company = company
 
     category.name = name
@@ -576,7 +577,7 @@ def deleteEmailCategory(request):
         category = EmailCategory.getById(id, company)
         if not category:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Email Category not found'
             }
 
@@ -584,7 +585,7 @@ def deleteEmailCategory(request):
         return {
             'code': 200,
             'msg': 'Email Category deleted succesfully!',
-            'data': getEmailCategories()['data']
+            'data': getEmailCategories(request)['data']
         }
 
     return {
@@ -595,7 +596,7 @@ def deleteEmailCategory(request):
 def getEmailTemplates(request):
 
     company = Company.getByUser(request.user)
-    emails = EmailTemplate.getAll(company=company)
+    emails = EmailTemplate.getForCompany(company=company)
 
     serializer = EmailTemplateSerializer(emails, many=True)
 
@@ -611,13 +612,21 @@ def saveEmailTemplate(request):
     data = request.data    
     name = data.get('name', None)   
     type = data.get('type', None)   
+    category = data.get('category', None)   
     subject = data.get('subject', None)   
     message = data.get('message', None)   
 
-    if not name or not type or not type in EmailTemplate.EMAIL_TYPES or not message or not subject:
+    if not name or not category or not type or not type in EmailTemplate.EMAIL_TYPES or not message or not subject:
         return {
             'code': 400,
             'msg': 'Invalid request'
+        }
+
+    category = EmailCategory.getById(category, company)    
+    if not category:
+        return {
+            'code': 400,
+            'msg': 'Category not found!'
         }
 
     id = data.get('id', None)
@@ -643,12 +652,13 @@ def saveEmailTemplate(request):
             email.attachment = file    
     
     email.name = name
+    email.category = category
     email.type = type
     email.subject = subject
     email.message = message
     email.save()
 
-    return getEmailCategories(request)
+    return getEmailTemplates(request)
 
 def deleteEmailTemmplate(request): 
 
@@ -657,11 +667,11 @@ def deleteEmailTemmplate(request):
 
     if id:
         email = EmailTemplate.getById(id, company)
-        if email.attachment:
+        if email and email.attachment:
                 email.attachment.delete()
         if not email:
             return {
-                'code': 200,
+                'code': 400,
                 'msg': 'Email Template not found'
             }
 
@@ -669,7 +679,7 @@ def deleteEmailTemmplate(request):
         return {
             'code': 200,
             'msg': 'Email Template deleted succesfully!',
-            'data': getEmailTemplates()['data']
+            'data': getEmailTemplates(request)['data']
         }
 
     return {

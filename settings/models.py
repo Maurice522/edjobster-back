@@ -38,7 +38,7 @@ class Location(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return Location.objects.filter(company=company).exists()
+        return Location.objects.filter(company=company)
 
     @staticmethod
     def getAll():
@@ -68,7 +68,7 @@ class Department(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return Department.objects.filter(company=company).exists()
+        return Department.objects.filter(company=company)
 
     @staticmethod
     def getAll():
@@ -102,7 +102,7 @@ class Designation(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return Designation.objects.filter(company=company).exists()
+        return Designation.objects.filter(company=company)
 
 
 class Degree(models.Model):
@@ -132,7 +132,7 @@ class Degree(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return Degree.objects.filter(company=company).exists()
+        return Degree.objects.filter(company=company)
 
 # Pipeline
 class PipelineStage(models.Model):
@@ -162,7 +162,7 @@ class PipelineStage(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return PipelineStage.objects.filter(company=company).exists()
+        return PipelineStage.objects.filter(company=company)
 
 
 
@@ -193,7 +193,7 @@ class PipelineField(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return PipelineField.objects.filter(company=company).exists()
+        return PipelineField.objects.filter(company=company)
 
 
 class Pipeline(models.Model):
@@ -201,7 +201,7 @@ class Pipeline(models.Model):
     company = models.ForeignKey(
         Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
-    fields = ArrayField(ArrayField(models.IntegerField()))
+    fields = ArrayField(models.CharField(max_length=50), blank=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -213,7 +213,7 @@ class Pipeline(models.Model):
         verbose_name_plural = 'Pipelines'
 
     @staticmethod
-    def getById(company, id):
+    def getById(id, company):
         if Pipeline.objects.filter(company=company, id=id).exists():
             return Pipeline.objects.get(id=id)
         return None
@@ -224,7 +224,7 @@ class Pipeline(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return Pipeline.objects.filter(company=company).exists()
+        return Pipeline.objects.filter(company=company)
 
 # Email
 class EmailCategory(models.Model):
@@ -250,7 +250,7 @@ class EmailCategory(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return EmailCategory.objects.filter(company=company).exists()
+        return EmailCategory.objects.filter(company=company)
 
     @staticmethod
     def getAll():
@@ -296,7 +296,7 @@ class EmailTemplate(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return EmailTemplate.objects.filter(company=company).exists()
+        return EmailTemplate.objects.filter(company=company)
 
     @staticmethod
     def getAll():
@@ -323,4 +323,8 @@ class EmailFields(models.Model):
 
     @staticmethod
     def getForCompany(company):
-        return EmailFields.objects.filter(company=company).exists()
+        return EmailFields.objects.filter(company=company)
+
+    @staticmethod
+    def getAll():
+        return EmailFields.objects.all()        
