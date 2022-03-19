@@ -165,6 +165,10 @@ def signInAccount(request):
     refresh = RefreshToken.for_user(account)
     access = AccessToken.for_user(account)
 
+    print('account', account)
+    print('refresh', refresh)
+    print('access', access)
+
     data = {
         'code': 200,
         'refresh': str(refresh),
