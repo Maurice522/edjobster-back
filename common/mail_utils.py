@@ -4,9 +4,9 @@ from django.template.loader import render_to_string
 import threading
 from common.encoder import encode
 
-URL_RESET_PSWD = "http://192.168.1.205:8080/authentication/reset-password/"
-URL_EMAIL_VERIFY = "http://192.168.1.205:8080/authentication/activate?token="
-URL_EMAIL_ACTIVATE = "http://192.168.1.205:8080/authentication/verify/"
+URL_RESET_PSWD = "http://34.125.49.10/authentication/reset-password/"
+URL_EMAIL_VERIFY = "http://34.125.49.10/authentication/activate?token="
+URL_EMAIL_ACTIVATE = "http://34.125.49.10/authentication/verify/"
 
 
 class ResetPasswordMailer(threading.Thread):
