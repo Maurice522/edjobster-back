@@ -36,14 +36,12 @@ def signUpAccount(request):
     locLon = data.get('loc_lon', None)
     address = data.get('address', None)
     landmark = data.get('landmark', None)
-    stateId = data.get('state', None)
     cityId = data.get('city', None)
-    countryId = data.get('country', None)
 
     print('info', firstName, lastName, mobile, email, companyName,
-          pincode, address, landmark, stateId, countryId, cityId)
+          pincode, address, landmark, cityId)
 
-    if not firstName or not lastName or not mobile or not email or not companyName or not pincode or not address or not landmark or not stateId or not countryId or not cityId:
+    if not firstName or not lastName or not mobile or not email or not companyName or not pincode or not address or not landmark or not cityId:
 
         return {
             'code': 400,
@@ -72,9 +70,7 @@ def signUpAccount(request):
             'msg': 'Email already exists'
         }
 
-    mState = State.getById(stateId)
     mCity = City.getById(cityId)
-    mCountry = Country.getById(countryId)
 
     account = Account()
     account.first_name = firstName
@@ -100,8 +96,8 @@ def signUpAccount(request):
     company.loc_lon = locLon
     company.address = address
     company.landmark = landmark
-    company.state = mState
-    company.country = mCountry
+    company.state = mCity.state
+    company.country = mCity.state.country
     company.city = mCity
     company.save()
 

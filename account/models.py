@@ -115,6 +115,12 @@ class Company(models.Model):
         verbose_name_plural = 'Companies'
 
     @staticmethod
+    def getByUser(user):
+        if Company.objects.filter(id=user.companyId).exists():
+            return Company.objects.get(id=user.companyId)
+        return None
+
+    @staticmethod
     def getById(id):
         if Company.objects.filter(id=id).exists():
             return Company.objects.get(id=id)
