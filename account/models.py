@@ -25,6 +25,7 @@ class Account(AbstractUser):
     photo = models.ImageField(
         upload_to='media/users/photos', default=None, null=True, blank=True)
     verified = models.BooleanField(default=True)
+    approved = models.BooleanField(default=False)
     companyId = models.UUIDField(default=None, null=True, blank=True)
     designation = models.IntegerField(default=None, null=True, blank=True)
     department = models.IntegerField(default=None, null=True, blank=True)
@@ -119,6 +120,12 @@ class Company(models.Model):
         if Company.objects.filter(id=user.companyId).exists():
             return Company.objects.get(id=user.companyId)
         return None
+
+    @staticmethod
+    def getByDomain(domain):
+        if Company.objects.filter(domain=domain).exists():
+            return Company.objects.get(domain=domain)
+        return None        
 
     @staticmethod
     def getById(id):

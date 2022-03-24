@@ -3,11 +3,11 @@ from .models import Location, Department, Designation, Degree, Pipeline, Pipelin
 
 
 class LocationSerializer(serializers.ModelSerializer):
-    city_id = serializers.CharField(source='city.id')
+    city_id = serializers.IntegerField(source='city.id')
     city_name = serializers.CharField(source='city.name')
-    state_id = serializers.CharField(source='state.id')
+    state_id = serializers.IntegerField(source='state.id')
     state_name = serializers.CharField(source='state.name')
-    country_id = serializers.CharField(source='country.id')
+    country_id = serializers.IntegerField(source='country.id')
     country_name = serializers.CharField(source='country.name')
 
     class Meta:
@@ -76,7 +76,7 @@ class EmailCategorySerializer(serializers.ModelSerializer):
 
 class EmailTemplateSerializer(serializers.ModelSerializer):
 
-    category_id = serializers.CharField(source='category.id')
+    category_id = serializers.IntegerField(source='category.id')
     category_name = serializers.CharField(source='category.name')
 
     class Meta:

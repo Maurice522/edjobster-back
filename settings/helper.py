@@ -134,9 +134,20 @@ def saveDepartment(request):
                 'code': 400,
                 'msg': 'Department not found'
             }
+        if department.name != name and Department.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Department with name '+name+' already exists.'
+            } 
     else:
+        if Department.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Department with name '+name+' already exists.'
+            } 
+
         department = Department()   
-        department.company = company 
+        department.company = company
     
     department.name = name
     department.save()
@@ -202,9 +213,21 @@ def saveDegree(request):
                 'code': 400,
                 'msg': 'Degree not found'
             }
+        if degree.name != name and Degree.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Degree with name '+name+' already exists.'
+            } 
     else:
+        if Degree.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Degree with name '+name+' already exists.'
+            } 
+
         degree = Degree()    
         degree.company = company
+
     
     degree.name = name
     degree.save()
@@ -270,7 +293,18 @@ def saveDesignation(request):
                 'code': 400,
                 'msg': 'Designation not found'
             }
+        if designation.name != name and Designation.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Designation with name '+name+' already exists.'
+            } 
     else:
+        if Designation.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Designation with name '+name+' already exists.'
+            } 
+
         designation = Designation()    
         designation.company = company
     
@@ -335,14 +369,26 @@ def savePipelineField(request):
 
     if id:
         pipelineField = PipelineField.getById(id, company)
-        if not PipelineField:
+        if not pipelineField:
             return {
                 'code': 400,
                 'msg': 'Pipeline Field not found'
             }
+        if pipelineField.name != name and PipelineField.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline Field with name '+name+' already exists.'
+            } 
     else:
+        if PipelineField.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline Field with name '+name+' already exists.'
+            } 
+
         pipelineField = PipelineField()    
         pipelineField.company = company
+
     
     pipelineField.name = name
     pipelineField.save()
@@ -403,12 +449,22 @@ def savePipelineStage(request):
 
     if id:
         pipelineStage = PipelineStage.getById(id, company)
-        if not PipelineStage:
+        if not pipelineStage:
             return {
                 'code': 400,
                 'msg': 'Pipeline Stage not found'
             }
+        if pipelineStage.name != name and PipelineStage.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline Stage with name '+name+' already exists.'
+            } 
     else:
+        if PipelineStage.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'pipeline Stage with name '+name+' already exists.'
+            } 
         pipelineStage = PipelineStage()    
         pipelineStage.company = company
     
@@ -477,7 +533,18 @@ def savePipeline(request):
                 'code': 400,
                 'msg': 'Pipeline not found'
             }
+        if pipeline.name != name and Pipeline.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline with name '+name+' already exists.'
+            } 
     else:
+        if Pipeline.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline with name '+name+' already exists.'
+            } 
+
         pipeline = Pipeline()    
         pipeline.company = company
 
@@ -559,7 +626,17 @@ def saveEmailCategory(request):
                 'code': 400,
                 'msg': 'Email Category not found'
             }
+        if category.name != name and EmailCategory.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Category with name '+name+' already exists.'
+            } 
     else:
+        if EmailCategory.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Category with name '+name+' already exists.'
+            } 
         category = EmailCategory()   
         category.company = company
 
@@ -638,7 +715,18 @@ def saveEmailTemplate(request):
                 'code': 400,
                 'msg': 'Email not found'
             }
+        if email.name != name and EmailTemplate.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Template with name '+name+' already exists.'
+            } 
     else:
+        if EmailTemplate.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Template with name '+name+' already exists.'
+            } 
+
         email = EmailTemplate()  
         email.company = company  
 

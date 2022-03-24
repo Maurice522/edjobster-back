@@ -65,6 +65,11 @@ class Department(models.Model):
         if Department.objects.filter(company=company, id=id).exists():
             return Department.objects.get(id=id)
         return None
+    
+    @staticmethod
+    def getByName(name, company):
+        return Department.objects.filter(company=company, name=name).exists()
+           
 
     @staticmethod
     def getForCompany(company):
@@ -97,6 +102,10 @@ class Designation(models.Model):
         return None
 
     @staticmethod
+    def getByName(name, company):
+        return Designation.objects.filter(company=company, name=name).exists()
+
+    @staticmethod
     def getAll():
         return Designation.objects.all()
 
@@ -125,6 +134,10 @@ class Degree(models.Model):
         if Degree.objects.filter(id=id, company=company).exists():
             return Degree.objects.get(id=id)
         return None
+
+    @staticmethod
+    def getByName(name, company):
+        return Degree.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getAll():
@@ -157,6 +170,10 @@ class PipelineStage(models.Model):
         return None
 
     @staticmethod
+    def getByName(name, company):
+        return Department.objects.filter(company=company, name=name).exists()
+
+    @staticmethod
     def getAll():
         return PipelineStage.objects.all()
 
@@ -180,6 +197,10 @@ class PipelineField(models.Model):
     class Meta:
         verbose_name = 'PipelineField'
         verbose_name_plural = 'PipelineFields'
+
+    @staticmethod
+    def getByName(name, company):
+        return PipelineField.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getById(id, company):
@@ -211,6 +232,10 @@ class Pipeline(models.Model):
     class Meta:
         verbose_name = 'Pipeline'
         verbose_name_plural = 'Pipelines'
+
+    @staticmethod
+    def getByName(name, company):
+        return Department.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getById(id, company):
@@ -249,6 +274,10 @@ class EmailCategory(models.Model):
         return None
 
     @staticmethod
+    def getByName(name, company):
+        return EmailCategory.objects.filter(company=company, name=name).exists()
+
+    @staticmethod
     def getForCompany(company):
         return EmailCategory.objects.filter(company=company)
 
@@ -263,8 +292,8 @@ class EmailTemplate(models.Model):
     INTERNAL = 'I'
     EMAIL_TYPES = [CANDIDATE, INTERNAL]
     TYPE = [
-        (CANDIDATE, 'C'),
-        (INTERNAL, 'I')
+        (CANDIDATE, 'Candidate'),
+        (INTERNAL, 'Internal')
     ]
 
     id = models.AutoField(primary_key=True)
@@ -295,6 +324,10 @@ class EmailTemplate(models.Model):
         return None
 
     @staticmethod
+    def getByName(name, company):
+        return EmailTemplate.objects.filter(company=company, name=name).exists()
+
+    @staticmethod
     def getForCompany(company):
         return EmailTemplate.objects.filter(company=company)
 
@@ -314,6 +347,10 @@ class EmailFields(models.Model):
     class Meta:
         verbose_name = 'EmailField'
         verbose_name_plural = 'EmailFields'
+
+    @staticmethod
+    def getByName(name, company):
+        return EmailFields.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getById(id):

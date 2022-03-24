@@ -17,6 +17,107 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 import os
 
 
+def checkCompany(request):
+
+    email = request.GET.get('email', None)
+
+    if not email:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+
+    if Account.getByEmail(email):
+        return {
+            'code': 400,
+            'msg': 'Email already exists'
+        } 
+
+    domain = getDomainFromEmail(email)
+
+    if not domain:
+        return {
+            'code': 400,
+            'msg': 'Invalid email address'
+        }
+
+    company = Company.getByDomain(email)
+
+    if company:
+        return {
+            'code': 200,
+            'msg': 'Company is already exists',
+            'data': {
+                'name': company.name,
+                'domain': company.domain,
+            }
+        }
+    return {
+        'code': 200,
+        'msg': 'New account'
+    }
+
+def signupUserAccount(request):
+
+    data = request.data
+
+    firstName = data.get('first_name', None)
+    lastName = data.get('last_name', None)
+    mobile = data.get('mobile', None)
+    email = data.get('email', None)
+
+    if not firstName or not lastName or not mobile or not email:
+
+        return {
+            'code': 400,
+            'msg': 'invalid request'
+        }
+
+    domain = getDomainFromEmail(email)
+
+    if not domain:
+        return {
+            'code': 400,
+            'msg': 'Invalid email address'
+        }
+
+    if Account.getByMobile(mobile):
+        return {
+            'code': 400,
+            'msg': 'Mobile already exists'
+        }
+
+    if Account.getByEmail(email):
+        return {
+            'code': 400,
+            'msg': 'Email already exists'
+        } 
+
+    account = Account()
+    account.first_name = firstName
+    account.last_name = lastName
+    account.mobile = mobile
+    account.email = email
+    account.role = Account.USER
+    account.username = email
+
+    account.is_staff = False
+    account.is_active = True
+    account.is_superuser = False
+    account.verified = False
+    account.save()       
+
+    token = TokenEmailVerification.createToken(account)
+    sendMail = EmailVerificationMailer(token)
+    sendMail.start()
+
+    data = {
+        'code': 200,
+        'msg': 'Account created successfully. We have sent you email to verify your account.',
+    }
+
+    return data        
+
 def signUpAccount(request):
 
     data = request.data
@@ -149,6 +250,12 @@ def signInAccount(request):
             'code': 400,
             'msg': 'Your account is not active. Please contact support for more details'
         }
+
+    if not account.approved:
+        return {
+            'code': 400,
+            'msg': 'Your account is not approved by admin. You can come back later to check or you can reach out to the admin to approve and activate your account'
+        }        
 
     if not account.check_password(password):
         return {
@@ -952,7 +1059,7 @@ def activateAccount(request):
 
         return {
             'code': 200,
-            'msg': 'Account activated succefully!'
+            'msg': 'Your account has been successfully created, but it is not active yet. The admin of your institute needs to approve and activate your account. You can come back later to check or you can reach out to the admin to approve and activate your account'
         }
 
     return {
