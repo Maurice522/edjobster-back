@@ -10,8 +10,8 @@ from common.encoder import decode
 from common.utils import isValidUuid, getDomainFromEmail
 from common.models import Country, State, City
 import json
-from settings.models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineField, PipelineStage
-from settings.serializer import DegreeSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineFieldSerializer, PipelineSerializer, PipelineStageSerializer
+from settings.models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStatus, PipelineStage
+from settings.serializer import DegreeSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineStatusSerializer, PipelineSerializer, PipelineStageSerializer
 
 
 def getCompanyByUser(user):
@@ -339,87 +339,6 @@ def deleteDecignation(request):
     }        
 
 #PIPELINES
-
-def getPipelineFields(request):
-
-    company = Company.getByUser(request.user)
-    pipelineFields = PipelineField.getForCompany(company=company)
-
-    serializer = PipelineFieldSerializer(pipelineFields, many=True)
-
-    return {
-        'code': 200,
-        'data': serializer.data
-    }    
-
-def savePipelineField(request):
-
-    company = Company.getByUser(request.user)    
-    
-    data = request.data    
-    name = data.get('name', None)   
-
-    if not name:
-        return {
-            'code': 400,
-            'msg': 'Invalid request'
-        }
-
-    id = data.get('id', None)
-
-    if id:
-        pipelineField = PipelineField.getById(id, company)
-        if not pipelineField:
-            return {
-                'code': 400,
-                'msg': 'Pipeline Field not found'
-            }
-        if pipelineField.name != name and PipelineField.getByName(name=name, company=company):
-            return {
-                'code': 400,
-                'msg': 'Pipeline Field with name '+name+' already exists.'
-            } 
-    else:
-        if PipelineField.getByName(name=name, company=company):
-            return {
-                'code': 400,
-                'msg': 'Pipeline Field with name '+name+' already exists.'
-            } 
-
-        pipelineField = PipelineField()    
-        pipelineField.company = company
-
-    
-    pipelineField.name = name
-    pipelineField.save()
-
-    return getPipelineFields(request)
-
-def deletePipelineField(request): 
-
-    id = request.GET.get('id', None)
-    company = Company.getByUser(request.user)
-
-    if id:
-        pipelineField = PipelineField.getById(id, company)
-        if not pipelineField:
-            return {
-                'code': 400,
-                'msg': 'Pipeline Field not found'
-            }
-
-        pipelineField.delete()
-        return {
-            'code': 200,
-            'msg': 'Pipeline Field deleted succesfully!',
-            'data': getPipelineFields(request)['data']
-        }
-
-    return {
-        'code': 400,
-        'msg': 'Invalid request'
-    }         
-
 def getPipelineStages(request):
 
     company = Company.getByUser(request.user)
@@ -498,6 +417,108 @@ def deletePipelineStage(request):
         'msg': 'Invalid request'
     }        
 
+
+def getPipelineStatus(request):
+
+    stage_id = request.GET.get('stage', None)   
+
+    if not stage_id:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+
+    company = Company.getByUser(request.user)    
+    stage = PipelineStage.getById(stage_id, company)
+    if not stage:
+        return {
+            'code': 400,
+            'msg': 'Pipeline Status not found'
+        }
+
+    pipelineStages = PipelineStatus.getForStage(stage=stage)
+    serializer = PipelineStatusSerializer(pipelineStages, many=True)
+
+    return {
+        'code': 200,
+        'data': serializer.data
+    }    
+
+def savePipelineStatus(request):
+
+    company = Company.getByUser(request.user)    
+    
+    data = request.data    
+    stage_id = data.get('stage', None)   
+    name = data.get('name', None)   
+    id = data.get('id', None)   
+
+    if not name or not stage:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+
+    stage = PipelineStage.getById(stage_id, company)
+    if not stage:
+        return {
+            'code': 400,
+            'msg': 'Pipeline Status not found'
+        }
+    
+    if id:
+        pipelineStatus = PipelineStatus.getById(id, stage)
+        if not pipelineStatus:
+            return {
+                'code': 400,
+                'msg': 'Pipeline Status not found'
+            }
+        if pipelineStatus.name != name and PipelineStatus.getByName(name=name, stage=stage):
+            return {
+                'code': 400,
+                'msg': 'Pipeline Status with name '+name+' already exists.'
+            } 
+    else:
+        if PipelineStatus.getByName(name=name, stage=stage):
+            return {
+                'code': 400,
+                'msg': 'Pipeline Status with name '+name+' already exists.'
+            } 
+
+        pipelineStatus = PipelineStatus()    
+        pipelineStatus.stage = stage
+
+    
+    pipelineStatus.name = name
+    pipelineStatus.save()
+
+    return getPipelineStatus(request)
+
+def deletePipelineStatus(request): 
+
+    id = request.GET.get('id', None)
+    company = Company.getByUser(request.user)
+
+    if id:
+        pipelineStatus = PipelineStatus.getByIdAndCompany(id, company)
+        if not pipelineStatus:
+            return {
+                'code': 400,
+                'msg': 'Pipeline Status not found'
+            }
+
+        pipelineStatus.delete()
+        return {
+            'code': 200,
+            'msg': 'Pipeline Status deleted succesfully!',
+            'data': getPipelineStatus(request)['data']
+        }
+
+    return {
+        'code': 400,
+        'msg': 'Invalid request'
+    }  
+    
 def getPipelines(request):
 
     company = Company.getByUser(request.user)

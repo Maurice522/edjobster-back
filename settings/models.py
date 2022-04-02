@@ -183,10 +183,10 @@ class PipelineStage(models.Model):
 
 
 
-class PipelineField(models.Model):
+class PipelineStatus(models.Model):
     id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(
-        Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
+    stage = models.ForeignKey(
+        PipelineStage, default=None, null=True, verbose_name='Stage', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -195,26 +195,35 @@ class PipelineField(models.Model):
         return str(self.account)+' '+str(self.name)[:20]
 
     class Meta:
-        verbose_name = 'PipelineField'
-        verbose_name_plural = 'PipelineFields'
+        verbose_name = 'Pipeline Status'
+        verbose_name_plural = 'Pipeline Statuses'
 
     @staticmethod
-    def getByName(name, company):
-        return PipelineField.objects.filter(company=company, name=name).exists()
+    def getByName(name, stage):
+        return PipelineStatus.objects.filter(stage=stage, name=name).exists()
 
     @staticmethod
-    def getById(id, company):
-        if PipelineField.objects.filter(company=company, id=id).exists():
-            return PipelineField.objects.get(id=id)
+    def getById(id, stage):
+        if PipelineStatus.objects.filter(stage=stage, id=id).exists():
+            return PipelineStatus.objects.get(id=id)
         return None
 
     @staticmethod
-    def getAll():
-        return PipelineField.objects.all()
+    def getByIdAndCompany(id, company):
+        if PipelineStatus.objects.filter(id=id).exists():
+            status = PipelineStatus.objects.get(id=id)
+            if status.stage.company.id != company.id:
+                return None
+            return status
+        return None        
 
     @staticmethod
-    def getForCompany(company):
-        return PipelineField.objects.filter(company=company)
+    def getAll():
+        return PipelineStatus.objects.all()
+
+    @staticmethod
+    def getForStage(stage):
+        return PipelineStatus.objects.filter(stage=stage)
 
 
 class Pipeline(models.Model):

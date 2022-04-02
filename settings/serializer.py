@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Location, Department, Designation, Degree, Pipeline, PipelineField, PipelineStage, EmailCategory, EmailTemplate, EmailFields
+from .models import Location, Department, Designation, Degree, Pipeline, PipelineStatus, PipelineStage, EmailCategory, EmailTemplate, EmailFields
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -46,10 +46,10 @@ class PipelineSerializer(serializers.ModelSerializer):
 
 
 
-class PipelineFieldSerializer(serializers.ModelSerializer):
+class PipelineStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = PipelineField
+        model = PipelineStatus
         fields = ['id', 'name']
 
 
