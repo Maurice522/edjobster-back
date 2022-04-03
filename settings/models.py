@@ -1,3 +1,4 @@
+import email
 from django.db import models
 from account.models import Company
 from django.contrib.postgres.fields import ArrayField
@@ -10,7 +11,9 @@ class Location(models.Model):
     company = models.ForeignKey(
         Company, default=None, null=False, verbose_name='Company', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
-    address = models.CharField(max_length=50, null=True, blank=True)
+    address = models.CharField(max_length=250, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True, blank=True)
     country = models.ForeignKey(
         Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
     state = models.ForeignKey(
@@ -24,7 +27,7 @@ class Location(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Location'
@@ -54,7 +57,7 @@ class Department(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Department'
@@ -65,6 +68,11 @@ class Department(models.Model):
         if Department.objects.filter(company=company, id=id).exists():
             return Department.objects.get(id=id)
         return None
+    
+    @staticmethod
+    def getByName(name, company):
+        return Department.objects.filter(company=company, name=name).exists()
+           
 
     @staticmethod
     def getForCompany(company):
@@ -84,7 +92,7 @@ class Designation(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Designation'
@@ -95,6 +103,10 @@ class Designation(models.Model):
         if Designation.objects.filter(company=company, id=id).exists():
             return Designation.objects.get(id=id)
         return None
+
+    @staticmethod
+    def getByName(name, company):
+        return Designation.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getAll():
@@ -114,7 +126,7 @@ class Degree(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Degree'
@@ -125,6 +137,10 @@ class Degree(models.Model):
         if Degree.objects.filter(id=id, company=company).exists():
             return Degree.objects.get(id=id)
         return None
+
+    @staticmethod
+    def getByName(name, company):
+        return Degree.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getAll():
@@ -140,11 +156,12 @@ class PipelineStage(models.Model):
     company = models.ForeignKey(
         Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
+    status = ArrayField(models.CharField(max_length=50), blank=True, default=list)    
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'PipelineStage'
@@ -157,43 +174,16 @@ class PipelineStage(models.Model):
         return None
 
     @staticmethod
+    def getByName(name, company):
+        return Department.objects.filter(company=company, name=name).exists()
+
+    @staticmethod
     def getAll():
         return PipelineStage.objects.all()
 
     @staticmethod
     def getForCompany(company):
         return PipelineStage.objects.filter(company=company)
-
-
-
-class PipelineField(models.Model):
-    id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(
-        Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=True, blank=True)
-    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
-
-    class Meta:
-        verbose_name = 'PipelineField'
-        verbose_name_plural = 'PipelineFields'
-
-    @staticmethod
-    def getById(id, company):
-        if PipelineField.objects.filter(company=company, id=id).exists():
-            return PipelineField.objects.get(id=id)
-        return None
-
-    @staticmethod
-    def getAll():
-        return PipelineField.objects.all()
-
-    @staticmethod
-    def getForCompany(company):
-        return PipelineField.objects.filter(company=company)
 
 
 class Pipeline(models.Model):
@@ -206,11 +196,15 @@ class Pipeline(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Pipeline'
         verbose_name_plural = 'Pipelines'
+
+    @staticmethod
+    def getByName(name, company):
+        return Department.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getById(id, company):
@@ -236,7 +230,7 @@ class EmailCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'EmailCategory'
@@ -247,6 +241,10 @@ class EmailCategory(models.Model):
         if EmailCategory.objects.filter(company=company, id=id).exists():
             return EmailCategory.objects.get(id=id)
         return None
+
+    @staticmethod
+    def getByName(name, company):
+        return EmailCategory.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getForCompany(company):
@@ -263,8 +261,8 @@ class EmailTemplate(models.Model):
     INTERNAL = 'I'
     EMAIL_TYPES = [CANDIDATE, INTERNAL]
     TYPE = [
-        (CANDIDATE, 'C'),
-        (INTERNAL, 'I')
+        (CANDIDATE, 'Candidate'),
+        (INTERNAL, 'Internal')
     ]
 
     id = models.AutoField(primary_key=True)
@@ -282,7 +280,7 @@ class EmailTemplate(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'EmailTemplate'
@@ -293,6 +291,10 @@ class EmailTemplate(models.Model):
         if EmailTemplate.objects.filter(company=company, id=id).exists():
             return EmailTemplate.objects.get(id=id)
         return None
+
+    @staticmethod
+    def getByName(name, company):
+        return EmailTemplate.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getForCompany(company):
@@ -309,11 +311,15 @@ class EmailFields(models.Model):
     value = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.name)+' '+str(self.value)[:20]
 
     class Meta:
         verbose_name = 'EmailField'
         verbose_name_plural = 'EmailFields'
+
+    @staticmethod
+    def getByName(name, company):
+        return EmailFields.objects.filter(company=company, name=name).exists()
 
     @staticmethod
     def getById(id):

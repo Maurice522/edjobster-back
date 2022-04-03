@@ -10,8 +10,8 @@ from common.encoder import decode
 from common.utils import isValidUuid, getDomainFromEmail
 from common.models import Country, State, City
 import json
-from settings.models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineField, PipelineStage
-from settings.serializer import DegreeSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineFieldSerializer, PipelineSerializer, PipelineStageSerializer
+from .models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStage
+from .serializer import DegreeSerializer, PipelineStagListSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineSerializer, PipelineStageSerializer
 
 
 def getCompanyByUser(user):
@@ -134,9 +134,20 @@ def saveDepartment(request):
                 'code': 400,
                 'msg': 'Department not found'
             }
+        if department.name != name and Department.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Department with name '+name+' already exists.'
+            } 
     else:
+        if Department.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Department with name '+name+' already exists.'
+            } 
+
         department = Department()   
-        department.company = company 
+        department.company = company
     
     department.name = name
     department.save()
@@ -202,9 +213,21 @@ def saveDegree(request):
                 'code': 400,
                 'msg': 'Degree not found'
             }
+        if degree.name != name and Degree.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Degree with name '+name+' already exists.'
+            } 
     else:
+        if Degree.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Degree with name '+name+' already exists.'
+            } 
+
         degree = Degree()    
         degree.company = company
+
     
     degree.name = name
     degree.save()
@@ -270,7 +293,18 @@ def saveDesignation(request):
                 'code': 400,
                 'msg': 'Designation not found'
             }
+        if designation.name != name and Designation.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Designation with name '+name+' already exists.'
+            } 
     else:
+        if Designation.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Designation with name '+name+' already exists.'
+            } 
+
         designation = Designation()    
         designation.company = company
     
@@ -305,81 +339,12 @@ def deleteDecignation(request):
     }        
 
 #PIPELINES
-
-def getPipelineFields(request):
-
-    company = Company.getByUser(request.user)
-    pipelineFields = PipelineField.getForCompany(company=company)
-
-    serializer = PipelineFieldSerializer(pipelineFields, many=True)
-
-    return {
-        'code': 200,
-        'data': serializer.data
-    }    
-
-def savePipelineField(request):
-
-    company = Company.getByUser(request.user)    
-    
-    data = request.data    
-    name = data.get('name', None)   
-
-    if not name:
-        return {
-            'code': 400,
-            'msg': 'Invalid request'
-        }
-
-    id = data.get('id', None)
-
-    if id:
-        pipelineField = PipelineField.getById(id, company)
-        if not PipelineField:
-            return {
-                'code': 400,
-                'msg': 'Pipeline Field not found'
-            }
-    else:
-        pipelineField = PipelineField()    
-        pipelineField.company = company
-    
-    pipelineField.name = name
-    pipelineField.save()
-
-    return getPipelineFields(request)
-
-def deletePipelineField(request): 
-
-    id = request.GET.get('id', None)
-    company = Company.getByUser(request.user)
-
-    if id:
-        pipelineField = PipelineField.getById(id, company)
-        if not pipelineField:
-            return {
-                'code': 400,
-                'msg': 'Pipeline Field not found'
-            }
-
-        pipelineField.delete()
-        return {
-            'code': 200,
-            'msg': 'Pipeline Field deleted succesfully!',
-            'data': getPipelineFields(request)['data']
-        }
-
-    return {
-        'code': 400,
-        'msg': 'Invalid request'
-    }         
-
 def getPipelineStages(request):
 
     company = Company.getByUser(request.user)
     pipelineStages = PipelineStage.getForCompany(company=company)
 
-    serializer = PipelineStageSerializer(pipelineStages, many=True)
+    serializer = PipelineStagListSerializer(pipelineStages, many=True)
 
     return {
         'code': 200,
@@ -403,12 +368,22 @@ def savePipelineStage(request):
 
     if id:
         pipelineStage = PipelineStage.getById(id, company)
-        if not PipelineStage:
+        if not pipelineStage:
             return {
                 'code': 400,
                 'msg': 'Pipeline Stage not found'
             }
+        if pipelineStage.name != name and PipelineStage.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline Stage with name '+name+' already exists.'
+            } 
     else:
+        if PipelineStage.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'pipeline Stage with name '+name+' already exists.'
+            } 
         pipelineStage = PipelineStage()    
         pipelineStage.company = company
     
@@ -441,6 +416,65 @@ def deletePipelineStage(request):
         'code': 400,
         'msg': 'Invalid request'
     }        
+
+
+def getPipelineStageDetails(request):
+
+    stage_id = request.GET.get('id', None)   
+
+    if not stage_id:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+
+    company = Company.getByUser(request.user)    
+    stage = PipelineStage.getById(stage_id, company)
+    if not stage:
+        return {
+            'code': 400,
+            'msg': 'Pipeline Status not found'
+        }
+
+    serializer = PipelineStageSerializer(stage, many=False)
+
+    return {
+        'code': 200,
+        'data': serializer.data
+    }    
+
+def savePipelineStatus(request):
+
+    company = Company.getByUser(request.user)    
+    
+    data = request.data    
+    stage_id = data.get('stage', None)   
+    status = data.get('status', None)   
+
+    if not stage_id or not isinstance(status, list):
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+
+    stage = PipelineStage.getById(stage_id, company)
+    if not stage:
+        return {
+            'code': 400,
+            'msg': 'Pipeline Status not found'
+        }
+    
+    stage.status = status
+    stage.save()
+
+    serializer = PipelineStageSerializer(stage, many=False)
+
+    return {
+        'code': 200,
+        'msg' : 'Pipeline stage updated!',
+        'data': serializer.data
+    }   
+
 
 def getPipelines(request):
 
@@ -477,7 +511,18 @@ def savePipeline(request):
                 'code': 400,
                 'msg': 'Pipeline not found'
             }
+        if pipeline.name != name and Pipeline.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline with name '+name+' already exists.'
+            } 
     else:
+        if Pipeline.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Pipeline with name '+name+' already exists.'
+            } 
+
         pipeline = Pipeline()    
         pipeline.company = company
 
@@ -559,7 +604,17 @@ def saveEmailCategory(request):
                 'code': 400,
                 'msg': 'Email Category not found'
             }
+        if category.name != name and EmailCategory.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Category with name '+name+' already exists.'
+            } 
     else:
+        if EmailCategory.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Category with name '+name+' already exists.'
+            } 
         category = EmailCategory()   
         category.company = company
 
@@ -638,7 +693,18 @@ def saveEmailTemplate(request):
                 'code': 400,
                 'msg': 'Email not found'
             }
+        if email.name != name and EmailTemplate.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Template with name '+name+' already exists.'
+            } 
     else:
+        if EmailTemplate.getByName(name=name, company=company):
+            return {
+                'code': 400,
+                'msg': 'Email Template with name '+name+' already exists.'
+            } 
+
         email = EmailTemplate()  
         email.company = company  
 

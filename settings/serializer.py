@@ -1,19 +1,19 @@
 from rest_framework import serializers
-from .models import Location, Department, Designation, Degree, Pipeline, PipelineField, PipelineStage, EmailCategory, EmailTemplate, EmailFields
+from .models import Location, Department, Designation, Degree, Pipeline, PipelineStage, EmailCategory, EmailTemplate, EmailFields
 
 
 class LocationSerializer(serializers.ModelSerializer):
-    city_id = serializers.CharField(source='city.id')
+    city_id = serializers.IntegerField(source='city.id')
     city_name = serializers.CharField(source='city.name')
-    state_id = serializers.CharField(source='state.id')
+    state_id = serializers.IntegerField(source='state.id')
     state_name = serializers.CharField(source='state.name')
-    country_id = serializers.CharField(source='country.id')
+    country_id = serializers.IntegerField(source='country.id')
     country_name = serializers.CharField(source='country.name')
 
     class Meta:
         model = Location
         fields = ['id',  'name', 'address', 'pincode', 'loc_lat', 'loc_lon', 'city_id', 'city_name', 'state_id', 'state_name',
-                  'country_id', 'country_name']
+                  'country_id', 'country_name', 'phone', 'email']
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -45,20 +45,17 @@ class PipelineSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'fields', 'created' , 'updated']
 
 
-
-class PipelineFieldSerializer(serializers.ModelSerializer):
+class PipelineStagListSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = PipelineField
+        model = PipelineStage
         fields = ['id', 'name']
-
-
 
 class PipelineStageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PipelineStage
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'status']
 
 class EmailFieldSerializer(serializers.ModelSerializer):
 
@@ -76,7 +73,7 @@ class EmailCategorySerializer(serializers.ModelSerializer):
 
 class EmailTemplateSerializer(serializers.ModelSerializer):
 
-    category_id = serializers.CharField(source='category.id')
+    category_id = serializers.IntegerField(source='category.id')
     category_name = serializers.CharField(source='category.name')
 
     class Meta:

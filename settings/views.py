@@ -79,22 +79,19 @@ class DegreeApi(APIView):
         data = helper.deleteDegree(request)
         return makeResponse(data)                     
 
-class PipelineFieldApi(APIView):
+class PipelineDetails(APIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        data = helper.getPipelineFields(request)
+        data = helper.getPipelineStageDetails(request)
         return makeResponse(data)
 
     def post(self, request):
-        data = helper.savePipelineField(request)
+        data = helper.savePipelineStatus(request)
         return makeResponse(data)
 
-    def delete(self, request):
-        data = helper.deletePipelineField(request)
-        return makeResponse(data)            
 
 class PipelineStageApi(APIView):
 
