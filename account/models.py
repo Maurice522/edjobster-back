@@ -50,6 +50,12 @@ class Account(AbstractUser):
         return None
 
     @staticmethod
+    def getByIdAndCompany(accountId, company):
+        if Account.objects.filter(companyId=company.id, accountId=accountId).exists():
+            return Account.objects.get(accountId=accountId)
+        return None        
+
+    @staticmethod
     def getByAll():
         return Account.objects.all()
 

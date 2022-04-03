@@ -9,7 +9,12 @@ import jwt
 from django.conf import settings
 import uuid
 
-
+def getErrorResponse(msg):
+    return {
+        'code': 400,
+        'msg': msg
+    }
+    
 def makeResponse(data):
 
     if data.get('code') == 200:

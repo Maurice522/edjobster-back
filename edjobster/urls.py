@@ -6,4 +6,5 @@ urlpatterns = [
     path('account/', include('account.urls')),
     path('common/', include('common.urls')),
     path('settings/', include('settings.urls')),
+    path('jobs/', include('job.urls')),
 ]

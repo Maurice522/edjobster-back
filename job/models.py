@@ -12,7 +12,7 @@ class AssesmentCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company.name)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Assesment Category'
@@ -47,7 +47,7 @@ class Assesment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company.name)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Assesment'
@@ -62,7 +62,10 @@ class Assesment(models.Model):
     @staticmethod
     def getByName(name, company):
         return Assesment.objects.filter(company=company, name=name).exists()
-           
+
+    @staticmethod
+    def getByNameAndCategory(name, category):
+        return Assesment.objects.filter(category=category, name=name).exists()           
 
     @staticmethod
     def getForCompany(company):
@@ -93,32 +96,40 @@ class AssesmentQuestion(models.Model):
     type = models.CharField(max_length=1, choices=TYPE, default=RADIO)
     question = models.TextField(max_length=500, null=False, blank=False)
     options = ArrayField(models.CharField(max_length=100), blank=True)
-    answers = ArrayField(models.CharField(max_length=100), blank=True)
+    answer = models.CharField(max_length=100)
+    marks = models.IntegerField(default=1)
     text = models.TextField(max_length=1000, null=True, blank=True)
-
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.company)+' '+str(self.question)[:40]
+        return str(self.assesment.company.name)+' '+str(self.question)[:40]
 
     class Meta:
         verbose_name = 'AssesmentQuestion'
         verbose_name_plural = 'AssesmentQuestions'
 
     @staticmethod
-    def getById(id, company):
-        if AssesmentQuestion.objects.filter(company=company, id=id).exists():
+    def getById(id, assesment):
+        if AssesmentQuestion.objects.filter(assesment=assesment, id=id).exists():
             return AssesmentQuestion.objects.get(id=id)
         return None
+
+    @staticmethod
+    def getByCompany(id, company):
+        if AssesmentQuestion.objects.filter(id=id).exists():
+            question = AssesmentQuestion.objects.get(id=id)
+            if question.assesment.company.id == company.id:
+                return question
+        return None        
 
     @staticmethod
     def getAll():
         return AssesmentQuestion.objects.all()
 
     @staticmethod
-    def getForCompany(company):
-        return AssesmentQuestion.objects.filter(company=company)
+    def getForAssesment(assesment):
+        return AssesmentQuestion.objects.filter(assesment=assesment)
 
 
 
@@ -158,9 +169,9 @@ class Job(models.Model):
     title = models.CharField(max_length=50, null=True, blank=True)
     vacancies = models.IntegerField(default=1, null=True, blank=True)
     department = models.CharField(max_length=50, null=True, blank=True)
-    owner = models.ForeignKey(Account, default=None, null=True, verbose_name='Owner', on_delete=models.SET_NULL)
+    owner = models.ForeignKey(Account, related_name='Owner', default=None, null=True, verbose_name='Owner', on_delete=models.SET_NULL)
     assesment = models.ForeignKey(Assesment, default=None, null=True, verbose_name='Assesment', on_delete=models.SET_NULL)
-    members = ArrayField(models.IntegerField(max_length=50), blank=True)
+    members = ArrayField(models.CharField(max_length=100), blank=True, default=list)
     type = models.CharField(max_length=1, choices=TYPE, default=FULL_TIME)
     nature = models.CharField(max_length=1, choices=NATURE, default=PHYSICAL)
     education = ArrayField(models.CharField(max_length=50), blank=True)
@@ -168,14 +179,14 @@ class Job(models.Model):
     description = models.TextField(max_length=3000, null=True, blank=True)
     exp_min = models.IntegerField(default=0)
     exp_max = models.IntegerField(default=0)
-    salary_min = models.IntegerField(default=0)
-    salary_max = models.IntegerField(default=0)
+    salary_min = models.CharField(max_length=50, null=True, blank=True, default='')
+    salary_max = models.CharField(max_length=50, null=True, blank=True, default='')
     salary_type = models.CharField(max_length=1, choices=PAY_TYPE, default=MONTHY)
     currency = models.CharField(max_length=10, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
     state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
     country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
-    created_by =  models.ForeignKey(Account, default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
+    created_by =  models.ForeignKey(Account, related_name='createdby', default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
     document = models.FileField(upload_to='media/jobs/', default=None, null=True, blank=True)  
     job_boards = ArrayField(models.CharField(max_length=50), blank=True)
     pipeline = models.IntegerField(default=0, null=True, blank=True)

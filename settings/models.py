@@ -1,3 +1,4 @@
+import email
 from django.db import models
 from account.models import Company
 from django.contrib.postgres.fields import ArrayField
@@ -10,7 +11,9 @@ class Location(models.Model):
     company = models.ForeignKey(
         Company, default=None, null=False, verbose_name='Company', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
-    address = models.CharField(max_length=50, null=True, blank=True)
+    address = models.CharField(max_length=250, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True, blank=True)
     country = models.ForeignKey(
         Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
     state = models.ForeignKey(
@@ -24,7 +27,7 @@ class Location(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Location'
@@ -54,7 +57,7 @@ class Department(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Department'
@@ -89,7 +92,7 @@ class Designation(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Designation'
@@ -123,7 +126,7 @@ class Degree(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Degree'
@@ -153,11 +156,12 @@ class PipelineStage(models.Model):
     company = models.ForeignKey(
         Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
+    status = ArrayField(models.CharField(max_length=50), blank=True, default=list)    
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'PipelineStage'
@@ -182,50 +186,6 @@ class PipelineStage(models.Model):
         return PipelineStage.objects.filter(company=company)
 
 
-
-class PipelineStatus(models.Model):
-    id = models.AutoField(primary_key=True)
-    stage = models.ForeignKey(
-        PipelineStage, default=None, null=True, verbose_name='Stage', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=True, blank=True)
-    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
-
-    class Meta:
-        verbose_name = 'Pipeline Status'
-        verbose_name_plural = 'Pipeline Statuses'
-
-    @staticmethod
-    def getByName(name, stage):
-        return PipelineStatus.objects.filter(stage=stage, name=name).exists()
-
-    @staticmethod
-    def getById(id, stage):
-        if PipelineStatus.objects.filter(stage=stage, id=id).exists():
-            return PipelineStatus.objects.get(id=id)
-        return None
-
-    @staticmethod
-    def getByIdAndCompany(id, company):
-        if PipelineStatus.objects.filter(id=id).exists():
-            status = PipelineStatus.objects.get(id=id)
-            if status.stage.company.id != company.id:
-                return None
-            return status
-        return None        
-
-    @staticmethod
-    def getAll():
-        return PipelineStatus.objects.all()
-
-    @staticmethod
-    def getForStage(stage):
-        return PipelineStatus.objects.filter(stage=stage)
-
-
 class Pipeline(models.Model):
     id = models.AutoField(primary_key=True)
     company = models.ForeignKey(
@@ -236,7 +196,7 @@ class Pipeline(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'Pipeline'
@@ -270,7 +230,7 @@ class EmailCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'EmailCategory'
@@ -320,7 +280,7 @@ class EmailTemplate(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.company)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'EmailTemplate'
@@ -351,7 +311,7 @@ class EmailFields(models.Model):
     value = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return str(self.account)+' '+str(self.name)[:20]
+        return str(self.name)+' '+str(self.value)[:20]
 
     class Meta:
         verbose_name = 'EmailField'

@@ -10,8 +10,8 @@ from common.encoder import decode
 from common.utils import isValidUuid, getDomainFromEmail
 from common.models import Country, State, City
 import json
-from settings.models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStatus, PipelineStage
-from settings.serializer import DegreeSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineStatusSerializer, PipelineSerializer, PipelineStageSerializer
+from .models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStage
+from .serializer import DegreeSerializer, PipelineStagListSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineSerializer, PipelineStageSerializer
 
 
 def getCompanyByUser(user):
@@ -344,7 +344,7 @@ def getPipelineStages(request):
     company = Company.getByUser(request.user)
     pipelineStages = PipelineStage.getForCompany(company=company)
 
-    serializer = PipelineStageSerializer(pipelineStages, many=True)
+    serializer = PipelineStagListSerializer(pipelineStages, many=True)
 
     return {
         'code': 200,
@@ -418,9 +418,9 @@ def deletePipelineStage(request):
     }        
 
 
-def getPipelineStatus(request):
+def getPipelineStageDetails(request):
 
-    stage_id = request.GET.get('stage', None)   
+    stage_id = request.GET.get('id', None)   
 
     if not stage_id:
         return {
@@ -436,8 +436,7 @@ def getPipelineStatus(request):
             'msg': 'Pipeline Status not found'
         }
 
-    pipelineStages = PipelineStatus.getForStage(stage=stage)
-    serializer = PipelineStatusSerializer(pipelineStages, many=True)
+    serializer = PipelineStageSerializer(stage, many=False)
 
     return {
         'code': 200,
@@ -450,10 +449,9 @@ def savePipelineStatus(request):
     
     data = request.data    
     stage_id = data.get('stage', None)   
-    name = data.get('name', None)   
-    id = data.get('id', None)   
+    status = data.get('status', None)   
 
-    if not name or not stage:
+    if not stage_id or not isinstance(status, list):
         return {
             'code': 400,
             'msg': 'Invalid request'
@@ -466,59 +464,18 @@ def savePipelineStatus(request):
             'msg': 'Pipeline Status not found'
         }
     
-    if id:
-        pipelineStatus = PipelineStatus.getById(id, stage)
-        if not pipelineStatus:
-            return {
-                'code': 400,
-                'msg': 'Pipeline Status not found'
-            }
-        if pipelineStatus.name != name and PipelineStatus.getByName(name=name, stage=stage):
-            return {
-                'code': 400,
-                'msg': 'Pipeline Status with name '+name+' already exists.'
-            } 
-    else:
-        if PipelineStatus.getByName(name=name, stage=stage):
-            return {
-                'code': 400,
-                'msg': 'Pipeline Status with name '+name+' already exists.'
-            } 
+    stage.status = status
+    stage.save()
 
-        pipelineStatus = PipelineStatus()    
-        pipelineStatus.stage = stage
-
-    
-    pipelineStatus.name = name
-    pipelineStatus.save()
-
-    return getPipelineStatus(request)
-
-def deletePipelineStatus(request): 
-
-    id = request.GET.get('id', None)
-    company = Company.getByUser(request.user)
-
-    if id:
-        pipelineStatus = PipelineStatus.getByIdAndCompany(id, company)
-        if not pipelineStatus:
-            return {
-                'code': 400,
-                'msg': 'Pipeline Status not found'
-            }
-
-        pipelineStatus.delete()
-        return {
-            'code': 200,
-            'msg': 'Pipeline Status deleted succesfully!',
-            'data': getPipelineStatus(request)['data']
-        }
+    serializer = PipelineStageSerializer(stage, many=False)
 
     return {
-        'code': 400,
-        'msg': 'Invalid request'
-    }  
-    
+        'code': 200,
+        'msg' : 'Pipeline stage updated!',
+        'data': serializer.data
+    }   
+
+
 def getPipelines(request):
 
     company = Company.getByUser(request.user)
