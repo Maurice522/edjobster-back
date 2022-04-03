@@ -322,8 +322,10 @@ def getJobDetails(request):
             )
 
     data['members'] = members 
-    data['pipeline_id'] = job.pipeline.id 
-    data['pipeline'] = job.pipeline.name 
+    pipeline = Pipeline.getById(job.pipeline, company)
+    if pipeline:
+        data['pipeline_id'] = pipeline.id 
+        data['pipeline'] = pipeline.name 
 
     return {
         'code': 200,
