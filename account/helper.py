@@ -766,7 +766,10 @@ def addMember(request):
     email = data.get('email', None)
     role = data.get('role', None)
 
-    if not firstName or not lastName or not email or not role:
+    department = data.get('department', None)
+    designation = data.get('designation', None)
+
+    if not firstName or not lastName or not email or not role or not designation or not designation:
 
         return {
             'code': 404,
@@ -805,6 +808,8 @@ def addMember(request):
     account.email = email
     account.role = role
     account.username = email
+    account.department = department
+    account.designation = designation
     account.addedBy = adminUser.accountId
 
     account.is_staff = False
@@ -841,9 +846,14 @@ def updateMember(request):
     mobile = data.get('mobile', None)
     email = data.get('email', None)
     role = data.get('role', None)
+    role = data.get('role', None)
+
+    department = data.get('department', None)
+    designation = data.get('designation', None)
+
     accountId = data.get('accountId', None)
 
-    if not first_name or not last_name or not email or not accountId or role not in [Account.ADMIN, Account.USER]:
+    if not first_name or not last_name or not email or not accountId or role not in [Account.ADMIN, Account.USER] or not department or not designation:
         return{
             'code': 404,
             'msg': 'Invalid Request !!!'
@@ -887,6 +897,8 @@ def updateMember(request):
     account.username = email
     account.mobile = mobile
     account.role = role
+    account.department = department
+    account.designation = designation
     photo = None
 
     if request.FILES != None:
@@ -969,11 +981,7 @@ def activateMember(request):
 
 def deleteMember(request):
     adminUser = request.user
-    data = request.data
-
-    accountId = data.get('accountId', None)
-
-    print('account delete', adminUser.accountId, accountId)
+    id = request.GET.get('id', None)
 
     if adminUser.role != Account.ADMIN:
         return {
@@ -981,31 +989,23 @@ def deleteMember(request):
             'msg': 'Only admin can add members'
         }
 
-    if not accountId:
+    if not id:
         return {
             'code': 400,
             'msg': 'Bad request!'
         }
 
-    if adminUser.accountId == accountId:
+    if adminUser.accountId == id:
         return {
             'code': 400,
             'msg': 'Cannot delete account of yourself'
         }
 
-    account = Account.getById(accountId)
+    account = Account.getById(id)
     if not account:
         return {
             'code': 400,
             'msg': 'Member not found'
-        }
-
-    print('activate >> ', adminUser, account)
-
-    if adminUser == account:
-        return {
-            'code': 400,
-            'msg': 'Cannot delete account of yourself'
         }
 
     account.delete()

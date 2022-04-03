@@ -169,6 +169,9 @@ class MembersApi(APIView):
         data = helper.addMember(request)
         return makeResponse(data)
 
+    def delete(self, request):
+        data = helper.deleteMember(request)
+        return makeResponse(data)
 
 class UpdateMemberApi(APIView):
 

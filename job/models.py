@@ -214,3 +214,6 @@ class Job(models.Model):
     @staticmethod
     def getForCompany(company):
         return Job.objects.filter(company=company)
+
+
+

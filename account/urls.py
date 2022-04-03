@@ -30,8 +30,6 @@ urlpatterns = [
     path('update-member/', views.UpdateMemberApi.as_view(), name='update-member'),
     path('activate-member/', views.ActivateMemberApi.as_view(),
          name='activate-member'),
-    path('delete-member/', views.DeleteMemberApi.as_view(), name='delete-member'),
-
     path('login/', TokenObtainPairView.as_view(), name='login'),
     path('refreshtoken/', TokenRefreshView.as_view(), name='refreshtoken'),
     path('verifytoken/', TokenVerifyView.as_view, name='verifytoken'),
