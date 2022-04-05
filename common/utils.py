@@ -8,6 +8,7 @@ import datetime
 import jwt
 from django.conf import settings
 import uuid
+from datetime import datetime
 
 def getErrorResponse(msg):
     return {
@@ -49,3 +50,9 @@ def getDomainFromEmail(email):
 def generateFileName(self, filename):
     url = "media/docs/%s/%s" % (self.domain, filename)
     return url
+
+def parseDate(date):
+    try:
+        return datetime.strptime(date, "%Y-%m-%d").date()
+    except:
+        return None

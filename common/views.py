@@ -32,3 +32,8 @@ class CitiesApi(APIView):
     def get(self, request):
         data = helper.getCitiesForState(request)
         return makeResponse(data)
+
+class NotesApi(APIView):
+    def get(self, request):
+        data = helper.getNoteTypes(request)
+        return makeResponse(data)

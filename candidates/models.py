@@ -1,9 +1,7 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
-from common.models import Country, State
+from common.models import Country, State, NoteType
 from django.db.models import Q
-from job.models import Job
-from settings.models import Location, EmailTemplate
+from job.models import Job, Account
 
 class Candidate(models.Model):
 
@@ -39,7 +37,7 @@ class Candidate(models.Model):
     mobile = models.CharField(max_length=50, null=True, blank=True)
     email = models.CharField(max_length=100, null=True, blank=True)
     email_alt = models.CharField(max_length=100, null=True, blank=True)
-    marital_status = models.CharField(max_length=3, choices=MARITAL_STATUS, default=SINGLE)
+    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS, default=SINGLE)
     date_of_birth = models.DateField(default=None, null=True, blank=True)
     age = models.IntegerField(default=0)
     last_applied = models.DateTimeField(default=None, null=True, blank=True)
@@ -52,7 +50,7 @@ class Candidate(models.Model):
   
     exp_years = models.IntegerField(default=0)
     exp_months = models.IntegerField(default=0)
-    qualification = models.CharField(max_length=1, choices=QUALIFICATIONS, default=GRADUATION)
+    qualification = models.CharField(max_length=3, choices=QUALIFICATIONS, default=GRADUATION)
     cur_job = models.CharField(max_length=50, null=True, blank=True)
     cur_employer = models.CharField(max_length=50, null=True, blank=True)
     certifications = models.CharField(max_length=50, null=True, blank=True)
@@ -77,69 +75,65 @@ class Candidate(models.Model):
         if Candidate.objects.filter(job=job, id=id).exists():
             return Candidate.objects.get(id=id)
         return None
-    
+
+    @staticmethod
+    def getByIdAndCompany(id, company):
+        if Candidate.objects.filter(id=id).exists():
+            candidate = Candidate.objects.get(id=id)
+            if candidate.job.company.id == company.id:
+                return candidate
+        return None
+
     @staticmethod
     def getByJob(job):
         return Candidate.objects.filter(job=job)
 
     @staticmethod
     def getByEmail(job, email):
-        return Candidate.objects.filter(job=job).filter(Q(email=email) | Q(email_alt=email))
+        return Candidate.objects.filter(job=job).filter(email=email)
 
     @staticmethod
-    def getByPhone(job, phone):
-        return Candidate.objects.filter(job=job).filter(Q(mobile=phone) | Q(phone=phone))
+    def getByPhone(job, mobile):
+        return Candidate.objects.filter(job=job).filter(mobile=mobile)
 
 
-class Interview(models.Model):
-
-    IN_PERSON = 'IP'
-    PHONE_CALL = 'PC'
-    VIDEO_CALL = 'VC'
-
-    INTEVIEW_TYPE_LIST = [IN_PERSON, PHONE_CALL, VIDEO_CALL]
-
-    INTEVIEW_TYPES = [
-        (IN_PERSON, 'In Person'),
-        (PHONE_CALL, 'Telephonic'),
-        (VIDEO_CALL, 'Video'),
-    ]
-
+class Note(models.Model):
     id = models.AutoField(primary_key=True)
-    job = models.ForeignKey(Job, default=None, null=False, verbose_name='Job', on_delete=models.CASCADE)
-    candidate = models.ForeignKey(Candidate, default=None, null=False, verbose_name='Candidate', on_delete=models.CASCADE)
-    title = models.CharField(max_length=250, null=True, blank=True)
-    type = models.CharField(max_length=2, choices=INTEVIEW_TYPES, default=IN_PERSON)
-    date = models.DateField(default=None, null=True, blank=True)
-    time_start = models.TimeField(default=None, null=True, blank=True)
-    time_end = models.TimeField(default=None, null=True, blank=True)
-    location = models.ForeignKey(Location, default=None, null=False, verbose_name='Location', on_delete=models.CASCADE)
-    interviewers = ArrayField(models.CharField(max_length=100), blank=True, default=list)
-    email_temp = models.ForeignKey(EmailTemplate, default=None, null=False, verbose_name='Email Template', on_delete=models.CASCADE)
-    email_sub = models.CharField(max_length=250, null=True, blank=True)
-    email_msg = models.TextField(max_length=5000, null=True, blank=True)
-    document = models.FileField(upload_to='media/interview/', default=None, null=True, blank=True)  
+    candidate = models.ForeignKey(
+        Candidate, default=None, null=False, verbose_name='Candidate', on_delete=models.CASCADE)
+    added_by = models.ForeignKey(
+        Account, default=None, null=True, verbose_name='Added by', on_delete=models.SET_NULL)
+    type = models.ForeignKey(
+        NoteType, default=None, null=True, verbose_name='Type', on_delete=models.SET_NULL)
+    note = models.TextField(max_length=1000, null=True, blank=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.job.title)[20]+' '+str(self.title)[:20]
+        return str(self.candidate)+' '+str(self.added_by)[:20]
 
     class Meta:
-        verbose_name = 'Interview'
-        verbose_name_plural = 'Interviews'
+        verbose_name = 'Note'
+        verbose_name_plural = 'Notes'
 
     @staticmethod
-    def getById(id, job):
-        if Interview.objects.filter(job=job, id=id).exists():
-            return Interview.objects.get(id=id)
+    def getById(id, candidate):
+        if Note.objects.filter(id=id, candidate=candidate).exists():
+            return Note.objects.get(id=id)
         return None
-    
-    @staticmethod
-    def getByJob(job):
-        return Interview.objects.filter(job=job)
 
     @staticmethod
-    def getByCandidate(candidate):
-        return Candidate.objects.filter(candidate=candidate)
+    def getForCandidate(candidate):
+        return Note.objects.filter(candidate=candidate)
 
+    @staticmethod
+    def getByIdAndCompany(id, company):
+        if Note.objects.filter(id=id).exists():
+            note = Note.objects.get(id=id)
+            if note.candidate.job.company.id == company.id:
+                return note
+        return None
+
+    @staticmethod
+    def getAll():
+        return Note.objects.all()

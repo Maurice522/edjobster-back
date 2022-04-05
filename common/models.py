@@ -109,6 +109,8 @@ class City(models.Model):
 class NoteType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, null=True, blank=True)
+    icon = models.ImageField(
+        upload_to='media/data/icons', default=None, null=True, blank=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -120,9 +122,9 @@ class NoteType(models.Model):
         verbose_name_plural = 'NoteTypes'
 
     @staticmethod
-    def getById(countryId):
-        if NoteType.objects.filter(id=countryId).exists():
-            return NoteType.objects.get(id=countryId)
+    def getById(id):
+        if NoteType.objects.filter(id=id).exists():
+            return NoteType.objects.get(id=id)
         return None
 
     @staticmethod

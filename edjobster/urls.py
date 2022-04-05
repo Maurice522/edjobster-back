@@ -7,4 +7,5 @@ urlpatterns = [
     path('common/', include('common.urls')),
     path('settings/', include('settings.urls')),
     path('jobs/', include('job.urls')),
+    path('candidate/', include('candidates.urls')),
 ]
