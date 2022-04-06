@@ -64,6 +64,13 @@ class Department(models.Model):
         verbose_name_plural = 'Departments'
 
     @staticmethod
+    def getByDid(id):
+        if Department.objects.filter(id=id).exists():
+            return Department.objects.get(id=id)
+        return None
+    
+
+    @staticmethod
     def getById(id, company):
         if Department.objects.filter(company=company, id=id).exists():
             return Department.objects.get(id=id)
@@ -97,6 +104,12 @@ class Designation(models.Model):
     class Meta:
         verbose_name = 'Designation'
         verbose_name_plural = 'Designations'
+
+    @staticmethod
+    def getByDid(id):
+        if Designation.objects.filter(id=id).exists():
+            return Designation.objects.get(id=id)
+        return None
 
     @staticmethod
     def getById(id, company):

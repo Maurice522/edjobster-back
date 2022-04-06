@@ -12,12 +12,14 @@ class Account(AbstractUser):
     USER = 'U'
     ADMIN = 'A'
 
+    ROLE_LIST = [USER, ADMIN]
+
     ROLE = [
         (USER, 'User'),
         (ADMIN, 'Admin')
     ]
 
-    accountId = models.UUIDField(
+    account_id = models.UUIDField(
         primary_key=False, unique=True, editable=False)
     role = models.CharField(max_length=1, choices=ROLE, default=USER)
     mobile = models.CharField(
@@ -26,14 +28,16 @@ class Account(AbstractUser):
         upload_to='media/users/photos', default=None, null=True, blank=True)
     verified = models.BooleanField(default=True)
     approved = models.BooleanField(default=False)
-    companyId = models.UUIDField(default=None, null=True, blank=True)
+    company_id = models.UUIDField(default=None, null=True, blank=True)
     designation = models.IntegerField(default=None, null=True, blank=True)
     department = models.IntegerField(default=None, null=True, blank=True)
     addedBy = models.UUIDField(default=None, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self.accountId = uuid.uuid4()
-        self.email = self.username
+        if not self.account_id:
+            self.account_id = uuid.uuid4()
+        if self.email != self.username:
+            self.email = self.username
         super(Account, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -44,15 +48,15 @@ class Account(AbstractUser):
         verbose_name_plural = 'Accounts'
 
     @staticmethod
-    def getById(accountId):
-        if Account.objects.filter(accountId=accountId).exists():
-            return Account.objects.get(accountId=accountId)
+    def getById(account_id):
+        if Account.objects.filter(account_id=account_id).exists():
+            return Account.objects.get(account_id=account_id)
         return None
 
     @staticmethod
-    def getByIdAndCompany(accountId, company):
-        if Account.objects.filter(companyId=company.id, accountId=accountId).exists():
-            return Account.objects.get(accountId=accountId)
+    def getByIdAndCompany(account_id, company):
+        if Account.objects.filter(company_id=company.id, account_id=account_id).exists():
+            return Account.objects.get(account_id=account_id)
         return None        
 
     @staticmethod
@@ -72,8 +76,8 @@ class Account(AbstractUser):
         return None
 
     @staticmethod
-    def getMembers(companyId):
-        return Account.objects.filter(companyId=companyId)
+    def getMembers(company_id):
+        return Account.objects.filter(company_id=company_id)
 
     @staticmethod
     def getByLogin(mobile, password):
@@ -123,8 +127,8 @@ class Company(models.Model):
 
     @staticmethod
     def getByUser(user):
-        if Company.objects.filter(id=user.companyId).exists():
-            return Company.objects.get(id=user.companyId)
+        if Company.objects.filter(id=user.company_id).exists():
+            return Company.objects.get(id=user.company_id)
         return None
 
     @staticmethod

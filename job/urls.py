@@ -9,4 +9,5 @@ urlpatterns = [
     path('assesment/', views.AssesmentApi.as_view(), name='assesment'),
     path('assesment-question/', views.AssesmentQuestionApi.as_view(), name='assesment-question'),
     path('assesment-category/', views.AssesmentCategoryApi.as_view(), name='assesment-category'),
+    path('board/', views.BoardApi.as_view(), name='board'),
 ]

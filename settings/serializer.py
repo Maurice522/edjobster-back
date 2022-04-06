@@ -60,8 +60,8 @@ class PipelineStageSerializer(serializers.ModelSerializer):
 class EmailFieldSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = EmailCategory
-        fields = ['id', 'name', 'value']
+        model = EmailFields
+        fields = ['name', 'value']
 
 class EmailCategorySerializer(serializers.ModelSerializer):
 

@@ -75,7 +75,7 @@ def getCitiesForState(request):
 def getNoteTypes(request):
 
     notes = NoteType.getAll()
-    serializer = NoteSerializer(notes, many=True)
+    serializer = NoteTypeSerializer(notes, many=True)
 
     return {
         'code': 200,

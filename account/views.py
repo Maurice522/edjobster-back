@@ -69,6 +69,23 @@ class UpdatePhotoApi(APIView):
         data = helper.updatePhoto(request)
         return makeResponse(data)
 
+class UpdateMemberPhotoApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.updateMemberPhoto(request)
+        return makeResponse(data)
+
+class UpdateMemberRoleApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.updateMemberRole(request)
+        return makeResponse(data)
 
 class UpdateLogoApi(APIView):
 
@@ -131,6 +148,11 @@ class ActvateAccountApi(APIView):
         data = helper.activateAccount(request)
         return makeResponse(data)
 
+class ApproveAccountApi(APIView):
+
+    def post(self, request):
+        data = helper.approveMember(request)
+        return makeResponse(data)
 
 class VerifyTokenApi(APIView):
 
@@ -182,6 +204,14 @@ class UpdateMemberApi(APIView):
         data = helper.updateMember(request)
         return makeResponse(data)
 
+class PhotoUpdateApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.updatePhoto(request)
+        return makeResponse(data)
 
 class ActivateMemberApi(APIView):
 

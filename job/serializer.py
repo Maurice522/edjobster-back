@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job
 from common.encoder import encode
+from settings.serializer import DepartmentSerializer, Department
 
 class AssesmentSerializer(serializers.ModelSerializer):
     categpry_id = serializers.IntegerField(source='category.id')
@@ -34,11 +35,12 @@ class AssesmentQuestionDetailsSerializer(serializers.ModelSerializer):
 class JobListSerializer(serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
-    owner_id = serializers.CharField(source='owner.accountId')
+    owner_id = serializers.CharField(source='owner.account_id')
     state_id = serializers.IntegerField(source='state.id')
     state_name = serializers.CharField(source='state.name')
     country_id = serializers.IntegerField(source='country.id')
     country_name = serializers.CharField(source='country.name')
+    department = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -48,6 +50,13 @@ class JobListSerializer(serializers.ModelSerializer):
 
     def get_id(self, obj):
         return encode(obj.id)
+
+    def get_department(self, obj):
+        if obj.department:
+            department = Department.getById(obj.department, obj.company)
+            if department:
+                return department.name
+        return None
 
 class JobDetailsSerializer(serializers.ModelSerializer):
 
