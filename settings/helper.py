@@ -692,13 +692,13 @@ def saveEmailTemplate(request):
                 'code': 400,
                 'msg': 'Email not found'
             }
-        if email.subject != subject and EmailTemplate.getByName(name=subject, company=company):
+        if email.subject != subject and EmailTemplate.getByName(subject=subject, company=company):
             return {
                 'code': 400,
                 'msg': 'Email Template with subject '+subject+' already exists.'
             } 
     else:
-        if EmailTemplate.getByName(name=subject, company=company):
+        if EmailTemplate.getByName(subject=subject, company=company):
             return {
                 'code': 400,
                 'msg': 'Email Template with name '+subject+' already exists.'

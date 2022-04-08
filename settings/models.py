@@ -305,8 +305,8 @@ class EmailTemplate(models.Model):
         return None
 
     @staticmethod
-    def getByName(name, company):
-        return EmailTemplate.objects.filter(company=company, name=name).exists()
+    def getByName(subject, company):
+        return EmailTemplate.objects.filter(company=company, subject=subject).exists()
 
     @staticmethod
     def getForCompany(company):
