@@ -78,6 +78,6 @@ class EmailTemplateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmailTemplate
-        fields = ['id', 'name', 'subject', 'message', 'type', 'category_id', 'category_name', 'attachment', 'created' , 'updated']
+        fields = ['id', 'subject', 'message', 'type', 'category_id', 'category_name', 'attachment', 'created' , 'updated']
 
                                                  
