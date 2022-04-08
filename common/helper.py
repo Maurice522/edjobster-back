@@ -1,5 +1,6 @@
-from .models import Country, State, City
-from .serializer import CountrySerializer, StateSerializer, CitySerializer
+from .models import Country, NoteType, State, City
+from .serializer import CountrySerializer, NoteTypeSerializer, StateSerializer, CitySerializer
+from common import serializer
 
 
 def getAllData():
@@ -69,4 +70,14 @@ def getCitiesForState(request):
     return {
         'code': 200,
         'cities': cities.data,
+    }
+
+def getNoteTypes(request):
+
+    notes = NoteType.getAll()
+    serializer = NoteTypeSerializer(notes, many=True)
+
+    return {
+        'code': 200,
+        'types': serializer.data,
     }

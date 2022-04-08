@@ -64,6 +64,13 @@ class Department(models.Model):
         verbose_name_plural = 'Departments'
 
     @staticmethod
+    def getByDid(id):
+        if Department.objects.filter(id=id).exists():
+            return Department.objects.get(id=id)
+        return None
+    
+
+    @staticmethod
     def getById(id, company):
         if Department.objects.filter(company=company, id=id).exists():
             return Department.objects.get(id=id)
@@ -97,6 +104,12 @@ class Designation(models.Model):
     class Meta:
         verbose_name = 'Designation'
         verbose_name_plural = 'Designations'
+
+    @staticmethod
+    def getByDid(id):
+        if Designation.objects.filter(id=id).exists():
+            return Designation.objects.get(id=id)
+        return None
 
     @staticmethod
     def getById(id, company):
@@ -268,7 +281,6 @@ class EmailTemplate(models.Model):
     id = models.AutoField(primary_key=True)
     company = models.ForeignKey(
         Company, null=False, verbose_name='Company', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=False, blank=False)
     category = models.ForeignKey(
         EmailCategory, null=False, verbose_name='Category', on_delete=models.CASCADE)
     type = models.CharField(max_length=1, choices=TYPE, default=CANDIDATE)

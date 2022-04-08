@@ -202,7 +202,7 @@ def signUpAccount(request):
     company.city = mCity
     company.save()
 
-    account.companyId = company.id
+    account.company_id = company.id
     account.save()
 
     token = TokenEmailVerification.createToken(account)
@@ -265,7 +265,7 @@ def signInAccount(request):
 
     serialized_account = AccountSerializer(account)
 
-    company = Company.getById(account.companyId)
+    company = Company.getById(account.company_id)
 
     serialized_company = CompanySerializer(company)
 
@@ -295,8 +295,8 @@ def getAccountProfile(request):
 
     serialized_account = AccountSerializer(account).data
 
-    print('company', account.companyId)
-    company = Company.getById(account.companyId)
+    print('company', account.company_id)
+    company = Company.getById(account.company_id)
     print('company', company)
     serialized_company = CompanySerializer(company)
 
@@ -313,7 +313,7 @@ def getCompanyInfo(request):
 
     account = request.user
 
-    company = Company.getById(account.companyId)
+    company = Company.getById(account.company_id)
     print('company', company)
     serialized_company = CompanySerializer(company)
 
@@ -335,7 +335,7 @@ def updateCompanyInfo(request):
             'msg': 'Access denied!'
         }
 
-    company = Company.getById(account.companyId)
+    company = Company.getById(account.company_id)
     if not company:
         return {
             'code': 400,
@@ -487,33 +487,6 @@ def updateMobile(request):
         'msg': 'Mobile number is succesfully Updated'
     }
 
-
-def updatePhoto(request):
-
-    account = request.user
-
-    photo = request.FILES['photo']
-    if photo:
-        try:
-            if account.photo != None:
-                if os.path.isfile(account.photo.path):
-                    os.remove(account.photo.path)
-        except Exception:
-            pass
-        account.photo = photo
-        account.save()
-
-        return {
-            'code': 200,
-            'msg': 'Photo updated successfully'
-        }
-
-    return {
-        'code': 400,
-        'msg': 'Bad request'
-    }
-
-
 def updateLogo(request):
 
     account = request.user
@@ -524,7 +497,7 @@ def updateLogo(request):
             'msg': 'Access Denied!'
         }
 
-    company = Company.getById(account.companyId)
+    company = Company.getById(account.company_id)
 
     if not company:
         return {
@@ -742,7 +715,7 @@ def forgotPasswordAccount(request):
 def listMembrs(request):
     account = request.user
 
-    members = Account.getMembers(account.companyId)
+    members = Account.getMembers(account.company_id)
 
     accountSerializer = AccountSerializer(members, many=True)
 
@@ -760,13 +733,16 @@ def addMember(request):
 
     print('addMember', request.data)
 
-    firstName = data.get('firstName', None)
-    lastName = data.get('lastName', None)
+    firstName = data.get('first_name', None)
+    lastName = data.get('last_name', None)
     mobile = data.get('mobile', None)
     email = data.get('email', None)
     role = data.get('role', None)
 
-    if not firstName or not lastName or not email or not role:
+    department = data.get('department', None)
+    designation = data.get('designation', None)
+
+    if not firstName or not lastName or not email or not role or not designation or not designation:
 
         return {
             'code': 404,
@@ -805,15 +781,25 @@ def addMember(request):
     account.email = email
     account.role = role
     account.username = email
-    account.addedBy = adminUser.accountId
+    account.department = department
+    account.designation = designation
+    account.addedBy = adminUser.account_id
 
     account.is_staff = False
     account.is_active = True
     account.is_superuser = False
-    account.verified = False
+    account.verified = True
+
+    if request.FILES != None:
+        print("files")
+        print(request.FILES)
+        if 'photo' in request.FILES:
+            photo = request.FILES['photo']
+            account.photo = photo    
+
     account.save()
 
-    account.companyId = adminUser.companyId
+    account.company_id = adminUser.company_id
     account.save()
 
     token = TokenEmailVerification.createToken(account)
@@ -836,14 +822,18 @@ def updateMember(request):
 
     print('updateMember', data)
 
-    first_name = data.get('firstName', None)
-    last_name = data.get('lastName', None)
+    first_name = data.get('first_name', None)
+    last_name = data.get('last_name', None)
     mobile = data.get('mobile', None)
     email = data.get('email', None)
     role = data.get('role', None)
-    accountId = data.get('accountId', None)
 
-    if not first_name or not last_name or not email or not accountId or role not in [Account.ADMIN, Account.USER]:
+    department = data.get('department', None)
+    designation = data.get('designation', None)
+
+    accountId = data.get('account_id', None)
+
+    if not first_name or not last_name or not email or not accountId or role not in [Account.ADMIN, Account.USER] or not department or not designation:
         return{
             'code': 404,
             'msg': 'Invalid Request !!!'
@@ -887,6 +877,8 @@ def updateMember(request):
     account.username = email
     account.mobile = mobile
     account.role = role
+    account.department = department
+    account.designation = designation
     photo = None
 
     if request.FILES != None:
@@ -907,14 +899,85 @@ def updateMember(request):
         'msg': 'Member details updated sucessfully!'
     }
 
+def updatePhoto(request):
 
-def activateMember(request):
+    account = request.user
+
+    if request.FILES != None and 'photo' in request.FILES :
+        photo = request.FILES['photo']
+        if photo:
+            try:
+                if account.photo != None:
+                    if os.path.isfile(account.photo.path):
+                        os.remove(account.photo.path)
+            except Exception:
+                pass
+            account.photo = photo
+            account.save()
+
+            return {
+                'code': 200,
+                'msg': 'Photo updated successfully'
+            }
+
+    return {
+        'code': 400,
+        'msg': 'Profile photo required'
+    }
+
+def updateMemberPhoto(request):
+
+    adminUser = request.user
+
+    if adminUser.role != Account.ADMIN:
+        return {
+            'code': 400,
+            'msg': 'access denied!'
+        }
+
+    accountId = request.data.get('account_id', None)
+    if not accountId:
+        return {
+            'code': 400,
+            'msg': 'Bad request!'
+        }
+    account = Account.getById(accountId)
+    if not account:
+        return {
+            'code': 400,
+            'msg': 'Member not found'
+        }
+
+    if request.FILES != None and 'photo' in request.FILES :
+        photo = request.FILES['photo']
+        if photo:
+            try:
+                if account.photo != None:
+                    if os.path.isfile(account.photo.path):
+                        os.remove(account.photo.path)
+            except Exception:
+                pass
+            account.photo = photo
+            account.save()
+
+            return {
+                'code': 200,
+                'msg': 'Photo updated successfully'
+            }
+
+    return {
+        'code': 400,
+        'msg': 'Profile photo required'
+    }    
+
+def updateMemberRole(request):
+    
     adminUser = request.user
     data = request.data
     print('activate >> ', data)
 
-    status = data.get('status', None)
-    accountId = data.get('accountId', None)
+    role = data.get('role', None)
+    accountId = data.get('account_id', None)
 
     if adminUser.role != Account.ADMIN:
         return {
@@ -922,7 +985,52 @@ def activateMember(request):
             'msg': 'Only admin can add members'
         }
 
-    print('activate >> ', adminUser.accountId, accountId)
+    print('activate >> ', adminUser.account_id, accountId)
+
+    if not role or not accountId or role not in Account.ROLE_LIST:
+        return {
+            'code': 400,
+            'msg': 'Bad request!'
+        }
+
+    account = Account.getById(accountId)
+    if not account:
+        return {
+            'code': 400,
+            'msg': 'Member not found'
+        }
+
+    print('activate >> ', adminUser, account)
+
+    if adminUser == account:
+        return {
+            'code': 400,
+            'msg': 'Cannot change role of yourself'
+        }
+    
+    account.role = role
+
+    return {
+        'code': 200,
+        'msg': 'Role updated successfully'
+    }
+
+def activateMember(request):
+    
+    adminUser = request.user
+    data = request.data
+    print('activate >> ', data)
+
+    status = data.get('status', None)
+    accountId = data.get('account_id', None)
+
+    if adminUser.role != Account.ADMIN:
+        return {
+            'code': 400,
+            'msg': 'Only admin can add members'
+        }
+
+    print('activate >> ', adminUser.account_id, accountId)
 
     if not status or not accountId:
         return {
@@ -966,14 +1074,14 @@ def activateMember(request):
         'msg': msg
     }
 
-
-def deleteMember(request):
+def approveMember(request):
+    
     adminUser = request.user
     data = request.data
+    print('approveMember >> ', data)
 
-    accountId = data.get('accountId', None)
-
-    print('account delete', adminUser.accountId, accountId)
+    status = data.get('status', None)
+    accountId = data.get('account_id', None)
 
     if adminUser.role != Account.ADMIN:
         return {
@@ -981,16 +1089,12 @@ def deleteMember(request):
             'msg': 'Only admin can add members'
         }
 
-    if not accountId:
+    print('activate >> ', adminUser.account_id, accountId)
+
+    if not status or not accountId:
         return {
             'code': 400,
             'msg': 'Bad request!'
-        }
-
-    if adminUser.accountId == accountId:
-        return {
-            'code': 400,
-            'msg': 'Cannot delete account of yourself'
         }
 
     account = Account.getById(accountId)
@@ -1005,7 +1109,64 @@ def deleteMember(request):
     if adminUser == account:
         return {
             'code': 400,
+            'msg': 'Cannot deactivate account of yourself'
+        }
+
+    if status not in ['A', 'D']:
+        return {
+            'code': 400,
+            'msg': 'Invalid status'
+        }
+
+    msg = ''
+    if status == 'A':
+        msg = 'Account activated successfully!'
+        account.verified = True
+    else:
+        msg = 'Account deactivated successfully!'
+        account.verified = False
+
+    account.save()
+
+    return {
+        'code': 200,
+        'msg': msg
+    }    
+
+
+def deleteMember(request):
+    adminUser = request.user
+    account_id = request.GET.get('account_id', None)
+
+    if adminUser.role != Account.ADMIN:
+        return {
+            'code': 400,
+            'msg': 'Only admin can add members'
+        }
+
+    if not account_id:
+        return {
+            'code': 400,
+            'msg': 'Bad request!'
+        }
+
+    if adminUser.account_id == account_id:
+        return {
+            'code': 400,
             'msg': 'Cannot delete account of yourself'
+        }
+    company = Company.getByUser(adminUser)
+    account = Account.getByIdAndCompany(account_id, company)
+    if not account:
+        return {
+            'code': 400,
+            'msg': 'Member not found'
+        }
+
+    if account.company_id != adminUser.company_id:
+        return {
+            'code': 400,
+            'msg': 'Access denied!'
         }
 
     account.delete()

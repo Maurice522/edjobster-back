@@ -1,12 +1,30 @@
 from rest_framework import serializers
 from .models import Account, Company
-
+from settings.models import Department, Designation
 
 class AccountSerializer(serializers.ModelSerializer):
+
+    department = serializers.SerializerMethodField()
+    designation = serializers.SerializerMethodField()
+
+    def get_department(self, obj):
+        if obj.department:
+            department = Department.getByDid(obj.department)
+            if department:
+                return department.name
+        return None
+
+    def get_designation(self, obj):
+        if obj.designation:
+            designation = Designation.getByDid(obj.designation)
+            if designation:
+                return designation.name
+        return None
+
     class Meta:
         model = Account
-        fields = ['accountId', 'photo', 'first_name', 'last_name', 'role', 'companyId', 'mobile', 'email',
-                  'is_active', 'verified']
+        fields = ['account_id', 'photo', 'first_name', 'last_name', 'role', 'company_id', 'mobile', 'email',
+                  'is_active', 'verified', 'department', 'designation']
 
 
 class CompanySerializer(serializers.ModelSerializer):

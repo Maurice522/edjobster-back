@@ -8,4 +8,5 @@ urlpatterns = [
     path('countires/', views.CountryApi.as_view(), name='countires'),
     path('states/', views.StatesApi.as_view(), name='states'),
     path('cities/', views.CitiesApi.as_view(), name='cities'),
+    path('note-types/', views.NotesApi.as_view(), name='note-types'),
 ]

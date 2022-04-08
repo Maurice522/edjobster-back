@@ -202,7 +202,13 @@ class Job(models.Model):
         verbose_name_plural = 'Jobs'
 
     @staticmethod
-    def getById(id, company):
+    def getById(id):
+        if Job.objects.filter(id=id).exists():
+            return Job.objects.get(id=id)
+        return None
+
+    @staticmethod
+    def getByIdAndCompany(id, company):
         if Job.objects.filter(company=company, id=id).exists():
             return Job.objects.get(id=id)
         return None
@@ -214,3 +220,6 @@ class Job(models.Model):
     @staticmethod
     def getForCompany(company):
         return Job.objects.filter(company=company)
+
+
+

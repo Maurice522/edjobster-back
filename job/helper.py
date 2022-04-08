@@ -17,7 +17,7 @@ import json
 from settings.models import Degree, Department, Pipeline
 from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
 from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
-
+from account.serializer import CompanySerializer
 
 #ASSESMENT
 def getAssesmentCategories(request):
@@ -273,6 +273,26 @@ def deleteAssesmentQuestion(request):
     return getErrorResponse('Invalid request')
 
 #JOBS
+def getJobsBoard(request):
+    company_id = request.data.get('id')
+    if not company_id:
+        return getErrorResponse('Bad request')
+    
+    company = Company.getById(company_id)
+    if not company:
+        return getErrorResponse('company not found')
+
+    company = Company.getByUser(request.user)
+    jobs = Job.getForCompany(company=company)
+    serializerJobs = JobListSerializer(jobs, many=True)
+    serializerCompany = CompanySerializer(company)
+
+    return {
+        'code': 200,
+        'company': serializerCompany.data,
+        'jobs': serializerJobs.data
+    }    
+
 def getJobs(request):
 
     company = Company.getByUser(request.user)
@@ -292,7 +312,7 @@ def getJobDetails(request):
     if not id:
         return getErrorResponse('Invalid request')
 
-    job = Job.getById(id, company)
+    job = Job.getByIdAndCompany(decode(id), company)
     if not job:
         return getErrorResponse('Job not found')
 
@@ -341,7 +361,7 @@ def saveJob(request):
     id = data.get('id', None)
 
     if id:
-        job = Job.getById(id, company)
+        job = Job.getByIdAndCompany(decode(id), company)
         if not category:
             return getErrorResponse( 'Job not found')
     else:
@@ -513,7 +533,7 @@ def saveJob(request):
 
     return {
         'code': 200,
-        'msg': 'Job created successfully'
+        'msg': 'Job saved successfully'
     }
 
 def deleteJob(request): 
@@ -522,7 +542,7 @@ def deleteJob(request):
     company = Company.getByUser(request.user)
 
     if id:
-        job = Job.getById(id, company)
+        job = Job.getByIdAndCompany(decode(id), company)
         if not job:
             return getErrorResponse('Job not found')
 
