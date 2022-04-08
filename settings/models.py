@@ -281,7 +281,6 @@ class EmailTemplate(models.Model):
     id = models.AutoField(primary_key=True)
     company = models.ForeignKey(
         Company, null=False, verbose_name='Company', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=False, blank=False)
     category = models.ForeignKey(
         EmailCategory, null=False, verbose_name='Category', on_delete=models.CASCADE)
     type = models.CharField(max_length=1, choices=TYPE, default=CANDIDATE)

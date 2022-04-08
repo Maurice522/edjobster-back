@@ -665,13 +665,12 @@ def saveEmailTemplate(request):
     company = Company.getByUser(request.user)    
     
     data = request.data    
-    name = data.get('name', None)   
     type = data.get('type', None)   
     category = data.get('category', None)   
     subject = data.get('subject', None)   
     message = data.get('message', None)   
 
-    if not name or not category or not type or not type in EmailTemplate.EMAIL_TYPES or not message or not subject:
+    if not category or not type or not type in EmailTemplate.EMAIL_TYPES or not message or not subject:
         return {
             'code': 400,
             'msg': 'Invalid request'
@@ -693,16 +692,16 @@ def saveEmailTemplate(request):
                 'code': 400,
                 'msg': 'Email not found'
             }
-        if email.name != name and EmailTemplate.getByName(name=name, company=company):
+        if email.subject != subject and EmailTemplate.getByName(name=subject, company=company):
             return {
                 'code': 400,
-                'msg': 'Email Template with name '+name+' already exists.'
+                'msg': 'Email Template with subject '+subject+' already exists.'
             } 
     else:
-        if EmailTemplate.getByName(name=name, company=company):
+        if EmailTemplate.getByName(name=subject, company=company):
             return {
                 'code': 400,
-                'msg': 'Email Template with name '+name+' already exists.'
+                'msg': 'Email Template with name '+subject+' already exists.'
             } 
 
         email = EmailTemplate()  
@@ -717,7 +716,6 @@ def saveEmailTemplate(request):
                 email.attachment.delete()
             email.attachment = file    
     
-    email.name = name
     email.category = category
     email.type = type
     email.subject = subject
