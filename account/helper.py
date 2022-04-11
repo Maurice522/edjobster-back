@@ -346,20 +346,19 @@ def updateCompanyInfo(request):
 
     print('data', request.data)
     companyName = data.get('company', None)
+    website = data.get('website', None)
+    description = data.get('description', None)
     pincode = data.get('pincode', None)
     gstNo = data.get('gst_no', None)
     locLat = data.get('loc_lat', None)
     locLon = data.get('loc_lon', None)
     address = data.get('address', None)
     landmark = data.get('landmark', None)
-    stateId = data.get('state', None)
     cityId = data.get('city', None)
-    countryId = data.get('country', None)
 
-    print('info', companyName, pincode, address,
-          landmark, stateId, countryId, cityId)
+    print('info', companyName, pincode, address, landmark, cityId)
 
-    if not companyName or not pincode or not address or not landmark or not stateId or not countryId or not cityId:
+    if not companyName or not pincode or not address or not landmark or not cityId or not website or not description:
 
         return {
             'code': 400,
@@ -368,11 +367,20 @@ def updateCompanyInfo(request):
 
     account = None
 
-    mState = State.getById(stateId)
     mCity = City.getById(cityId)
-    mCountry = Country.getById(countryId)
+
+    if not mCity:
+        return {
+            'code': 400,
+            'msg': 'City not found'
+        }
+
+    mState = mCity.state
+    mCountry = mState.country
 
     company.name = companyName
+    company.website = website
+    company.description = description
     company.pincode = pincode
     company.gst_no = gstNo
     company.loc_lat = locLat
