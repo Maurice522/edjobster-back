@@ -36,13 +36,13 @@ class CompanySerializer(serializers.ModelSerializer):
 
     city_id = serializers.IntegerField(source='city.id')
     city_name = serializers.CharField(source='city.name')
-    state_id = serializers.IntegerField(source='state.id')
-    state_name = serializers.CharField(source='state.name')
-    country_id = serializers.IntegerField(source='country.id')
-    country_name = serializers.CharField(source='country.name')
+    state_id = serializers.IntegerField(source='city.state.id')
+    state_name = serializers.CharField(source='city.state.name')
+    country_id = serializers.IntegerField(source='city.state.country.id')
+    country_name = serializers.CharField(source='city.state.country.name')
 
     class Meta:
         model = Company
-        fields = ['id', 'logo', 'name', 'domain', 'admin_id', 'admin_first_name',
+        fields = ['id', 'logo', 'name', 'domain', 'website', 'description', 'admin_id', 'admin_first_name',
                   'admin_last_name', 'admin_email', 'address', 'landmark', 'pincode', 'loc_lat', 'loc_lon', 'city_id', 'city_name', 'state_id', 'state_name',
                   'country_id', 'country_name']
