@@ -1,7 +1,9 @@
+from email.policy import default
 from django.db import models
 from common.models import Country, State, NoteType
 from django.db.models import Q
 from job.models import Job, Account
+from django.contrib.postgres.fields import JSONField
 
 class Candidate(models.Model):
 
@@ -59,6 +61,7 @@ class Candidate(models.Model):
     skills = models.CharField(max_length=250, null=True, blank=True)
 
     resume = models.FileField(upload_to='media/resume/', default=None, null=True, blank=True)  
+    resume_parse_data = JSONField(null=True, default=None)
 
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
