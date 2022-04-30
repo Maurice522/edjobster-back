@@ -38,7 +38,16 @@ class ApplicationsResumeApi(APIView):
 
     def post(self, request):
         data = helper.updateResume(request)
-        return makeResponse(data)        
+        return makeResponse(data)  
+
+class ApplicationsResumeParseApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.parseResume(request)
+        return makeResponse(data)                 
 
 class CandidateDetailsApi(APIView):
 

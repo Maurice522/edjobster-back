@@ -192,3 +192,13 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = "edjobster@gmail.com"
 EMAIL_HOST_PASSWORD = "Edjobster2021"
+
+#RESUME PARSE
+RESUME_PARSE_URL = "https://rest.rchilli.com/RChilliParser/Rchilli/parseResume"
+RESUME_PARSE_USER = "Syed Hamid Hasan"
+RESUME_PARSE_KEY = "NFSF6Y36"
+RESUME_PARSE_VERSION = "8.0.0"
+
+#MEDIA URLS
+RESUME_URL = '/cv/'
+RESUME_URL_ROOT = os.path.join(BASE_DIR, 'media/resume/')

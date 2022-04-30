@@ -22,6 +22,8 @@ from common.encoder import decode
 from django.utils.dateparse import parse_date
 from common.utils import parseDate
 from datetime import date    
+from django.conf import settings
+import requests
 
 def applyJob(request):
 
@@ -380,6 +382,49 @@ def updateResume(request):
         'msg': 'Job resume updated!'
     }                    
 
+def parseResume(request):
+
+    data = request.data
+
+    candidate_id = data.get('id', None)
+
+    if not candidate_id:
+        return getErrorResponse('Invalid request')
+
+    company = Company.getByUser(request.user)
+    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    
+    if not candidate:
+        return getErrorResponse('candidate not found')
+
+    if request.FILES != None:
+        print("files")
+        print(request.FILES)
+        if 'resume' in request.FILES:
+            resume = request.FILES['resume']
+            candidate.resume = resume    
+
+    parse = {
+        "url": "https://drive.google.com/file/d/1Vqdon9qf-QWQvUS08aKqfBZnj7sRUJNt/view?usp=sharing",
+        "userkey": settings.RESUME_PARSE_KEY,
+        "version": settings.RESUME_PARSE_VERSION,
+        "subuserid": settings.RESUME_PARSE_USER,
+    }
+
+    response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
+
+    print('response', response.status_code)
+    print('content', response.text)
+
+    if response.status_code == 200:
+        candidate.resume_parse_data = response.json()
+
+    candidate.save()
+
+    return {
+        'code': 200,
+        'msg': 'Job resume updated!'
+    } 
 
 def getAllNotes(request):
     candidate_id = request.GET.get('candidate')
