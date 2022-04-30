@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import Candidate, Note
 from common.encoder import encode
 from common.serializer import NoteTypeSerializer
+from django.conf import settings
 
 class CandidateListSerializer(serializers.ModelSerializer):
 
@@ -38,7 +39,7 @@ class CandidateDetailsSerializer(serializers.ModelSerializer):
 
     def get_resume(self, obj):
         if obj.resume:
-            return obj.resume.name[13:]
+            return settings.RESUME_FILE_URL+obj.resume.name[13:]
         return None              
 
 class NoteSerializer(serializers.ModelSerializer):

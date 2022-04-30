@@ -404,27 +404,34 @@ def parseResume(request):
             resume = request.FILES['resume']
             candidate.resume = resume    
 
-    parse = {
-        "url": "https://drive.google.com/file/d/1Vqdon9qf-QWQvUS08aKqfBZnj7sRUJNt/view?usp=sharing",
-        "userkey": settings.RESUME_PARSE_KEY,
-        "version": settings.RESUME_PARSE_VERSION,
-        "subuserid": settings.RESUME_PARSE_USER,
-    }
+            parse = {
+                "url": settings.RESUME_FILE_URL+resume.name[13:],
+                "userkey": settings.RESUME_PARSE_KEY,
+                "version": settings.RESUME_PARSE_VERSION,
+                "subuserid": settings.RESUME_PARSE_USER,
+            }
 
-    response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
+            print('body', parse)
 
-    print('response', response.status_code)
-    print('content', response.text)
+            response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
 
-    if response.status_code == 200:
-        candidate.resume_parse_data = response.json()
+            print('response', response.status_code)
+            print('content', response.text)
 
-    candidate.save()
+            if response.status_code == 200:
+                candidate.resume_parse_data = response.json()
+
+            candidate.save()
+
+            return {
+                'code': 200,
+                'msg': 'Job resume updated!'
+            } 
 
     return {
         'code': 200,
         'msg': 'Job resume updated!'
-    } 
+    }             
 
 def getAllNotes(request):
     candidate_id = request.GET.get('candidate')

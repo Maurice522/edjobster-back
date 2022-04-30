@@ -202,3 +202,4 @@ RESUME_PARSE_VERSION = "8.0.0"
 #MEDIA URLS
 RESUME_URL = '/cv/'
 RESUME_URL_ROOT = os.path.join(BASE_DIR, 'media/resume/')
+RESUME_FILE_URL = "http://api.edjobster.com/candidate/cv/"
