@@ -31,7 +31,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     def get_photo(self, obj):
         if obj.photo:
-            return settings.PHOTO_FILE_URL+obj.photo.name[18:]
+            return settings.PHOTO_FILE_URL+obj.photo.name[19:]
         return None  
 
 class CompanySerializer(serializers.ModelSerializer):
