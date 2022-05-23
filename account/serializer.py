@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Account, Company
 from settings.models import Department, Designation
+from django.conf import settings
 
 class AccountSerializer(serializers.ModelSerializer):
 
@@ -40,9 +41,15 @@ class CompanySerializer(serializers.ModelSerializer):
     state_name = serializers.CharField(source='city.state.name')
     country_id = serializers.IntegerField(source='city.state.country.id')
     country_name = serializers.CharField(source='city.state.country.name')
+    logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Company
         fields = ['id', 'logo', 'name', 'domain', 'website', 'description', 'admin_id', 'admin_first_name',
                   'admin_last_name', 'admin_email', 'address', 'landmark', 'pincode', 'loc_lat', 'loc_lon', 'city_id', 'city_name', 'state_id', 'state_name',
                   'country_id', 'country_name']
+
+    def get_resume(self, obj):
+        if obj.logo:
+            return settings.LOGO_FILE_URL+obj.logo.name[22:]
+        return None    
