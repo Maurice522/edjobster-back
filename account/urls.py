@@ -39,3 +39,4 @@ urlpatterns = [
 ]
 
 urlpatterns += static(settings.LOGO_URL, document_root=settings.LOGO_URL_ROOT)
+urlpatterns += static(settings.PHOTO_URL, document_root=settings.PHOTO_URL_ROOT)

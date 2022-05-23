@@ -7,6 +7,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     department = serializers.SerializerMethodField()
     designation = serializers.SerializerMethodField()
+    photo = serializers.SerializerMethodField()
 
     def get_department(self, obj):
         if obj.department:
@@ -27,6 +28,11 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ['account_id', 'photo', 'first_name', 'last_name', 'role', 'company_id', 'mobile', 'email',
                   'is_active', 'verified', 'department', 'designation']
 
+
+    def get_photo(self, obj):
+        if obj.photo:
+            return settings.PHOTO_FILE_URL+obj.photo.name[18:]
+        return None  
 
 class CompanySerializer(serializers.ModelSerializer):
 
@@ -49,7 +55,7 @@ class CompanySerializer(serializers.ModelSerializer):
                   'admin_last_name', 'admin_email', 'address', 'landmark', 'pincode', 'loc_lat', 'loc_lon', 'city_id', 'city_name', 'state_id', 'state_name',
                   'country_id', 'country_name']
 
-    def get_resume(self, obj):
+    def get_logo(self, obj):
         if obj.logo:
             return settings.LOGO_FILE_URL+obj.logo.name[22:]
         return None    
