@@ -203,3 +203,13 @@ RESUME_PARSE_VERSION = "8.0.0"
 RESUME_URL = '/cv/'
 RESUME_URL_ROOT = os.path.join(BASE_DIR, 'media/resume/')
 RESUME_FILE_URL = "http://api.edjobster.com/candidate/cv/"
+
+#LOGO URLS
+LOGO_URL = '/logo/'
+LOGO_URL_ROOT = os.path.join(BASE_DIR, 'media/companies/logos')
+LOGO_FILE_URL = "http://api.edjobster.com/account/logo/"
+
+#PHOTO URLS
+PHOTO_URL = '/photo/'
+PHOTO_URL_ROOT = os.path.join(BASE_DIR, 'media/users/photos')
+PHOTO_FILE_URL = "http://api.edjobster.com/account/photo/"

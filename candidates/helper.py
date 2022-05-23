@@ -404,8 +404,11 @@ def parseResume(request):
             resume = request.FILES['resume']
             candidate.resume = resume    
 
+            url = "http://api.edjobster.com/candidate/cv/Imran-Resume.pdf"
+            # url = settings.RESUME_FILE_URL+resume.name[13:],
+
             parse = {
-                "url": settings.RESUME_FILE_URL+resume.name[13:],
+                "url": url,
                 "userkey": settings.RESUME_PARSE_KEY,
                 "version": settings.RESUME_PARSE_VERSION,
                 "subuserid": settings.RESUME_PARSE_USER,

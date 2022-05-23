@@ -37,3 +37,6 @@ urlpatterns = [
     path('refreshtoken/', TokenRefreshView.as_view(), name='refreshtoken'),
     path('verifytoken/', TokenVerifyView.as_view, name='verifytoken'),
 ]
+
+urlpatterns += static(settings.LOGO_URL, document_root=settings.LOGO_URL_ROOT)
+urlpatterns += static(settings.PHOTO_URL, document_root=settings.PHOTO_URL_ROOT)
