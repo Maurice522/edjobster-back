@@ -4,9 +4,9 @@ from django.template.loader import render_to_string
 import threading
 from common.encoder import encode
 
-URL_RESET_PSWD = "http://34.125.49.10/authentication/reset-password/"
-URL_EMAIL_VERIFY = "http://34.125.49.10/authentication/activate?token="
-URL_EMAIL_ACTIVATE = "http://34.125.49.10/authentication/verify/"
+URL_RESET_PSWD = "http://app.edjobster.com/auth/reset-password/"
+URL_EMAIL_VERIFY = "http://app.edjobster.com/auth/activate?token="
+URL_EMAIL_ACTIVATE = "http://app.edjobster.com/auth/verify/"
 
 
 class ResetPasswordMailer(threading.Thread):
@@ -50,7 +50,7 @@ class EmailVerificationMailer(threading.Thread):
         send_mail(
             "Edjobster| Verify Account",
             "Verify Account",
-            "faimsoft@gmail.com",
+            "info@edjobster.com",
             [self.token.user.email],
             html_message=msg_html,
             fail_silently=False,

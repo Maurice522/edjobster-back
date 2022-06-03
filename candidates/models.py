@@ -67,7 +67,7 @@ class Candidate(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.job.title)[20]+' '+str(self.email)[:30]
+        return str(self.job)+' '+str(self.email)[:30]
 
     class Meta:
         verbose_name = 'Candidate'
