@@ -50,7 +50,7 @@ class EmailVerificationMailer(threading.Thread):
         send_mail(
             "Edjobster| Verify Account",
             "Verify Account",
-            "faimsoft@gmail.com",
+            "info@edjobster.com",
             [self.token.user.email],
             html_message=msg_html,
             fail_silently=False,
