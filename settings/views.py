@@ -171,3 +171,29 @@ class EmailTemplateApi(APIView):
     def delete(self, request):
         data = helper.deleteEmailTemmplate(request)
         return makeResponse(data)           
+
+class WebformApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getWebforms(request)
+        return makeResponse(data)
+
+    def post(self, request):
+        data = helper.saveWebForms(request)
+        return makeResponse(data)
+
+    def delete(self, request):
+        data = helper.deleteWebforms(request)
+        return makeResponse(data)                   
+
+class WebformFieldsApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getWebformFields(request)
+        return makeResponse(data)        

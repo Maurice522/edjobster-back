@@ -4,6 +4,7 @@ from account.models import Company
 from django.contrib.postgres.fields import ArrayField
 from common.models import Country, State, City
 from common.utils import generateFileName
+from django.contrib.postgres.fields import JSONField
 
 
 class Location(models.Model):
@@ -318,6 +319,7 @@ class EmailTemplate(models.Model):
 
 
 class EmailFields(models.Model):
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, null=True, blank=True)
     value = models.CharField(max_length=100, null=True, blank=True)
@@ -346,3 +348,38 @@ class EmailFields(models.Model):
     @staticmethod
     def getAll():
         return EmailFields.objects.all()        
+
+
+
+class Webform(models.Model):
+    id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    form = JSONField(null=True, default=None)
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.name)+' '+str(self.value)[:20]
+
+    class Meta:
+        verbose_name = 'Webform'
+        verbose_name_plural = 'Webforms'
+
+    @staticmethod
+    def getByName(name, company):
+        return Webform.objects.filter(company=company, name=name).exists()
+
+    @staticmethod
+    def getById(id, company):
+        if Webform.objects.filter(id=id, company=company).exists():
+            return Webform.objects.get(id=id)
+        return None
+
+    @staticmethod
+    def getForCompany(company):
+        return Webform.objects.filter(company=company)
+
+    @staticmethod
+    def getAll():
+        return Webform.objects.all()         

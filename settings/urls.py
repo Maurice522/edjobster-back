@@ -14,4 +14,6 @@ urlpatterns = [
     path('email-field/', views.EmailFieldApi.as_view(), name='email-field'),
     path('email-category/', views.EmailCategoryApi.as_view(), name='email-category'),
     path('email-template/', views.EmailTemplateApi.as_view(), name='email-template'),
+    path('webform/', views.WebformApi.as_view(), name='webform'),
+    path('webform-fields/', views.WebformFieldsApi.as_view(), name='webform-fields'),
 ]

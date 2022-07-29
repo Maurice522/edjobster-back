@@ -5,10 +5,12 @@ from django.db.models import Q
 from job.models import Job, Account
 from django.contrib.postgres.fields import JSONField
 
+from settings.models import Webform
+
 class Candidate(models.Model):
 
-    SINGLE = 'S'
-    MARRIED = 'M'
+    SINGLE = 'Single'
+    MARRIED = 'Married'
 
     MARITAL_STATUS_LIST = [SINGLE, MARRIED]
 
@@ -17,21 +19,35 @@ class Candidate(models.Model):
         (MARRIED, 'Married'),
     ]
 
+    MALE = 'Male'
+    FEMALE = 'Female'
+
+    GENDER_LIST = [MALE, FEMALE]
+
+    GENDER_OPTIONS = [
+        (MALE, 'Male'),
+        (FEMALE, 'Female'),
+    ]
+
     SSC = 'SSC'
     HSC = 'HSC'
-    DIPLOMA = 'DIP'
+    DIPLOMA = 'DIPLOMA'
     GRADUATION = 'UG'
     POST_GRADUATION = 'PG'
 
     QUALIFICATION_LIST = [SSC, HSC, DIPLOMA, GRADUATION, POST_GRADUATION]
 
     QUALIFICATIONS = [
-        (SINGLE, 'Single'),
-        (MARRIED, 'Married'),
+        (SSC, 'SSC'),
+        (HSC, 'HSC'),
+        (DIPLOMA, 'DIPLOMA'),
+        (GRADUATION, 'UG'),
+        (POST_GRADUATION, 'PG'),
     ]
 
     id = models.AutoField(primary_key=True)
-    job = models.ForeignKey(Job, default=None, null=False, verbose_name='Job', on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, default=None, null=True, verbose_name='Job', on_delete=models.SET_NULL)
+    webform = models.ForeignKey(Webform, default=None, null=True, verbose_name='webform', on_delete=models.SET_NULL)
     first_name = models.CharField(max_length=50, null=True, blank=True)
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
@@ -39,7 +55,8 @@ class Candidate(models.Model):
     mobile = models.CharField(max_length=50, null=True, blank=True)
     email = models.CharField(max_length=100, null=True, blank=True)
     email_alt = models.CharField(max_length=100, null=True, blank=True)
-    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS, default=SINGLE)
+    marital_status = models.CharField(max_length=10,  null=True, blank=True, choices=MARITAL_STATUS, default=SINGLE)
+    gender = models.CharField(max_length=6,  null=True, blank=True, choices=GENDER_OPTIONS, default=MALE)
     date_of_birth = models.DateField(default=None, null=True, blank=True)
     age = models.IntegerField(default=0)
     last_applied = models.DateTimeField(default=None, null=True, blank=True)
@@ -52,7 +69,7 @@ class Candidate(models.Model):
   
     exp_years = models.IntegerField(default=0)
     exp_months = models.IntegerField(default=0)
-    qualification = models.CharField(max_length=3, choices=QUALIFICATIONS, default=GRADUATION)
+    qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION)
     cur_job = models.CharField(max_length=50, null=True, blank=True)
     cur_employer = models.CharField(max_length=50, null=True, blank=True)
     certifications = models.CharField(max_length=50, null=True, blank=True)

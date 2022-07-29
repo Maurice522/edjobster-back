@@ -11,6 +11,7 @@ class CandidateListSerializer(serializers.ModelSerializer):
     state_name = serializers.CharField(source='state.name')
     country_id = serializers.IntegerField(source='country.id')
     country_name = serializers.CharField(source='country.name')
+    webform_id = serializers.SerializerMethodField()
 
     job_id = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
@@ -21,13 +22,18 @@ class CandidateListSerializer(serializers.ModelSerializer):
         model = Candidate
         fields = ['id', 'first_name', 'middle_name', 'last_name', 'phone', 'mobile', 'email', 'email_alt',
                   'city', 'pincode', 'state_id', 'state_name', 'country_id', 'country_name',
-                  'job_id', 'job_title']
+                  'job_id', 'job_title', 'webform_id']
 
     def get_job_id(self, obj):
         return encode(obj.job.id)
     
     def get_id(self, obj):
         return encode(obj.id)  
+
+    def get_webform_id(self, obj):
+        if obj.webform:
+            return obj.webform.id
+        return None     
 
 class CandidateDetailsSerializer(serializers.ModelSerializer):
 
