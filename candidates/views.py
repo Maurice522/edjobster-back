@@ -14,6 +14,12 @@ class ApplyApi(APIView):
         data = helper.applyJob(request)
         return makeResponse(data)
 
+class ApplyJobApi(APIView):
+
+    def post(self, request):
+        data = helper.applyWebformJob(request)
+        return makeResponse(data)        
+
 class ApplicationsApi(APIView):
 
     authentication_classes = [JWTAuthentication]

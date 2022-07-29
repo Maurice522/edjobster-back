@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('apply/', views.ApplyApi.as_view(), name='apply'),
+    path('apply-job/', views.ApplyJobApi.as_view(), name='apply-job'),
     path('applications/', views.ApplicationsApi.as_view(), name='applications'),
     path('resume/', views.ApplicationsResumeApi.as_view(), name='resume'),
     path('resume-parse/', views.ApplicationsResumeParseApi.as_view(), name='resume-parse'),

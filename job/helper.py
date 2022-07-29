@@ -187,9 +187,9 @@ def getAssesmentQuestions(assesment):
 def saveAssesmentQuestion(request):
 
     company = Company.getByUser(request.user)
-    id = request.GET.get('id')
+    assesment = request.data.get('assesment')
 
-    assesment = Assesment.getById(id=id, company=company)
+    assesment = Assesment.getById(id=assesment, company=company)
     if not assesment:
         return getErrorResponse( 'Assesment not found')
     

@@ -3,6 +3,7 @@ import email
 import re
 from unicodedata import category
 from account.models import Account, Company, TokenEmailVerification, TokenResetPassword
+from candidates.models import Candidate
 from rest_framework.response import Response
 from rest_framework.authentication import BaseAuthentication
 from django.contrib.auth import authenticate
@@ -10,8 +11,8 @@ from common.encoder import decode
 from common.utils import isValidUuid, getDomainFromEmail
 from common.models import Country, State, City
 import json
-from .models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStage
-from .serializer import DegreeSerializer, PipelineStagListSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineSerializer, PipelineStageSerializer
+from .models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStage, Webform
+from .serializer import DegreeSerializer, PipelineStagListSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineSerializer, PipelineStageSerializer, WebformDataSerializer, WebformListSerializer
 
 
 def getCompanyByUser(user):
@@ -750,3 +751,253 @@ def deleteEmailTemmplate(request):
         'code': 400,
         'msg': 'Invalid request'
     }        
+
+
+def getWebforms(request):
+
+    company = Company.getByUser(request.user)
+
+    id = request.GET.get('id', None)
+
+    if id:
+        form = Webform.getById(id, company)
+        if not form:
+            return {
+                'code': 400,
+                'msg': 'Form not found'
+            }
+        serializer = WebformDataSerializer(form)
+    else:
+        forms = Webform.getForCompany(company=company)
+        serializer = WebformListSerializer(forms, many=True)
+
+    return {
+        'code': 200,
+        'data': serializer.data
+    }    
+
+def saveWebForms(request):
+
+    company = Company.getByUser(request.user)    
+    
+    data = request.data    
+    name = data.get('name', None)   
+    form = data.get('form', None)   
+
+    if not company or not name or not form:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+
+    id = data.get('id', None)
+
+    if id:
+        webform = Webform.getById(id, company)
+        if not webform:
+            return {
+                'code': 400,
+                'msg': 'Email not found'
+            }
+        if webform.name != name:
+            if Webform.getByName(name, company):
+                return {
+                    'code': 400,
+                    'msg': 'Webform with name '+name+' already exists!'
+                }
+    else:
+        if Webform.getByName(name, company):
+            return {
+                'code': 400,
+                'msg': 'Webform with name '+name+' already exists!'
+            }
+
+        webform = Webform()  
+        webform.company = company
+
+
+    webform.name = name
+    webform.form = form
+
+    webform.save()
+
+    return {
+        'code': 200,
+        'msg': 'Webform saved successfully!'
+    }
+
+def deleteWebforms(request): 
+
+    id = request.GET.get('id', None)
+    company = Company.getByUser(request.user)
+
+    if id:
+        form = Webform.getById(id, company)
+
+        if not form:
+            return {
+                'code': 400,
+                'msg': 'Webform not found'
+            }
+
+        form.delete()
+        return {
+            'code': 200,
+            'msg': 'Webform deleted succesfully!',
+        }
+
+    return {
+        'code': 400,
+        'msg': 'Invalid request'
+    }            
+
+def getWebformFields(request):
+
+    return {
+        'code': 200,
+        'data': [
+            {
+                'name': 'First Name',
+                'value': 'first_name',
+                'type': 'text'
+            },
+            {
+                'name': 'Middle Name',
+                'value': 'middle_name',
+                'type': 'text'
+            },
+            {
+                'name': 'Last Name',
+                'value': 'last_name',
+                'type': 'text'
+            },
+            {
+                'name': 'Phone Number',
+                'value': 'phone',
+                'type': 'number'
+            },
+            {
+                'name': 'Mobile Number',
+                'value': 'mobile',
+                'type': 'number'
+            },
+            {
+                'name': 'Email',
+                'value': 'email',
+                'type': 'email'
+            },
+            {
+                'name': 'Alternate Email',
+                'value': 'email_alt',
+                'type': 'email'
+            },
+            {
+                'name': 'Marrital Status',
+                'value': 'marital_status',
+                'type': 'select',
+                'options': ['Single', 'Married']
+            },
+            {
+                'name': 'Gender',
+                'value': 'gender',
+                'type': 'select',
+                'options': Candidate.GENDER_LIST
+            },
+            {
+                'name': 'Date of Birth',
+                'value': 'date_of_birth',
+                'type': 'date'
+            },
+            {
+                'name': 'Last Applied',
+                'value': 'last_applied',
+                'type': 'datetime'
+            },
+            {
+                'name': 'Street',
+                'value': 'street',
+                'type': 'text'
+            },
+            {
+                'name': 'Pincode',
+                'value': 'pincode',
+                'type': 'number'
+            },
+            {
+                'name': 'City',
+                'value': 'city',
+                'type': 'text'
+            },
+            {
+                'name': 'State',
+                'value': 'state',
+                'type': 'state'
+            },
+            {
+                'name': 'Country',
+                'value': 'country',
+                'type': 'country'
+            },
+            {
+                'name': 'Age',
+                'value': 'age',
+                'type': 'number'
+            },
+            {
+                'name': 'Experience in years',
+                'value': 'exp_years',
+                'type': 'number'
+            },
+            {
+                'name': 'Experience in months',
+                'value': 'exp_months',
+                'type': 'number'
+            },
+            {
+                'name': 'Highest Qualification',
+                'value': 'qualification',
+                'type': 'select',
+                'options': Candidate.QUALIFICATION_LIST
+            },
+            {
+                'name': 'Current Job',
+                'value': 'cur_job',
+                'type': 'text'
+            },
+            {
+                'name': 'Current Job',
+                'value': 'cur_job',
+                'type': 'text'
+            },
+            {
+                'name': 'Current Employer',
+                'value': 'cur_employer',
+                'type': 'text'
+            },
+            {
+                'name': 'Certifications',
+                'value': 'certifications',
+                'type': 'text'
+            },
+            {
+                'name': 'Functional Area',
+                'value': 'fun_area',
+                'type': 'text'
+            },
+            {
+                'name': 'Subjects',
+                'value': 'subjects',
+                'type': 'text'
+            },
+            {
+                'name': 'Skills',
+                'value': 'skills',
+                'type': 'text'
+            },
+            {
+                'name': 'Resume',
+                'value': 'resume',
+                'type': 'file'
+            }
+        ]
+    }     

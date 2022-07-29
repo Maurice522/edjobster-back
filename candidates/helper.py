@@ -15,7 +15,7 @@ from django.contrib.auth import authenticate
 from common.utils import isValidUuid, getErrorResponse
 from common.models import Country, NoteType, State, City
 import json
-from settings.models import Degree, Department, Pipeline
+from settings.models import Degree, Department, Pipeline, Webform
 from .models import Candidate, Note
 from .serializer import CandidateListSerializer, CandidateDetailsSerializer, NoteSerializer
 from common.encoder import decode
@@ -526,3 +526,155 @@ def deleteNote(request):
         }
     
     return getErrorResponse('Note not found')
+
+
+def applyWebformJob(request):
+
+    data = request.data
+
+    print('data', request.data)
+
+    webform_id = data.get('webform_id', None)
+
+    if not webform_id: 
+        return getErrorResponse('Webform id required!')
+
+    job_id = data.get('job_id', None)
+    if not job_id: 
+        return getErrorResponse('Job id required!')
+
+
+    job = Job.getById(decode(job_id))
+    if not job:
+        return getErrorResponse('Invalid Job')
+
+    webform = Webform.getById(webform_id, job.company)
+    if not webform:
+        return getErrorResponse('Invalid Webform')
+
+    first_name = data.get('first_name', None)
+
+    middle_name = data.get('middle_name', None)
+    last_name = data.get('last_name', None)
+    phone = data.get('phone', None)
+    mobile = data.get('mobile', None)
+    email = data.get('email', None)
+    email_alt = data.get('email_alt', None)
+    marital_status = data.get('marital_status', None)
+    date_of_birth = data.get('date_of_birth', None)
+    last_applied = data.get('last_applied', None)
+
+    street = data.get('street', None)
+    pincode = data.get('pincode', None)
+    city = data.get('city', None)
+    state_id = data.get('state_id', None)
+
+    exp_years = data.get('exp_years', None)
+    exp_months = data.get('exp_months', 0)
+    qualification = data.get('qualification', None)
+    cur_job = data.get('cur_job', None)
+    cur_employer = data.get('cur_employer', None)
+    certifications = data.get('certifications', None)
+    fun_area = data.get('fun_area', None)
+    subjects = data.get('subjects', None)
+    skills = data.get('skills', None)
+    gender = data.get('gender', None)
+    age = data.get('age', 0)
+
+    if not webform.form:
+        return getErrorResponse('Invalid Webform')
+
+    for item in webform.form:
+        print('item', item.get('value', None))
+        value = item.get('value', None)
+        type = item.get('type', None)
+        if value:
+            if type == 'file':
+                if request.FILES == None or value not in request.FILES:           
+                    return getErrorResponse(item.get('name', None)+' is required')
+            elif not data.get(value, None):
+                return getErrorResponse(item.get('name', None)+' is required')
+            
+            if 'marital_status' == value:
+                if marital_status not in Candidate.MARITAL_STATUS_LIST:
+                    return getErrorResponse('Invalid marital status')   
+            if 'dob' == value:             
+                dob = parseDate(date_of_birth)
+                if not dob:
+                    return getErrorResponse('Invalid date of birth')
+                
+                age = ((date.today() - dob).days) / 365
+                print('Age', age)
+
+                if age < 18:
+                    return getErrorResponse("You are under age!")
+            if 'pincode' == value:
+                if int(pincode) != pincode and len(str(pincode)) != 6:
+                    return getErrorResponse('invalid pincode')   
+            if 'qualification' == value:
+                if qualification not in Candidate.QUALIFICATION_LIST:
+                    return getErrorResponse('Invalid Qualification')   
+            if 'gender' == value:
+                if gender not in Candidate.GENDER_LIST:
+                    return getErrorResponse('Invalid Gender')   
+            if 'age' == value:
+                if int(age) != age and (int(age) < 18 or int(age) > 75):
+                    return getErrorResponse('invalid age')       
+            if 'state' == value:
+                state = State.getById(state_id)       
+                if not state:
+                    return getErrorResponse('invalid state')                                                          
+    
+    if not age:
+        if date_of_birth:
+            age = ((date.today() - date_of_birth).days) / 365
+            print('Age', age)
+
+    candidate = Candidate()
+        
+    if request.FILES != None:
+        print("files")
+        print(request.FILES)
+        if 'resume' in request.FILES:
+            resume = request.FILES['resume']
+            candidate.resume = resume    
+
+    candidate.first_name = first_name            
+    candidate.last_name = last_name            
+    candidate.middle_name = middle_name            
+    candidate.email = email            
+    candidate.email_alt = email_alt            
+    candidate.phone = phone            
+    candidate.mobile = mobile            
+    candidate.marital_status = marital_status            
+    candidate.date_of_birth = date_of_birth            
+    candidate.age = age            
+    candidate.last_applied = last_applied            
+    candidate.street = street            
+    candidate.last_applied = last_applied            
+    candidate.street = street            
+    candidate.pincode = pincode            
+    candidate.city = city 
+
+    if state:           
+        candidate.state = state            
+        candidate.country = state.country          
+    
+    candidate.exp_years = exp_years            
+    candidate.exp_months = exp_months            
+    candidate.qualification = qualification            
+    candidate.cur_job = cur_job            
+    candidate.cur_employer = cur_employer            
+    candidate.certifications = certifications            
+    candidate.fun_area = fun_area            
+    candidate.subjects = subjects            
+    candidate.skills = skills
+    candidate.job = job
+    candidate.webform = webform
+
+    candidate.save()
+
+    return {
+        'code': 200,
+        'msg': 'Job application submitted sucessfully!'
+    }            
