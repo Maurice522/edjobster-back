@@ -37,6 +37,15 @@ class ApplicationsApi(APIView):
         data = helper.deleteApplication(request)
         return makeResponse(data)    
 
+class CandidatesApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getCandidates(request)
+        return makeResponse(data)
+
 class ApplicationsResumeApi(APIView):
 
     authentication_classes = [JWTAuthentication]

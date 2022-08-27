@@ -105,6 +105,10 @@ class Candidate(models.Model):
         return None
 
     @staticmethod
+    def getByCompany(company):
+        return Candidate.objects.filter(job__company=company)
+
+    @staticmethod
     def getByJob(job):
         return Candidate.objects.filter(job=job)
 
@@ -157,3 +161,17 @@ class Note(models.Model):
     @staticmethod
     def getAll():
         return Note.objects.all()
+
+        
+
+class ResumeFiles(models.Model):
+    id = models.AutoField(primary_key=True)
+    resume = models.FileField(upload_to='media/temp/', default=None, null=True, blank=True)  
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.candidate)+' '+str(self.added_by)[:20]
+
+    class Meta:
+        verbose_name = 'Note'
+        verbose_name_plural = 'Notes'
