@@ -424,7 +424,7 @@ def parseResume(request, candidate=None):
                 resume = ResumeFiles()
                 resume.resume = file
                 resume.save()
-                url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[12:]
+                url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[11:]
             else:
                 url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
 
