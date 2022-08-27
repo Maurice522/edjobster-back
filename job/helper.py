@@ -18,7 +18,9 @@ from settings.models import Degree, Department, Pipeline
 from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
 from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
 from account.serializer import CompanySerializer
+from django.core.paginator import Paginator
 
+PAGE_SIZE = 30
 #ASSESMENT
 def getAssesmentCategories(request):
 
@@ -296,13 +298,33 @@ def getJobsBoard(request):
 def getJobs(request):
 
     company = Company.getByUser(request.user)
-    jobs = Job.getForCompany(company=company)
-    serializer = JobListSerializer(jobs, many=True)
+    page_no = request.GET.get('page', 1)  
 
-    return {
-        'code': 200,
-        'data': serializer.data
-    }    
+    try:
+        page_no = int(page_no)
+    except Exception as e:
+        print(e)
+        page_no = 1
+    
+    jobs = Job.getForCompany(company=company)
+
+    jobs = Paginator(jobs, PAGE_SIZE)
+
+    pages = jobs.num_pages
+
+    if pages >= page_no:
+        p1 = jobs.page(page_no)
+        lst = p1.object_list
+        serializer = JobListSerializer(lst, many=True)
+
+        return {
+            'code': 200,
+            'list': serializer.data,
+            'current_page': page_no,
+            'total_pages': pages
+        }        
+    else:
+        return getErrorResponse('Page not available')
 
 def getJobDetails(request):
 

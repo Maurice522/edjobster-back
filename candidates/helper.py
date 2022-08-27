@@ -202,7 +202,7 @@ def getApplications(request):
             'total_pages': pages
         }        
     else:
-        return getErrorResponse('Given page not available')
+        return getErrorResponse('Page not available')
 
 def deleteApplication(request):
     candidate_id = request.GET.get('id')
