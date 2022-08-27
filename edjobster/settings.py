@@ -203,6 +203,10 @@ RESUME_URL = '/cv/'
 RESUME_URL_ROOT = os.path.join(BASE_DIR, 'media/resume/')
 RESUME_FILE_URL = "http://api.edjobster.com/candidate/cv/"
 
+RESUME_TEMP_URL = '/temp/'
+RESUME_TEMP_URL_ROOT = os.path.join(BASE_DIR, 'media/temp/')
+RESUME_TEMP_FILE_URL = "http://api.edjobster.com/candidate/temp/"
+
 #LOGO URLS
 LOGO_URL = '/logo/'
 LOGO_URL_ROOT = os.path.join(BASE_DIR, 'media/companies/logos')

@@ -16,7 +16,7 @@ from common.utils import isValidUuid, getErrorResponse
 from common.models import Country, NoteType, State, City
 import json
 from settings.models import Degree, Department, Pipeline, Webform
-from .models import Candidate, Note
+from .models import Candidate, Note, ResumeFiles
 from .serializer import CandidateListSerializer, CandidateDetailsSerializer, NoteSerializer
 from common.encoder import decode
 from django.utils.dateparse import parse_date
@@ -24,6 +24,9 @@ from common.utils import parseDate
 from datetime import date    
 from django.conf import settings
 import requests
+from django.core.paginator import Paginator
+
+PAGE_SIZE = 30
 
 def applyJob(request):
 
@@ -173,14 +176,33 @@ def getApplications(request):
     if not job:
         return getErrorResponse('Job not found')
 
+    page_no = request.GET.get('page', 1)  
+
+    try:
+        page_no = int(page_no)
+    except Exception as e:
+        print(e)
+        page_no = 1
+    
     candidates = Candidate.getByJob(job=job)
 
-    serializer = CandidateListSerializer(candidates, many=True)
+    candidates = Paginator(candidates, PAGE_SIZE)
 
-    return {
-        'code': 200,
-        'list': serializer.data
-    }
+    pages = candidates.num_pages
+
+    if pages >= page_no:
+        p1 = candidates.page(page_no)
+        lst = p1.object_list
+        serializer = CandidateListSerializer(lst, many=True)
+
+        return {
+            'code': 200,
+            'list': serializer.data,
+            'current_page': page_no,
+            'total_pages': pages
+        }        
+    else:
+        return getErrorResponse('Given page not available')
 
 def deleteApplication(request):
     candidate_id = request.GET.get('id')
@@ -368,44 +390,43 @@ def updateResume(request):
     if not candidate:
         return getErrorResponse('candidate not found')
 
+    print("files")
+    print(request.FILES)
+
     if request.FILES != None:
-        print("files")
-        print(request.FILES)
+ 
         if 'resume' in request.FILES:
             resume = request.FILES['resume']
             candidate.resume = resume    
+            candidate.save()
+            data = parseResume(request, candidate)
+            if data.get('code') == 200:
+                candidate.resume_parse_data = data.get('data')
 
-    candidate.save()
+            candidate.save()
 
-    return {
-        'code': 200,
-        'msg': 'Job resume updated!'
-    }                    
+            return {
+                'code': 200,
+                'msg': 'Resume updated!'
+            }         
+    return getErrorResponse('Resume required!')                       
 
-def parseResume(request):
-
-    data = request.data
-
-    candidate_id = data.get('id', None)
-
-    if not candidate_id:
-        return getErrorResponse('Invalid request')
-
-    company = Company.getByUser(request.user)
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
-    
-    if not candidate:
-        return getErrorResponse('candidate not found')
+def parseResume(request, candidate=None):
 
     if request.FILES != None:
         print("files")
         print(request.FILES)
         if 'resume' in request.FILES:
-            resume = request.FILES['resume']
-            candidate.resume = resume    
+            file = request.FILES['resume']
 
-            url = "http://api.edjobster.com/candidate/cv/Imran-Resume.pdf"
-            # url = settings.RESUME_FILE_URL+resume.name[13:],
+            url = ''
+            if candidate == None:
+                resume = ResumeFiles()
+                resume.resume = file
+                resume.save()
+                url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[12:]
+            else:
+                url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
 
             parse = {
                 "url": url,
@@ -422,19 +443,18 @@ def parseResume(request):
             print('content', response.text)
 
             if response.status_code == 200:
-                candidate.resume_parse_data = response.json()
+                res = response.json()
+                if 'error' in res:
+                    error = res.get('error')
+                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
 
-            candidate.save()
+                return {
+                    'code': 200,
+                    'data': res
+                } 
+            return getErrorResponse('Failed to parse resume')
 
-            return {
-                'code': 200,
-                'msg': 'Job resume updated!'
-            } 
-
-    return {
-        'code': 200,
-        'msg': 'Job resume updated!'
-    }             
+    return getErrorResponse('Resume required!')          
 
 def getAllNotes(request):
     candidate_id = request.GET.get('candidate')
@@ -678,3 +698,41 @@ def applyWebformJob(request):
         'code': 200,
         'msg': 'Job application submitted sucessfully!'
     }            
+
+
+def getCandidates(request):
+
+    company = Company.getByUser(request.user)
+    if not company:
+        return getErrorResponse('Company required')
+
+    page_no = request.GET.get('page', 1)  
+
+    try:
+        page_no = int(page_no)
+    except Exception as e:
+        print(e)
+        page_no = 1
+    
+    candidates = Candidate.getByCompany(company=company)
+
+    candidates = Paginator(candidates, PAGE_SIZE)
+
+    pages = candidates.num_pages
+
+    if pages >= page_no:
+        p1 = candidates.page(page_no)
+        lst = p1.object_list
+        serializer = CandidateListSerializer(lst, many=True)
+
+        return {
+            'code': 200,
+            'list': serializer.data,
+            'current_page': page_no,
+            'total_pages': pages
+        }        
+    else:
+        return getErrorResponse('Given page not available')
+
+
+   

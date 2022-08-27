@@ -319,7 +319,7 @@ def getJobDetails(request):
     serializer = JobDetailsSerializer(job, many=False)
     data = serializer.data
 
-    data['owner_id'] = job.owner.accountId 
+    data['owner_id'] = job.owner.account_id 
     data['owner'] = job.owner.first_name+' '+job.owner.last_name 
     data['state_id'] = job.state.id
     data['state'] = job.state.name 
