@@ -14,7 +14,7 @@ from common.utils import isValidUuid, getErrorResponse
 from common.models import Country, State, City
 import json
 
-from settings.models import Degree, Department, Pipeline
+from settings.models import Degree, Department, Pipeline, Webform
 from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
 from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
 from account.serializer import CompanySerializer
@@ -341,34 +341,6 @@ def getJobDetails(request):
     serializer = JobDetailsSerializer(job, many=False)
     data = serializer.data
 
-    data['owner_id'] = job.owner.account_id 
-    data['owner'] = job.owner.first_name+' '+job.owner.last_name 
-    data['state_id'] = job.state.id
-    data['state'] = job.state.name 
-    data['country_id'] = job.country.id
-    data['country'] = job.country.name 
-    data['created_by'] = job.created_by.first_name+' '+job.created_by.last_name 
-    if job.document:
-        data['document'] = job.document.name 
-    data['job_boards'] = job.job_boards 
-
-    members = []
-    for member in job.members:
-        account = Account.getById(member, company)
-        if account:
-            members.append(
-                {
-                    'id': member,
-                    'name': account.first_name+' '+account.last_name
-                }
-            )
-
-    data['members'] = members 
-    pipeline = Pipeline.getById(job.pipeline, company)
-    if pipeline:
-        data['pipeline_id'] = pipeline.id 
-        data['pipeline'] = pipeline.name 
-
     return {
         'code': 200,
         'data': data
@@ -430,7 +402,7 @@ def saveJob(request):
     
     if not owner_id:
         return getErrorResponse('Owner required')
-    
+
     owner = Account.getById(owner_id)
     if not owner:
         return getErrorResponse('Owner not found')    

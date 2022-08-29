@@ -1,7 +1,14 @@
+from os import access
+from account.models import Account
+from common.models import Country, State
 from rest_framework import serializers
 from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job
 from common.encoder import encode
-from settings.serializer import DepartmentSerializer, Department
+from settings.serializer import DepartmentSerializer, DegreeSerializer, PipelineSerializer
+from settings.models import Department, Pipeline
+from account.serializer import AccountSerializer
+from common.serializer import CitySerializer, StateSerializer, CountrySerializer
+from django.conf import settings
 
 class AssesmentSerializer(serializers.ModelSerializer):
     categpry_id = serializers.IntegerField(source='category.id')
@@ -60,11 +67,70 @@ class JobListSerializer(serializers.ModelSerializer):
 
 class JobDetailsSerializer(serializers.ModelSerializer):
 
-    id = serializers.SerializerMethodField()
+    department = serializers.SerializerMethodField()
+    owner = serializers.SerializerMethodField()
+    assesment = serializers.SerializerMethodField()
+    members = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
+    document = serializers.SerializerMethodField()
+    pipeline = serializers.SerializerMethodField()
 
     def get_id(self, obj):
         return encode(obj.id)
         
     class Meta:
         model = Job
-        fields = '__all__'
+        fields = [
+             'id', 'title', 'vacancies', 'department', 'owner', 'assesment', 'members', 'type', 'nature', 'education', 'speciality', 'description',
+             'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 'city', 'state', 'country', 'created_by', 'document', 
+             'job_boards', 'pipeline', 'active', 'updated', 'created']
+
+    def get_department(self, obj):
+        if obj.department:
+            department = Department.getById(obj.department, obj.company)
+            if department:
+                return DepartmentSerializer(department).data
+        return None             
+
+    def get_owner(self, obj):
+        if obj.owner:
+            return AccountSerializer(obj.owner).data
+        return None    
+
+    def get_members(self, obj):
+        if obj.members:
+            members = []
+            for memberId in obj.members:
+                account = Account.getById(memberId)
+                if account:
+                    members.append(AccountSerializer(account).data)
+            return members
+        return None  
+
+    def get_assesment(self, obj):
+        if obj.assesment:
+            return AssesmentSerializer(obj.assesment).data
+        return None            
+
+    def get_document(self, obj):
+        if obj.document:
+            return settings.JOB_DOC_FILE_URL+obj.document.name[11:]
+        return None           
+
+    def get_state(self, obj):
+        if obj.state:
+            return StateSerializer(obj.state).data
+        return None  
+
+    def get_country(self, obj):
+        if obj.country:
+            return CountrySerializer(obj.country).data
+        return None          
+
+    def get_pipeline(self, obj):
+        if obj.pipeline:
+            pipeline = Pipeline.getById(obj.pipeline, obj.company)
+            if pipeline:
+                return PipelineSerializer(pipeline).data
+        return None          

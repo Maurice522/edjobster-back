@@ -11,3 +11,4 @@ urlpatterns = [
     path('assesment-category/', views.AssesmentCategoryApi.as_view(), name='assesment-category'),
     path('board/', views.BoardApi.as_view(), name='board'),
 ]
+urlpatterns += static(settings.JOB_DOC_URL, document_root=settings.JOB_DOC_URL_ROOT)
