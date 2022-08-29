@@ -216,3 +216,7 @@ LOGO_FILE_URL = "http://api.edjobster.com/account/logo/"
 PHOTO_URL = '/photo/'
 PHOTO_URL_ROOT = os.path.join(BASE_DIR, 'media/users/photos')
 PHOTO_FILE_URL = "http://api.edjobster.com/account/photo/"
+
+JOB_DOC_URL = '/jd/'
+JOB_DOC_URL_ROOT = os.path.join(BASE_DIR, 'media/jobs/')
+JOB_DOC_FILE_URL = "http://api.edjobster.com/jobs/jd/"

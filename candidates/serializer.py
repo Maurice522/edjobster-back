@@ -1,9 +1,13 @@
 from account.serializer import AccountSerializer
 from rest_framework import serializers
+from settings.models import Webform
+from settings.serializer import WebformListSerializer
 from .models import Candidate, Note
 from common.encoder import encode
 from common.serializer import NoteTypeSerializer
 from django.conf import settings
+from common.serializer import StateSerializer, CountrySerializer
+from job.serializer import Job, JobListSerializer
 
 class CandidateListSerializer(serializers.ModelSerializer):
 
@@ -38,6 +42,9 @@ class CandidateListSerializer(serializers.ModelSerializer):
 class CandidateDetailsSerializer(serializers.ModelSerializer):
 
     resume = serializers.SerializerMethodField()
+    job = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
 
     class Meta:
         model = Candidate
@@ -47,6 +54,23 @@ class CandidateDetailsSerializer(serializers.ModelSerializer):
         if obj.resume:
             return settings.RESUME_FILE_URL+obj.resume.name[13:]
         return None              
+
+    def get_job(self, obj):
+        if obj.job:
+            return JobListSerializer(obj.job).data
+        return None  
+
+
+
+    def get_state(self, obj):
+        if obj.state:
+            return StateSerializer(obj.state).data
+        return None  
+
+    def get_country(self, obj):
+        if obj.country:
+            return CountrySerializer(obj.country).data
+        return None          
 
 class NoteSerializer(serializers.ModelSerializer):
 
