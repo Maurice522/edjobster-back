@@ -55,7 +55,10 @@ class JobListSerializer(serializers.ModelSerializer):
         if obj.department:
             department = Department.getById(obj.department, obj.company)
             if department:
-                return department.name
+                return {
+                    'id': department.id,
+                    'name': department.name                
+                }
         return None
 
 class JobDetailsSerializer(serializers.ModelSerializer):
