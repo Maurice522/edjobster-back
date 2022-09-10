@@ -174,7 +174,7 @@ class Job(models.Model):
     members = ArrayField(models.CharField(max_length=100), blank=True, default=list)
     type = models.CharField(max_length=1, choices=TYPE, default=FULL_TIME)
     nature = models.CharField(max_length=1, choices=NATURE, default=PHYSICAL)
-    education = ArrayField(models.CharField(max_length=50), blank=True)
+    educations = ArrayField(models.IntegerField(default=0), null=True, default=None)
     speciality = models.CharField(max_length=250, null=True, blank=True)
     description = models.TextField(max_length=3000, null=True, blank=True)
     exp_min = models.IntegerField(default=0)

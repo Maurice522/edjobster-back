@@ -371,7 +371,7 @@ def saveJob(request):
     department_id = data.get('department', None)   
     owner_id = data.get('owner', None)   
     assesment_id = data.get('assesment', None)   
-    member_ids = data.get('members', None)   
+    member_ids = data.get('member_ids', None)   
     type = data.get('type', None)   
     nature = data.get('nature', None)   
     education = data.get('education', None)   
@@ -420,8 +420,11 @@ def saveJob(request):
         for member in member_ids:
             user = Account.getById(member)
             if user:
-                jobMembers.append(user.accountId)
+                jobMembers.append(user.account_id)
     
+    print('member_ids', member_ids)
+    print('jobMembers', jobMembers)
+
     if not type or not type in Job.TYPES:
         return getErrorResponse('invalid job type')
 
@@ -431,12 +434,6 @@ def saveJob(request):
     if not education or not isinstance(education, list):
         return getErrorResponse('Invalid education list')
     
-    degrees = []
-    for e in education:
-        d = Degree.getById(e, company)
-        if d:
-            degrees.append(d.name)
-
     if not speciality:
         return getErrorResponse('Speciality required')
 
@@ -492,14 +489,11 @@ def saveJob(request):
     job.department = department.id
     job.owner = owner
     job.assesment = assesment
-    members = []
-    for member in members:
-        members.append(member.id)
-    
-    job.members = members
+
+    job.members = jobMembers
     job.type = type
     job.nature = nature
-    job.education = degrees
+    job.educations = education
     job.description = description
     job.speciality = speciality
     job.exp_min = exp_min
