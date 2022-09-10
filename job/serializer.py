@@ -5,7 +5,7 @@ from rest_framework import serializers
 from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job
 from common.encoder import encode
 from settings.serializer import DepartmentSerializer, DegreeSerializer, PipelineSerializer
-from settings.models import Department, Pipeline
+from settings.models import Degree, Department, Pipeline
 from account.serializer import AccountSerializer
 from common.serializer import CitySerializer, StateSerializer, CountrySerializer
 from django.conf import settings
@@ -75,6 +75,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
     country = serializers.SerializerMethodField()
     document = serializers.SerializerMethodField()
     pipeline = serializers.SerializerMethodField()
+    educations = serializers.SerializerMethodField()
 
     def get_id(self, obj):
         return encode(obj.id)
@@ -82,7 +83,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
-             'id', 'title', 'vacancies', 'department', 'owner', 'assesment', 'members', 'type', 'nature', 'education', 'speciality', 'description',
+             'id', 'title', 'vacancies', 'department', 'owner', 'assesment', 'members', 'type', 'nature', 'educations', 'speciality', 'description',
              'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 'city', 'state', 'country', 'created_by', 'document', 
              'job_boards', 'pipeline', 'active', 'updated', 'created']
 
@@ -91,7 +92,14 @@ class JobDetailsSerializer(serializers.ModelSerializer):
             department = Department.getById(obj.department, obj.company)
             if department:
                 return DepartmentSerializer(department).data
-        return None             
+        return None   
+
+    def get_educations(self, obj):
+        if obj.educations:
+            educations = Degree.getByIds(obj.educations, obj.company)
+            if educations:
+                return DegreeSerializer(educations, many=True).data
+        return []                     
 
     def get_owner(self, obj):
         if obj.owner:

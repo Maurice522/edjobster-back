@@ -153,6 +153,10 @@ class Degree(models.Model):
         return None
 
     @staticmethod
+    def getByIds(ids, company):
+        return Degree.objects.filter(company=company, id__in=ids)
+
+    @staticmethod
     def getByName(name, company):
         return Degree.objects.filter(company=company, name=name).exists()
 
