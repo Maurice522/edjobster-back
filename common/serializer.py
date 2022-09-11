@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Country, NoteType, State, City
-
+from django.conf import settings
 
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,5 +30,5 @@ class NoteTypeSerializer(serializers.ModelSerializer):
 
     def get_icon(self, obj):
         if obj.icon:
-            return obj.icon.name[17:]
+            return settings.NOTE_ICON_FILE_URL+obj.icon.name[17:]
         return None                      

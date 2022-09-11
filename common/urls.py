@@ -10,3 +10,4 @@ urlpatterns = [
     path('cities/', views.CitiesApi.as_view(), name='cities'),
     path('note-types/', views.NotesApi.as_view(), name='note-types'),
 ]
+urlpatterns += static(settings.NOTE_ICON_URL, document_root=settings.NOTE_ICON_URL_ROOT)
