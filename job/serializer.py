@@ -42,7 +42,7 @@ class AssesmentQuestionDetailsSerializer(serializers.ModelSerializer):
 class JobListSerializer(serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
-    owner_id = serializers.CharField(source='owner.account_id')
+    owner_id = serializers.SerializerMethodField()
     state_id = serializers.IntegerField(source='state.id')
     state_name = serializers.CharField(source='state.name')
     country_id = serializers.IntegerField(source='country.id')
@@ -57,6 +57,11 @@ class JobListSerializer(serializers.ModelSerializer):
 
     def get_id(self, obj):
         return encode(obj.id)
+
+    def get_owner_id(self, obj):
+        if obj.owner:
+            return obj.owner.account_id
+        return None
 
     def get_department(self, obj):
         if obj.department:

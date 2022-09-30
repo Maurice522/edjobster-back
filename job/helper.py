@@ -307,7 +307,8 @@ def getJobs(request):
         page_no = 1
     
     jobs = Job.getForCompany(company=company)
-
+    for job in jobs:
+        print('job', job)
     jobs = Paginator(jobs, PAGE_SIZE)
 
     pages = jobs.num_pages
@@ -315,6 +316,7 @@ def getJobs(request):
     if pages >= page_no:
         p1 = jobs.page(page_no)
         lst = p1.object_list
+
         serializer = JobListSerializer(lst, many=True)
 
         return {
