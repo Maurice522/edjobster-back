@@ -3,6 +3,7 @@ from account.models import Account, Company
 from django.contrib.postgres.fields import ArrayField
 from common.models import Country, State, City
 from common.utils import generateFileName
+from settings.models import Webform
 
 class AssesmentCategory(models.Model):
     id = models.AutoField(primary_key=True)
@@ -169,8 +170,10 @@ class Job(models.Model):
     title = models.CharField(max_length=50, null=True, blank=True)
     vacancies = models.IntegerField(default=1, null=True, blank=True)
     department = models.CharField(max_length=50, null=True, blank=True)
-    owner = models.ForeignKey(Account, related_name='Owner', default=None, null=True, verbose_name='Owner', on_delete=models.SET_NULL)
-    assesment = models.ForeignKey(Assesment, default=None, null=True, verbose_name='Assesment', on_delete=models.SET_NULL)
+    # owner = models.ForeignKey(Account, related_name='Owner', default=None, null=True, verbose_name='Owner', on_delete=models.SET_NULL)
+    owner = models.CharField(max_length=50, null=True, blank=True)
+    # assesment = models.ForeignKey(Assesment, default=None, null=True, verbose_name='Assesment', on_delete=models.SET_NULL)
+    assesment =  models.CharField(max_length=50, null=True, blank=True)
     members = ArrayField(models.CharField(max_length=100), blank=True, default=list)
     type = models.CharField(max_length=1, choices=TYPE, default=FULL_TIME)
     nature = models.CharField(max_length=1, choices=NATURE, default=PHYSICAL)
@@ -184,15 +187,20 @@ class Job(models.Model):
     salary_type = models.CharField(max_length=1, choices=PAY_TYPE, default=MONTHY)
     currency = models.CharField(max_length=10, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
-    state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
-    country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
-    created_by =  models.ForeignKey(Account, related_name='createdby', default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
+    # state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
+    state =  models.CharField(max_length=50, null=True, blank=True)
+    # country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
+    country =  models.CharField(max_length=50, null=True, blank=True)
+    # created_by =  models.ForeignKey(Account, related_name='createdby', default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
+    created_by =  models.CharField(max_length=50, null=True, blank=True)
     document = models.FileField(upload_to='media/jobs/', default=None, null=True, blank=True)  
     job_boards = ArrayField(models.CharField(max_length=50), blank=True)
     pipeline = models.IntegerField(default=0, null=True, blank=True)
     active = models.BooleanField(default=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    # webform_id = models.ForeignKey(Webform,related_name='webform_id',on_delete=models.CASCADE)
+    webform_id = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return str(self.company)+' '+str(self.title)[:20]
