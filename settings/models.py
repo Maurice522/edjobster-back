@@ -364,8 +364,7 @@ class Webform(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.name)+' '+str(self.value)[:20]
-
+        return str(self.id)
     class Meta:
         verbose_name = 'Webform'
         verbose_name_plural = 'Webforms'
