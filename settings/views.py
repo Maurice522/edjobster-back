@@ -30,8 +30,8 @@ class LocationsApi(APIView):
 
 class DepartmentApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getDepartments(request)
