@@ -129,10 +129,12 @@ class Company(models.Model):
 
     @staticmethod
     def getByUser(user):
-        if Company.objects.filter(id=user.company_id).exists():
-            return Company.objects.get(id=user.company_id)
-        return None
-
+        try:
+            if Company.objects.filter(id=user.company_id).exists():
+                return Company.objects.get(id=user.company_id)
+        except Exception as e:
+            return None
+            
     @staticmethod
     def getByDomain(domain):
         if Company.objects.filter(domain=domain).exists():
