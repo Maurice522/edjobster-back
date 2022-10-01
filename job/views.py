@@ -1,3 +1,4 @@
+import imp
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -7,11 +8,13 @@ from .import helper
 from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from settings.models import Webform
+from .models import Job
 
 class AssesmentCategoryApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getAssesmentCategories(request)
@@ -28,8 +31,8 @@ class AssesmentCategoryApi(APIView):
 
 class AssesmentQuestionApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getAssesmentDetails(request)
@@ -45,8 +48,8 @@ class AssesmentQuestionApi(APIView):
 
 class AssesmentApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getAssesments(request)
@@ -62,8 +65,8 @@ class AssesmentApi(APIView):
 
 class JobApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getJobs(request)
@@ -77,11 +80,46 @@ class JobApi(APIView):
         data = helper.deleteJob(request)
         return makeResponse(data)             
 
+class CreateJobApi(APIView):
+    def post(self, request):
+
+        data = request.data
+        print(data)
+
+        title = data['title']
+        vacancies = data['vacancies']
+        department = data['department']
+        owner = data['owner']
+        assesment = data['assesment']
+        member_ids = data['member_ids']
+        type = data['type']
+        nature = data['nature']
+        education = data['education']
+        speciality = data['speciality']
+        description = data['description']
+        exp_min = data['exp_min']
+        exp_max = data['exp_max']
+        salary_min = data['salary_min']
+        salary_max = data['salary_max']
+        salary_type = data['salary_type']
+        currency = data['currency']
+        city = data['city']
+        state = data['state']
+        job_boards = data['job_boards']
+        pipeline = data['pipeline']
+        active = data['active']
+
+        webform_id = data['webform_id']
+
+        job = Job(title= title,vacancies = vacancies, department = department, owner = owner, assesment = assesment , type = type , nature = nature ,speciality = speciality , description = description , exp_max = exp_max , exp_min = exp_min , salary_min = salary_min , salary_max = salary_max , salary_type = salary_type , currency = currency , city = city , state = state ,job_boards = job_boards , pipeline = pipeline ,active = active , webform_id = webform_id )
+        job.save()
+
+        return makeResponse(data)
 
 class JobDetailsApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getJobDetails(request)

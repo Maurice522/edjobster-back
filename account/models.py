@@ -41,7 +41,7 @@ class Account(AbstractUser):
         super(Account, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.mobile)+' '+str(self.email)[:20]
+        return str(self.account_id)
 
     class Meta:
         verbose_name = 'Account'
@@ -129,10 +129,12 @@ class Company(models.Model):
 
     @staticmethod
     def getByUser(user):
-        if Company.objects.filter(id=user.company_id).exists():
-            return Company.objects.get(id=user.company_id)
-        return None
-
+        try:
+            if Company.objects.filter(id=user.company_id).exists():
+                return Company.objects.get(id=user.company_id)
+        except Exception as e:
+            return None
+            
     @staticmethod
     def getByDomain(domain):
         if Company.objects.filter(domain=domain).exists():
