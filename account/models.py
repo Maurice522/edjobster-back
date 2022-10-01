@@ -134,6 +134,7 @@ class Company(models.Model):
                 return Company.objects.get(id=user.company_id)
         except Exception as e:
             return None
+            
     @staticmethod
     def getByDomain(domain):
         if Company.objects.filter(domain=domain).exists():

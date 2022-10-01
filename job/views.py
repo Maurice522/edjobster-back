@@ -10,8 +10,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class AssesmentCategoryApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getAssesmentCategories(request)
@@ -28,8 +28,8 @@ class AssesmentCategoryApi(APIView):
 
 class AssesmentQuestionApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getAssesmentDetails(request)
@@ -45,8 +45,8 @@ class AssesmentQuestionApi(APIView):
 
 class AssesmentApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getAssesments(request)
@@ -80,8 +80,8 @@ class JobApi(APIView):
 
 class JobDetailsApi(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         data = helper.getJobDetails(request)
