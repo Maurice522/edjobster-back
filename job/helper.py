@@ -16,7 +16,7 @@ import json
 
 from settings.models import Degree, Department, Pipeline, Webform
 from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
-from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer, JobsSerializer
+from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
 from account.serializer import CompanySerializer
 from django.core.paginator import Paginator
 
