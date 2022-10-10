@@ -43,24 +43,22 @@ class JobListSerializer(serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
     owner_id = serializers.SerializerMethodField()
-    state_id = serializers.IntegerField(source='state.id')
-    state_name = serializers.CharField(source='state.name')
-    country_id = serializers.IntegerField(source='country.id')
-    country_name = serializers.CharField(source='country.name')
+    state_name = serializers.CharField(source='state')
+    country_name = serializers.CharField(source='country')
     department = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
         fields = ['id', 'title', 'owner_id', 'vacancies', 'department', 'type',
          'nature', 'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 
-         'city', 'state_id', 'state_name', 'country_id', 'country_name', 'created', 'updated', 'active']
+         'city', 'state_name', 'country_name', 'created', 'updated', 'active']
 
     def get_id(self, obj):
         return encode(obj.id)
 
     def get_owner_id(self, obj):
         if obj.owner:
-            return obj.owner.account_id
+            return obj.owner
         return None
 
     def get_department(self, obj):

@@ -16,7 +16,7 @@ import json
 
 from settings.models import Degree, Department, Pipeline, Webform
 from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
-from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
+from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer, JobsSerializer
 from account.serializer import CompanySerializer
 from django.core.paginator import Paginator
 
@@ -298,7 +298,7 @@ def getJobsBoard(request):
 def getJobs(request):
 
     company = Company.getByUser(request.user)
-    page_no = request.GET.get('page', 1)  
+    page_no = request.GET.get('page', 1)
 
     try:
         page_no = int(page_no)
@@ -307,14 +307,13 @@ def getJobs(request):
         page_no = 1
     
     jobs = Job.getForCompany(company=company)
-    for job in jobs:
-        print('job', job)
-    jobs = Paginator(jobs, PAGE_SIZE)
 
-    pages = jobs.num_pages
+    paginated_jobs = Paginator(jobs, PAGE_SIZE)
+
+    pages = paginated_jobs.num_pages
 
     if pages >= page_no:
-        p1 = jobs.page(page_no)
+        p1 = paginated_jobs.page(page_no)
         lst = p1.object_list
 
         serializer = JobListSerializer(lst, many=True)
