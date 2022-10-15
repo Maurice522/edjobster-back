@@ -61,6 +61,12 @@ class Assesment(models.Model):
         return None
     
     @staticmethod
+    def getByAssessmentId(id):
+        if Assesment.objects.filter(id=id).exists():
+            return Assesment.objects.get(id=id)
+        return None
+    
+    @staticmethod
     def getByName(name, company):
         return Assesment.objects.filter(company=company, name=name).exists()
 

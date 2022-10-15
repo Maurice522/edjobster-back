@@ -10,17 +10,17 @@ class AccountSerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
 
     def get_department(self, obj):
-        if obj.department:
-            department = Department.getByDid(obj.department)
-            if department:
-                return department.name
+        # if 'department' in obj:
+        #     department = Department.getByDid(obj['department'])
+        #     if department:
+        #         return department.name
         return None
 
     def get_designation(self, obj):
-        if obj.designation:
-            designation = Designation.getByDid(obj.designation)
-            if designation:
-                return designation.name
+        # if 'designation' in obj:
+        #     designation = Designation.getByDid(obj['designation'])
+        #     if designation:
+        #         return designation.name
         return None
 
     class Meta:
@@ -30,8 +30,9 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
     def get_photo(self, obj):
-        if obj.photo:
-            return settings.PHOTO_FILE_URL+obj.photo.name[19:]
+        # if 'photo' in obj:
+        #     return obj['photo']
+            # return settings.PHOTO_FILE_URL+obj['photo']['name'][19:]
         return None  
 
 class CompanySerializer(serializers.ModelSerializer):

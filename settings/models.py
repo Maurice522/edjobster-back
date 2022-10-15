@@ -378,6 +378,12 @@ class Webform(models.Model):
         if Webform.objects.filter(id=id, company=company).exists():
             return Webform.objects.get(id=id)
         return None
+    
+    @staticmethod
+    def getByWebformId(id):
+        if Webform.objects.filter(id=id).exists():
+            return Webform.objects.get(id=id)
+        return None
 
     @staticmethod
     def getForCompany(company):

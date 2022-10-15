@@ -1,22 +1,22 @@
+from dataclasses import fields
 from os import access
-from account.models import Account
+from account.models import Account, Company
 from common.models import Country, State
 from rest_framework import serializers
 from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job
 from common.encoder import encode
-from settings.serializer import DepartmentSerializer, DegreeSerializer, PipelineSerializer
-from settings.models import Degree, Department, Pipeline
+from settings.serializer import DepartmentSerializer, DegreeSerializer, PipelineSerializer, WebformDataSerializer
+from settings.models import Degree, Department, Pipeline, Webform
 from account.serializer import AccountSerializer
 from common.serializer import CitySerializer, StateSerializer, CountrySerializer
 from django.conf import settings
 
 class AssesmentSerializer(serializers.ModelSerializer):
-    categpry_id = serializers.IntegerField(source='category.id')
-    category_name = serializers.CharField(source='category.name')
+    # category = serializers.CharField()
 
     class Meta:
         model = Assesment
-        fields = ['id',  'name', 'categpry_id', 'category_name', 'created', 'updated']
+        fields ='__all__'
 
 
 class AssesmentCategorySerializer(serializers.ModelSerializer):
@@ -37,6 +37,16 @@ class AssesmentQuestionDetailsSerializer(serializers.ModelSerializer):
         model = AssesmentQuestion
         fields = ['id', 'type', 'question', 'options', 'marks', 'answer', 'created', 'updated' ]        
 
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = "__all__"
+
+class JobsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = "__all__"
 
 
 class JobListSerializer(serializers.ModelSerializer):
@@ -79,6 +89,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
     document = serializers.SerializerMethodField()
     pipeline = serializers.SerializerMethodField()
     educations = serializers.SerializerMethodField()
+    webform = serializers.SerializerMethodField()
 
     def get_id(self, obj):
         return encode(obj.id)
@@ -88,7 +99,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
         fields = [
              'id', 'title', 'vacancies', 'department', 'owner', 'assesment', 'members', 'type', 'nature', 'educations', 'speciality', 'description',
              'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 'city', 'state', 'country', 'created_by', 'document', 
-             'job_boards', 'pipeline', 'active', 'updated', 'created']
+             'job_boards', 'pipeline', 'active', 'updated', 'created', 'webform']
 
     def get_department(self, obj):
         if obj.department:
@@ -121,7 +132,8 @@ class JobDetailsSerializer(serializers.ModelSerializer):
 
     def get_assesment(self, obj):
         if obj.assesment:
-            return AssesmentSerializer(obj.assesment).data
+            assess = Assesment.getByAssessmentId(obj.assesment)
+            return AssesmentSerializer(assess).data
         return None            
 
     def get_document(self, obj):
@@ -144,4 +156,11 @@ class JobDetailsSerializer(serializers.ModelSerializer):
             pipeline = Pipeline.getById(obj.pipeline, obj.company)
             if pipeline:
                 return PipelineSerializer(pipeline).data
+        return None  
+
+    def get_webform(self, obj):
+        if obj.webform_id:
+            webform = Webform.getByWebformId(obj.webform_id)
+            if webform:
+                return WebformDataSerializer(webform).data
         return None          
