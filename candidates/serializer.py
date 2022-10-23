@@ -11,10 +11,8 @@ from job.serializer import Job, JobListSerializer
 
 class CandidateListSerializer(serializers.ModelSerializer):
 
-    state_id = serializers.IntegerField(source='state.id')
-    state_name = serializers.CharField(source='state.name')
-    country_id = serializers.IntegerField(source='country.id')
-    country_name = serializers.CharField(source='country.name')
+    state = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
     webform_id = serializers.SerializerMethodField()
 
     job_id = serializers.SerializerMethodField()
@@ -25,14 +23,24 @@ class CandidateListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
         fields = ['id', 'first_name', 'middle_name', 'last_name', 'phone', 'mobile', 'email', 'email_alt',
-                  'city', 'pincode', 'state_id', 'state_name', 'country_id', 'country_name',
+                  'city', 'pincode', 'state', 'country',
                   'job_id', 'job_title', 'webform_id']
 
     def get_job_id(self, obj):
         return encode(obj.job.id)
     
     def get_id(self, obj):
-        return encode(obj.id)  
+        return encode(obj.id)
+    
+    def get_state(self, obj):
+        if obj.state:
+            return StateSerializer(obj.state).data
+        return None
+    
+    def get_country(self, obj):
+        if obj.country:
+            return CountrySerializer(obj.country).data
+        return None
 
     def get_webform_id(self, obj):
         if obj.webform:
@@ -52,14 +60,14 @@ class CandidateDetailsSerializer(serializers.ModelSerializer):
 
     def get_resume(self, obj):
         if obj.resume:
-            return settings.RESUME_FILE_URL+obj.resume.name[13:]
+            tmp = str(obj.resume)
+            return settings.RESUME_FILE_URL+tmp[13:]
         return None              
 
     def get_job(self, obj):
         if obj.job:
             return JobListSerializer(obj.job).data
         return None  
-
 
 
     def get_state(self, obj):

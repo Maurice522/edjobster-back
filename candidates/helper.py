@@ -51,7 +51,7 @@ def applyJob(request):
     city = data.get('city', None)
     state_id = data.get('state_id', None)
 
-    exp_years = data.get('exp_years', None)
+    exp_years = data.get('exp_years', 0)
     exp_months = data.get('exp_months', 0)
     qualification = data.get('qualification', None)
     cur_job = data.get('cur_job', None)
@@ -64,7 +64,7 @@ def applyJob(request):
     if not job_id:
         return getErrorResponse('Job id required')
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(int(job_id))
     if not job:
         return getErrorResponse('Invalid Job')
 
@@ -72,53 +72,53 @@ def applyJob(request):
         return getErrorResponse('First name required')
     if not last_name:
         return getErrorResponse('Last name required')
-    if not mobile:
-        return getErrorResponse('mobile required')
-    if not email:
-        return getErrorResponse('email required')
-    if not date_of_birth:
-        return getErrorResponse('Date of birth required')
+    # if not mobile:
+    #     return getErrorResponse('mobile required')
+    # if not email:
+    #     return getErrorResponse('email required')
+    # if not date_of_birth:
+    #     return getErrorResponse('Date of birth required')
 
-    dob = parseDate(date_of_birth)
-    if not dob:
-        return getErrorResponse('Invalid date of birth')
+    # dob = parseDate(date_of_birth)
+    # if not dob:
+    #     return getErrorResponse('Invalid date of birth')
     
-    age = ((date.today() - dob).days) / 365
-    print('Age', age)
+    # age = ((date.today() - dob).days) / 365
+    # print('Age', age)
 
-    if age < 18:
-        return getErrorResponse("You are under age!")
+    # if age < 18:
+    #     return getErrorResponse("You are under age!")
 
-    if not marital_status:
-        return getErrorResponse('Marital status required')
+    # if not marital_status:
+    #     return getErrorResponse('Marital status required')
 
-    if marital_status not in Candidate.MARITAL_STATUS_LIST:
-        return getErrorResponse('Invalid marital status')
+    # if marital_status not in Candidate.MARITAL_STATUS_LIST:
+    #     return getErrorResponse('Invalid marital status')
 
-    if not street:
-        return getErrorResponse('Street required')          
-    if not pincode:
-        return getErrorResponse('pincode required')  
+    # if not street:
+    #     return getErrorResponse('Street required')          
+    # if not pincode:
+    #     return getErrorResponse('pincode required')  
      
-    if int(pincode) != pincode and len(str(pincode)) != 6:
-        return getErrorResponse('invalid pincode')   
-    if not city:
-        return getErrorResponse('city required')          
-    if not state_id:
-        return getErrorResponse('state required')     
+    # if int(pincode) != pincode and len(str(pincode)) != 6:
+    #     return getErrorResponse('invalid pincode')   
+    # if not city:
+    #     return getErrorResponse('city required')          
+    # if not state_id:
+    #     return getErrorResponse('state required')     
 
-    state = State.getById(state_id)       
-    if not state:
-        return getErrorResponse('invalid state')     
+    # state = State.getById(state_id)       
+    # if not state:
+    #     return getErrorResponse('invalid state')     
 
-    if not exp_years :
-        return getErrorResponse('Experience year required')     
+    # if not exp_years :
+    #     return getErrorResponse('Experience year required')     
 
-    if not qualification:
-        return getErrorResponse('qualification required')    
+    # if not qualification:
+    #     return getErrorResponse('qualification required')    
 
-    if qualification not in Candidate.QUALIFICATION_LIST:
-        return getErrorResponse('Invalid Qualification')    
+    # if qualification not in Candidate.QUALIFICATION_LIST:
+    #     return getErrorResponse('Invalid Qualification')    
 
     candidate = Candidate()
         
@@ -127,28 +127,28 @@ def applyJob(request):
         print(request.FILES)
         if 'resume' in request.FILES:
             resume = request.FILES['resume']
-            candidate.resume = resume    
+            candidate.resume = resume
 
-    candidate.first_name = first_name            
-    candidate.last_name = last_name            
-    candidate.middle_name = middle_name            
-    candidate.email = email            
-    candidate.email_alt = email_alt            
-    candidate.phone = phone            
-    candidate.mobile = mobile            
-    candidate.marital_status = marital_status            
-    candidate.date_of_birth = dob            
-    candidate.age = age            
-    candidate.last_applied = last_applied            
-    candidate.street = street            
-    candidate.last_applied = last_applied            
-    candidate.street = street            
-    candidate.pincode = pincode            
-    candidate.city = city            
-    candidate.state = state            
-    candidate.country = state.country          
-    candidate.exp_years = exp_years            
-    candidate.exp_months = exp_months            
+    candidate.first_name = first_name
+    candidate.last_name = last_name
+    candidate.middle_name = middle_name
+    candidate.email = email
+    candidate.email_alt = email_alt
+    candidate.phone = phone
+    candidate.mobile = mobile
+    candidate.marital_status = marital_status
+    # candidate.date_of_birth = dob
+    # candidate.age = age
+    candidate.last_applied = last_applied
+    candidate.street = street
+    candidate.last_applied = last_applied
+    candidate.street = street
+    candidate.pincode = pincode
+    candidate.city = city
+    candidate.state = state_id
+    # candidate.country = ''
+    candidate.exp_years = exp_years
+    candidate.exp_months = exp_months
     candidate.qualification = qualification            
     candidate.cur_job = cur_job            
     candidate.cur_employer = cur_employer            
@@ -162,7 +162,8 @@ def applyJob(request):
 
     return {
         'code': 200,
-        'msg': 'Job application submitted sucessfully!'
+        'msg': 'Job application submitted successfully!',
+        'data': CandidateDetailsSerializer(candidate).data,
     }            
 
 def getApplications(request):
@@ -434,13 +435,7 @@ def parseResume(request, candidate=None):
                 "version": settings.RESUME_PARSE_VERSION,
                 "subuserid": settings.RESUME_PARSE_USER,
             }
-
-            print('body', parse)
-
             response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
-
-            print('response', response.status_code)
-            print('content', response.text)
 
             if response.status_code == 200:
                 res = response.json()
@@ -693,10 +688,12 @@ def applyWebformJob(request):
     candidate.webform = webform
 
     candidate.save()
+    print("Candidate created")
 
     return {
         'code': 200,
-        'msg': 'Job application submitted sucessfully!'
+        'msg': 'Job application submitted sucessfully!',
+        'data': CandidateDetailsSerializer(candidate)
     }            
 
 
@@ -715,8 +712,9 @@ def getCandidates(request):
         page_no = 1
     
     candidates = Candidate.getByCompany(company=company)
+    all_candidates = [candidate for candidate in candidates if candidate.job.company.id == company.id]
 
-    candidates = Paginator(candidates, PAGE_SIZE)
+    candidates = Paginator(all_candidates, PAGE_SIZE)
 
     pages = candidates.num_pages
 
