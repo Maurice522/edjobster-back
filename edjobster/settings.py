@@ -99,19 +99,27 @@ WSGI_APPLICATION = 'edjobster.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME':  'edjobster_db',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'postgres',
+    #     'HOST': 'db',
+    #     'PORT': '5432',
+    # },
+    # 'db2': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME':  'hr',
+    #     'USER': 'app',
+    #     'PASSWORD': 'app@1508',
+    #     'HOST': 'localhost',
+    #     'PORT': '5432',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  'edjobster_db',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
-        'PORT': '5432',
-    },
-    'db2': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME':  'hr',
-        'USER': 'app',
-        'PASSWORD': 'app@1508',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '5432',
     }
