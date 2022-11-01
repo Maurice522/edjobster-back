@@ -1,9 +1,11 @@
 import imp
+from job.serializer import JobsSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework import mixins, generics
 from .import helper
 from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
@@ -62,6 +64,22 @@ class AssesmentApi(APIView):
     def delete(self, request):
         data = helper.deleteAssesment(request)
         return makeResponse(data)           
+
+class JobsList(mixins.ListModelMixin,
+                  generics.GenericAPIView):
+    queryset = Job.objects.all()
+    serializer_class = JobsSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+class JobsDetail(mixins.RetrieveModelMixin,
+                    generics.GenericAPIView):
+    queryset = Job.objects.all()
+    serializer_class = JobsSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
 class JobApi(APIView):
 

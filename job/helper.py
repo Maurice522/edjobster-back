@@ -162,7 +162,7 @@ def getAssesmentDetails(request):
     company = Company.getByUser(request.user)
     id = request.GET.get('id')
 
-    assesment = Assesment.getById(id=id, company=company)
+    assesment = Assesment.getByAssessmentId(id=id)
     if not assesment:
         return getErrorResponse('Assesment not found')
 
@@ -298,7 +298,7 @@ def getJobsBoard(request):
 def getJobs(request):
 
     company = Company.getByUser(request.user)
-    page_no = request.GET.get('page', 1)  
+    page_no = request.GET.get('page', 1)
 
     try:
         page_no = int(page_no)
@@ -307,14 +307,13 @@ def getJobs(request):
         page_no = 1
     
     jobs = Job.getForCompany(company=company)
-    for job in jobs:
-        print('job', job)
-    jobs = Paginator(jobs, PAGE_SIZE)
 
-    pages = jobs.num_pages
+    paginated_jobs = Paginator(jobs, PAGE_SIZE)
+
+    pages = paginated_jobs.num_pages
 
     if pages >= page_no:
-        p1 = jobs.page(page_no)
+        p1 = paginated_jobs.page(page_no)
         lst = p1.object_list
 
         serializer = JobListSerializer(lst, many=True)
@@ -336,7 +335,8 @@ def getJobDetails(request):
     if not id:
         return getErrorResponse('Invalid request')
 
-    job = Job.getByIdAndCompany(decode(id), company)
+    # job = Job.getByIdAndCompany(decode(id), company)
+    job = Job.getById(id)
     if not job:
         return getErrorResponse('Job not found')
 
@@ -389,7 +389,8 @@ def saveJob(request):
     state_id = data.get('state', None)   
     job_board_ids = data.get('job_boards', None)   
     pipeline_id = data.get('pipeline', None)   
-    active = data.get('active', None)   
+    active = data.get('active', None)
+    webform_id = data.get('webform', None)
     
     if not title:
         return getErrorResponse('Job title required')
@@ -411,9 +412,10 @@ def saveJob(request):
 
     assesment = None
     if assesment_id:
-        assesment = Assesment.getById(assesment_id, company)
-        if not assesment:
-            return getErrorResponse('Assesment not found')
+        # assesment = Assesment.getById(assesment_id, company)
+        assesment = assesment_id
+        # if not assesment:
+        #     return getErrorResponse('Assesment not found')
 
     jobMembers = []
     if member_ids:
@@ -511,6 +513,7 @@ def saveJob(request):
     job.pipeline = pipeline.id
     job.active = active
     job.job_boards = job_board_ids
+    job.webform_id = webform_id
 
     if request.FILES != None:
         print("files")
