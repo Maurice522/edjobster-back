@@ -46,6 +46,18 @@ class CandidatesApi(APIView):
         data = helper.getCandidates(request)
         return makeResponse(data)
 
+
+class CreateCandidateUsingResume(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.createCandidate(request)
+        return makeResponse(data)
+
+        
+
 class ApplicationsResumeApi(APIView):
 
     authentication_classes = [JWTAuthentication]

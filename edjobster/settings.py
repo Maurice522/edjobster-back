@@ -27,7 +27,7 @@ SECRET_KEY = 'zczznka#5b3qntonf@ywy_q@5mapn_8jjjw51g-q0bdaw1w&j-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'http://localhost:3000']
 
 # Application definition
 
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -57,8 +58,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
+
+# CORS_ALLOWED_ORIGINS = [
+#     '*',
+#     'http://localhost:3000',
+# ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -94,11 +99,27 @@ WSGI_APPLICATION = 'edjobster.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME':  'edjobster_db',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'postgres',
+    #     'HOST': 'db',
+    #     'PORT': '5432',
+    # },
+    # 'db2': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME':  'hr',
+    #     'USER': 'app',
+    #     'PASSWORD': 'app@1508',
+    #     'HOST': 'localhost',
+    #     'PORT': '5432',
+    # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME':  'hr',
-        'USER': 'app',
-        'PASSWORD': 'app@1508',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -203,9 +224,6 @@ RESUME_URL = '/cv/'
 RESUME_URL_ROOT = os.path.join(BASE_DIR, 'media/resume/')
 RESUME_FILE_URL = "http://api.edjobster.com/candidate/cv/"
 
-RESUME_TEMP_URL = '/temp/'
-RESUME_TEMP_URL_ROOT = os.path.join(BASE_DIR, 'media/temp/')
-RESUME_TEMP_FILE_URL = "http://api.edjobster.com/candidate/temp/"
 
 #LOGO URLS
 LOGO_URL = '/logo/'

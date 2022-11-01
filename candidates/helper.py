@@ -16,15 +16,16 @@ from common.utils import isValidUuid, getErrorResponse
 from common.models import Country, NoteType, State, City
 import json
 from settings.models import Degree, Department, Pipeline, Webform
-from .models import Candidate, Note, ResumeFiles
-from .serializer import CandidateListSerializer, CandidateDetailsSerializer, NoteSerializer
+from .models import Candidate, CandidateExperience, CandidateQualification, Note, ResumeFiles
+from .serializer import CandidateExperienceSerializer, CandidateListSerializer, CandidateDetailsSerializer, CandidateQualificationSerializer, NoteSerializer
 from common.encoder import decode
 from django.utils.dateparse import parse_date
 from common.utils import parseDate
-from datetime import date    
+from datetime import date, datetime    
 from django.conf import settings
 import requests
 from django.core.paginator import Paginator
+from django.db import transaction
 
 PAGE_SIZE = 30
 
@@ -51,7 +52,7 @@ def applyJob(request):
     city = data.get('city', None)
     state_id = data.get('state_id', None)
 
-    exp_years = data.get('exp_years', None)
+    exp_years = data.get('exp_years', 0)
     exp_months = data.get('exp_months', 0)
     qualification = data.get('qualification', None)
     cur_job = data.get('cur_job', None)
@@ -64,7 +65,7 @@ def applyJob(request):
     if not job_id:
         return getErrorResponse('Job id required')
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(int(job_id))
     if not job:
         return getErrorResponse('Invalid Job')
 
@@ -72,53 +73,53 @@ def applyJob(request):
         return getErrorResponse('First name required')
     if not last_name:
         return getErrorResponse('Last name required')
-    if not mobile:
-        return getErrorResponse('mobile required')
-    if not email:
-        return getErrorResponse('email required')
-    if not date_of_birth:
-        return getErrorResponse('Date of birth required')
+    # if not mobile:
+    #     return getErrorResponse('mobile required')
+    # if not email:
+    #     return getErrorResponse('email required')
+    # if not date_of_birth:
+    #     return getErrorResponse('Date of birth required')
 
-    dob = parseDate(date_of_birth)
-    if not dob:
-        return getErrorResponse('Invalid date of birth')
+    # dob = parseDate(date_of_birth)
+    # if not dob:
+    #     return getErrorResponse('Invalid date of birth')
     
-    age = ((date.today() - dob).days) / 365
-    print('Age', age)
+    # age = ((date.today() - dob).days) / 365
+    # print('Age', age)
 
-    if age < 18:
-        return getErrorResponse("You are under age!")
+    # if age < 18:
+    #     return getErrorResponse("You are under age!")
 
-    if not marital_status:
-        return getErrorResponse('Marital status required')
+    # if not marital_status:
+    #     return getErrorResponse('Marital status required')
 
-    if marital_status not in Candidate.MARITAL_STATUS_LIST:
-        return getErrorResponse('Invalid marital status')
+    # if marital_status not in Candidate.MARITAL_STATUS_LIST:
+    #     return getErrorResponse('Invalid marital status')
 
-    if not street:
-        return getErrorResponse('Street required')          
-    if not pincode:
-        return getErrorResponse('pincode required')  
+    # if not street:
+    #     return getErrorResponse('Street required')          
+    # if not pincode:
+    #     return getErrorResponse('pincode required')  
      
-    if int(pincode) != pincode and len(str(pincode)) != 6:
-        return getErrorResponse('invalid pincode')   
-    if not city:
-        return getErrorResponse('city required')          
-    if not state_id:
-        return getErrorResponse('state required')     
+    # if int(pincode) != pincode and len(str(pincode)) != 6:
+    #     return getErrorResponse('invalid pincode')   
+    # if not city:
+    #     return getErrorResponse('city required')          
+    # if not state_id:
+    #     return getErrorResponse('state required')     
 
-    state = State.getById(state_id)       
-    if not state:
-        return getErrorResponse('invalid state')     
+    # state = State.getById(state_id)       
+    # if not state:
+    #     return getErrorResponse('invalid state')     
 
-    if not exp_years :
-        return getErrorResponse('Experience year required')     
+    # if not exp_years :
+    #     return getErrorResponse('Experience year required')     
 
-    if not qualification:
-        return getErrorResponse('qualification required')    
+    # if not qualification:
+    #     return getErrorResponse('qualification required')    
 
-    if qualification not in Candidate.QUALIFICATION_LIST:
-        return getErrorResponse('Invalid Qualification')    
+    # if qualification not in Candidate.QUALIFICATION_LIST:
+    #     return getErrorResponse('Invalid Qualification')    
 
     candidate = Candidate()
         
@@ -127,28 +128,28 @@ def applyJob(request):
         print(request.FILES)
         if 'resume' in request.FILES:
             resume = request.FILES['resume']
-            candidate.resume = resume    
+            candidate.resume = resume
 
-    candidate.first_name = first_name            
-    candidate.last_name = last_name            
-    candidate.middle_name = middle_name            
-    candidate.email = email            
-    candidate.email_alt = email_alt            
-    candidate.phone = phone            
-    candidate.mobile = mobile            
-    candidate.marital_status = marital_status            
-    candidate.date_of_birth = dob            
-    candidate.age = age            
-    candidate.last_applied = last_applied            
-    candidate.street = street            
-    candidate.last_applied = last_applied            
-    candidate.street = street            
-    candidate.pincode = pincode            
-    candidate.city = city            
-    candidate.state = state            
-    candidate.country = state.country          
-    candidate.exp_years = exp_years            
-    candidate.exp_months = exp_months            
+    candidate.first_name = first_name
+    candidate.last_name = last_name
+    candidate.middle_name = middle_name
+    candidate.email = email
+    candidate.email_alt = email_alt
+    candidate.phone = phone
+    candidate.mobile = mobile
+    candidate.marital_status = marital_status
+    # candidate.date_of_birth = dob
+    # candidate.age = age
+    candidate.last_applied = last_applied
+    candidate.street = street
+    candidate.last_applied = last_applied
+    candidate.street = street
+    candidate.pincode = pincode
+    candidate.city = city
+    candidate.state = state_id
+    # candidate.country = ''
+    candidate.exp_years = exp_years
+    candidate.exp_months = exp_months
     candidate.qualification = qualification            
     candidate.cur_job = cur_job            
     candidate.cur_employer = cur_employer            
@@ -162,7 +163,8 @@ def applyJob(request):
 
     return {
         'code': 200,
-        'msg': 'Job application submitted sucessfully!'
+        'msg': 'Job application submitted successfully!',
+        'data': CandidateDetailsSerializer(candidate).data,
     }            
 
 def getApplications(request):
@@ -434,13 +436,7 @@ def parseResume(request, candidate=None):
                 "version": settings.RESUME_PARSE_VERSION,
                 "subuserid": settings.RESUME_PARSE_USER,
             }
-
-            print('body', parse)
-
             response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
-
-            print('response', response.status_code)
-            print('content', response.text)
 
             if response.status_code == 200:
                 res = response.json()
@@ -693,10 +689,12 @@ def applyWebformJob(request):
     candidate.webform = webform
 
     candidate.save()
+    print("Candidate created")
 
     return {
         'code': 200,
-        'msg': 'Job application submitted sucessfully!'
+        'msg': 'Job application submitted sucessfully!',
+        'data': CandidateDetailsSerializer(candidate)
     }            
 
 
@@ -715,8 +713,9 @@ def getCandidates(request):
         page_no = 1
     
     candidates = Candidate.getByCompany(company=company)
+    all_candidates = [candidate for candidate in candidates if candidate.job.company.id == company.id]
 
-    candidates = Paginator(candidates, PAGE_SIZE)
+    candidates = Paginator(all_candidates, PAGE_SIZE)
 
     pages = candidates.num_pages
 
@@ -735,4 +734,269 @@ def getCandidates(request):
         return getErrorResponse('Given page not available')
 
 
-   
+def createCandidate(request):
+
+    company = Company.getByUser(request.user)
+    if not company:
+        return getErrorResponse('Company required')
+
+    job_id = request.data.get("job_id")
+    job = Job.getByIdAndCompany(decode(job_id), company)
+    if not job:
+        return getErrorResponse('job_id is missing or incorrect')
+
+    webform_id = request.data.get("webform_id", None)
+    form_filled = request.data.get("form_filled", None)
+
+    print(webform_id)
+    print(form_filled)
+    if webform_id != None:
+        if form_filled != None:
+            empty_webform = Webform.getById(webform_id, company)
+            filled_webform = Webform()
+            filled_webform.company = company
+            filled_webform.form = form_filled
+
+        else:    
+            return getErrorResponse('Please provide filled form data')
+
+    if request.FILES['resume']:#TO-DO imporve if check
+        resume = request.FILES['resume']
+        url = settings.RESUME_FILE_URL+resume.name
+        # url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
+
+        apiParserBody = {
+            "url": url,
+            "userkey": settings.RESUME_PARSE_KEY,
+            "version": settings.RESUME_PARSE_VERSION,
+            "subuserid": settings.RESUME_PARSE_USER,
+        }
+        response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(apiParserBody))
+        
+        if response.status_code == 200:
+                res = response.json()
+                if 'error' in res:
+                    error = res.get('error')
+                    print("Resume parsing API didn't return a valid response")
+                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+                else:
+                    if getCandidateFromResumeJson(res)['code'] == 200:
+                        candidate = getCandidateFromResumeJson(res)['candidate']
+                    else:
+                        return {
+                            'code': 400,
+                            'msg': 'Something went wrong while parsing data from JSON'
+                        }
+                    candidate.job = job
+                    candidate.resume = resume
+                    candidate.resume_parse_data = res
+                    candidateExperiences = getCandidateExperiencesFromResumeJson(res)
+                    try:
+                        with transaction.atomic():
+                            filled_webform.save()
+                            candidate.webform = filled_webform
+                            candidateExperiences = getCandidateExperiencesFromResumeJson(res)
+                            candidateQualifications = getCandidateQualificationsFromResumeJson(res)
+                            candidate.save()
+
+                            for candidateExperience in candidateExperiences:
+                                candidateExperience.candidate = candidate
+                                candidateExperience.save()
+                            
+                            for candidateQualification in candidateQualifications:
+                                candidateQualification.candidate = candidate
+                                candidateQualification.save()
+                            
+                            candidateSerialized = CandidateDetailsSerializer(candidate)
+                            candidateExperiencesSerialized = CandidateExperienceSerializer(candidateExperiences,many = True)
+                            candidateQualificationsSerialized = CandidateQualificationSerializer(candidateQualifications,many = True)
+                            return {
+                                'code': 200,
+                                'msg': 'Candidate created successfully',
+                                'candidate': candidateSerialized.data,
+                                'candidateExp':  candidateExperiencesSerialized.data,
+                                'candidateQual': candidateQualificationsSerialized.data
+                            }
+
+                    except Exception as e:
+                        print("some error occurred while saving the candidate")
+                        print(e)
+                        return getErrorResponse('Failed to parse resume and create candidate')
+
+        return getErrorResponse("Resume parsing API didn't return a valid response")
+    return getErrorResponse('Resume required!')
+
+def getCandidateFromResumeJson(res):
+    try:
+        candidate = Candidate()
+        if res["ResumeParserData"]["Name"]:
+            candidate.first_name = res["ResumeParserData"]["Name"]["FirstName"]
+            candidate.middle_name = res["ResumeParserData"]["Name"]["MiddleName"]
+            candidate.last_name = res["ResumeParserData"]["Name"]["LastName"]
+
+        if len(res["ResumeParserData"]["PhoneNumber"]) > 0:
+            candidate.phone = res["ResumeParserData"]["PhoneNumber"][0]["FormattedNumber"]
+        
+        if len(res["ResumeParserData"]["PhoneNumber"]) > 1:
+            candidate.mobile = res["ResumeParserData"]["PhoneNumber"][1]["FormattedNumber"]
+
+        if len(res["ResumeParserData"]["Email"]) > 0:
+            candidate.email = res["ResumeParserData"]["Email"][0]["EmailAddress"]
+        
+        if len(res["ResumeParserData"]["Email"]) > 1:
+            candidate.email_alt = res["ResumeParserData"]["Email"][1]["EmailAddress"]
+
+        if res["ResumeParserData"]["MaritalStatus"]:
+            candidate.marital_status = res["ResumeParserData"]["MaritalStatus"]
+
+        if res["ResumeParserData"]["Gender"]:
+            candidate.gender = res["ResumeParserData"]["Gender"]
+
+        if res["ResumeParserData"]["DateOfBirth"]:
+            candidate.date_of_birth = datetime.strptime(res["ResumeParserData"]["DateOfBirth"], "%d/%m/%Y").strftime("%Y-%m-%d")
+
+        if len(res["ResumeParserData"]["Address"]) > 0:
+            candidate.street = res["ResumeParserData"]["Address"][0]["Street"]
+            candidate.pincode = res["ResumeParserData"]["Address"][0]["ZipCode"]
+            candidate.city = res["ResumeParserData"]["Address"][0]["City"]
+            candidate.state = res["ResumeParserData"]["Address"][0]["State"]
+            candidate.country = res["ResumeParserData"]["Address"][0]["Country"]
+
+        if res["ResumeParserData"]["WorkedPeriod"]:
+            candidate.exp_years = int ( float(res["ResumeParserData"]["WorkedPeriod"]["TotalExperienceInYear"] ) )
+            candidate.exp_months = res["ResumeParserData"]["WorkedPeriod"]["TotalExperienceInMonths"]
+
+        if res["ResumeParserData"]["Summary"]:
+            candidate.cur_job = res["ResumeParserData"]["Summary"]
+
+        if res["ResumeParserData"]["JobProfile"]:
+            candidate.cur_job = res["ResumeParserData"]["JobProfile"]
+
+        if res["ResumeParserData"]["CurrentEmployer"]:
+            candidate.cur_employer = res["ResumeParserData"]["CurrentEmployer"]
+
+        if res["ResumeParserData"]["Certification"]:
+            candidate.certifications = res["ResumeParserData"]["Certification"]
+        
+        if res["ResumeParserData"]["Hobbies"]:
+            candidate.fun_area = res["ResumeParserData"]["Hobbies"]
+        
+        if res["ResumeParserData"]["SkillKeywords"]:
+            candidate.skills = res["ResumeParserData"]["SkillKeywords"]
+        
+        return {
+            'code': 200,
+            'candidate' : candidate
+        }
+
+    except Exception as e:
+        print("Exception occured while parsing data from JSON")
+        print(e)
+        return {
+            'code': 400,
+            'msg': 'Something went wrong while parsing data from JSON'
+        }
+    
+
+
+def getCandidateExperiencesFromResumeJson(res):
+
+    if res["ResumeParserData"]["SegregatedExperience"]:
+        candidateExperiences = []
+        for experience in res["ResumeParserData"]["SegregatedExperience"]:
+            candidateExperience = CandidateExperience()
+            if experience["Employer"]["EmployerName"]:
+                candidateExperience.employer = experience["Employer"]["EmployerName"]
+            if experience["JobProfile"]:
+                if experience["JobProfile"]["Title"]:
+                    candidateExperience.jobProfile = experience["JobProfile"]["Title"]
+                if experience["JobProfile"]["RelatedSkills"]:
+                    candidateExperience.skills = getSkillsFromRelatedSkillsArray(experience["JobProfile"]["RelatedSkills"])
+            if experience["Location"]:
+                candidateExperience.city = experience["Location"]["City"]
+                candidateExperience.state = experience["Location"]["State"]
+                candidateExperience.country = experience["Location"]["Country"]
+            if experience["StartDate"]:
+                candidateExperience.start_date = datetime.strptime(experience["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+            if experience["EndDate"]:
+                candidateExperience.end_date = datetime.strptime(experience["EndDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+            if experience["JobDescription"]:
+                candidateExperience.jobDescription = experience["JobDescription"]
+            candidateExperiences.append(candidateExperience)
+        
+        return candidateExperiences
+        
+            
+
+def getSkillsFromRelatedSkillsArray(relatedSkills):
+
+    if relatedSkills:
+        skillString = ''
+        for skill in relatedSkills:
+            skillString = skillString + skill["Skill"] + ', '
+        return skillString
+
+
+def getCandidateQualificationsFromResumeJson(res):
+
+    if res["ResumeParserData"]["SegregatedQualification"]:
+        qualifications = []
+        for qualification in res["ResumeParserData"]["SegregatedQualification"]:
+            candidateQualification = CandidateQualification()
+            if qualification["Institution"]["Name"]:
+                candidateQualification.institue_name = qualification["Institution"]["Name"]
+            if qualification["Degree"]:
+                candidateQualification.degree = qualification["Degree"]["DegreeName"]
+            if qualification["Institution"]["Location"]:
+                candidateQualification.city = qualification["Institution"]["Location"]["City"]
+                candidateQualification.state = qualification["Institution"]["Location"]["State"]
+                candidateQualification.country = qualification["Institution"]["Location"]["Country"]
+            if qualification["StartDate"]:
+                candidateQualification.start_date = datetime.strptime(qualification["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+            if qualification["EndDate"]:
+                candidateQualification.end_date = datetime.strptime(qualification["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+            if qualification["Aggregate"]:
+                candidateQualification.grade = str (qualification["Aggregate"]["Value"])
+                candidateQualification.gradeType = qualification["Aggregate"]["MeasureType"]
+            qualifications.append(candidateQualification)
+        return qualifications
+                      
+
+def parseResume(request, candidate=None):
+
+    if request.FILES != None:
+        print("files")
+        print(request.FILES)
+        if 'resume' in request.FILES:
+            file = request.FILES['resume']
+
+            url = ''
+            if candidate == None:
+                resume = ResumeFiles()
+                resume.resume = file
+                resume.save()
+                url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[11:]
+            else:
+                url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+
+            parse = {
+                "url": url,
+                "userkey": settings.RESUME_PARSE_KEY,
+                "version": settings.RESUME_PARSE_VERSION,
+                "subuserid": settings.RESUME_PARSE_USER,
+            }
+            response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
+
+            if response.status_code == 200:
+                res = response.json()
+                if 'error' in res:
+                    error = res.get('error')
+                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+
+                return {
+                    'code': 200,
+                    'data': res
+                } 
+            return getErrorResponse('Failed to parse resume')
+
+    return getErrorResponse('Resume required!') 
