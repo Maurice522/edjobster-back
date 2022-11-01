@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'edjobster.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  'edjobster_db',
+        'NAME':  'hr',
         'USER': 'app',
         'PASSWORD': 'app@1508',
         'HOST': 'localhost',
