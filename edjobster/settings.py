@@ -102,9 +102,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':  'edjobster_db',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
+        'USER': 'app',
+        'PASSWORD': 'app@1508',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
     # 'db2': {
