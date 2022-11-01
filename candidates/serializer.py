@@ -2,7 +2,7 @@ from account.serializer import AccountSerializer
 from rest_framework import serializers
 from settings.models import Webform
 from settings.serializer import WebformListSerializer
-from .models import Candidate, Note
+from .models import Candidate, CandidateExperience, CandidateQualification, Note
 from common.encoder import encode
 from common.serializer import NoteTypeSerializer
 from django.conf import settings
@@ -51,12 +51,13 @@ class CandidateDetailsSerializer(serializers.ModelSerializer):
 
     resume = serializers.SerializerMethodField()
     job = serializers.SerializerMethodField()
-    state = serializers.SerializerMethodField()
-    country = serializers.SerializerMethodField()
+    # state = serializers.SerializerMethodField()
+    # country = serializers.SerializerMethodField()
 
     class Meta:
         model = Candidate
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ('resume_parse_data',)
 
     def get_resume(self, obj):
         if obj.resume:
@@ -98,3 +99,16 @@ class NoteSerializer(serializers.ModelSerializer):
         if obj.added_by:
             return AccountSerializer(obj.added_by).data
         return None    
+    
+
+class CandidateExperienceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CandidateExperience
+        fields = '__all__'
+
+class CandidateQualificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CandidateQualification
+        fields = '__all__'

@@ -64,18 +64,21 @@ class Candidate(models.Model):
     street = models.CharField(max_length=100, null=True, blank=True)
     pincode = models.CharField(max_length=10, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
-    state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
-    country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
+    state = models.CharField(max_length=10, null=True, blank=True)
+    country = models.CharField(max_length=50, null=True, blank=True)
+    # state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
+    # country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
   
     exp_years = models.IntegerField(default=0)
     exp_months = models.IntegerField(default=0)
-    qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION)
+    # qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION)
     cur_job = models.CharField(max_length=50, null=True, blank=True)
     cur_employer = models.CharField(max_length=50, null=True, blank=True)
-    certifications = models.CharField(max_length=50, null=True, blank=True)
+    certifications = models.TextField(null=True, blank=True)
     fun_area = models.CharField(max_length=50, null=True, blank=True)
     subjects = models.CharField(max_length=50, null=True, blank=True)
     skills = models.CharField(max_length=250, null=True, blank=True)
+    summary = models.TextField(null=True, blank=True)
 
     resume = models.FileField(upload_to='media/resume/', default=None, null=True, blank=True)  
     resume_parse_data = JSONField(null=True, default=None)
@@ -119,6 +122,40 @@ class Candidate(models.Model):
     @staticmethod
     def getByPhone(job, mobile):
         return Candidate.objects.filter(job=job).filter(mobile=mobile)
+
+class CandidateExperience(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    candidate = models.ForeignKey(Candidate, null=True, verbose_name='candidate', on_delete=models.CASCADE)
+    employer = models.CharField(max_length=100, null=True, blank=True)
+    jobProfile = models.CharField(max_length=100, null=True, blank=True)
+    skills = models.CharField(max_length=200, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    start_date = models.DateField(max_length=30, null=True, blank=True)
+    end_date = models.DateField(max_length=30, null=True, blank=True)
+    jobDescription = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return str(self.employer)+' exp'
+
+class CandidateQualification(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    candidate = models.ForeignKey(Candidate, null=True, verbose_name='candidate', on_delete=models.CASCADE)
+    institue_name = models.CharField(max_length=200, null=True, blank=True)
+    degree = models.CharField(max_length=200, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    start_date = models.DateField(max_length=30, null=True, blank=True)
+    end_date = models.DateField(max_length=30, null=True, blank=True)
+    grade = models.CharField(max_length=30, null=True, blank=True)
+    gradeType = models.CharField(max_length=30, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.id)+' '+str(self.candidate)
 
 
 class Note(models.Model):

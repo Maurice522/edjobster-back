@@ -12,7 +12,7 @@ urlpatterns = [
     path('resume-parse/', views.ApplicationsResumeParseApi.as_view(), name='resume-parse'),
     path('details/', views.CandidateDetailsApi.as_view(), name='details'),
     path('notes/', views.NoteApi.as_view(), name='notes'),
+    path('create-candidate/', views.CreateCandidateUsingResume.as_view(), name='create-candidate'),
 ]
 
 urlpatterns += static(settings.RESUME_URL, document_root=settings.RESUME_URL_ROOT)
-urlpatterns += static(settings.RESUME_TEMP_URL, document_root=settings.RESUME_TEMP_URL_ROOT)
