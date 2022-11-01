@@ -99,19 +99,27 @@ WSGI_APPLICATION = 'edjobster.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME':  'edjobster_db',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'postgres',
+    #     'HOST': 'db',
+    #     'PORT': '5432',
+    # },
+    # 'db2': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME':  'hr',
+    #     'USER': 'app',
+    #     'PASSWORD': 'app@1508',
+    #     'HOST': 'localhost',
+    #     'PORT': '5432',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  'edjobster_db',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
-        'PORT': '5432',
-    },
-    'db2': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME':  'hr',
-        'USER': 'app',
-        'PASSWORD': 'app@1508',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -216,9 +224,6 @@ RESUME_URL = '/cv/'
 RESUME_URL_ROOT = os.path.join(BASE_DIR, 'media/resume/')
 RESUME_FILE_URL = "http://api.edjobster.com/candidate/cv/"
 
-RESUME_TEMP_URL = '/temp/'
-RESUME_TEMP_URL_ROOT = os.path.join(BASE_DIR, 'media/temp/')
-RESUME_TEMP_FILE_URL = "http://api.edjobster.com/candidate/temp/"
 
 #LOGO URLS
 LOGO_URL = '/logo/'
