@@ -741,7 +741,7 @@ def createCandidate(request):
         return getErrorResponse('Company required')
 
     job_id = request.data.get("job_id")
-    job = Job.getByIdAndCompany(decode(job_id), company)
+    job = Job.getByIdAndCompany(job_id, company)
     if not job:
         return getErrorResponse('job_id is missing or incorrect')
 
@@ -763,7 +763,7 @@ def createCandidate(request):
     if request.FILES['resume']:#TO-DO imporve if check
         resume = request.FILES['resume']
         url = settings.RESUME_FILE_URL+resume.name
-        # url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
+        url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
 
         apiParserBody = {
             "url": url,
