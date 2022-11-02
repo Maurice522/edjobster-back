@@ -335,8 +335,8 @@ def getJobDetails(request):
     if not id:
         return getErrorResponse('Invalid request')
 
-    # job = Job.getByIdAndCompany(decode(id), company)
-    job = Job.getById(id)
+    job = Job.getByIdAndCompany(decode(id), company)
+    # job = Job.getById(id)
     if not job:
         return getErrorResponse('Job not found')
 

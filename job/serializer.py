@@ -61,7 +61,7 @@ class JobListSerializer(serializers.ModelSerializer):
         model = Job
         fields = ['id', 'title', 'owner_id', 'vacancies', 'department', 'type',
          'nature', 'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 
-         'city', 'state_name', 'country_name', 'created', 'updated', 'active']
+         'city', 'state_name', 'country_name', 'created', 'updated', 'active', 'webform_id']
 
     def get_id(self, obj):
         return encode(obj.id)

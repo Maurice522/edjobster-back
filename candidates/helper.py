@@ -26,6 +26,7 @@ from django.conf import settings
 import requests
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.core.files.storage import FileSystemStorage
 
 PAGE_SIZE = 30
 
@@ -744,12 +745,18 @@ def createCandidate(request):
     job = Job.getByIdAndCompany(job_id, company)
     if not job:
         return getErrorResponse('job_id is missing or incorrect')
+    
+    email = request.data.get("email")
+    if email is None or len(str(email).strip())==0:
+        return getErrorResponse("Please provide candidate email")
+
+    if Candidate.objects.filter(email=email).exists() or Candidate.objects.filter(email_alt=email).exists():
+        return getErrorResponse("Canidate with this email is already registered")
+
 
     webform_id = request.data.get("webform_id", None)
     form_filled = request.data.get("form_filled", None)
 
-    print(webform_id)
-    print(form_filled)
     if webform_id != None:
         if form_filled != None:
             empty_webform = Webform.getById(webform_id, company)
@@ -763,8 +770,10 @@ def createCandidate(request):
     if request.FILES['resume']:#TO-DO imporve if check
         resume = request.FILES['resume']
         url = settings.RESUME_FILE_URL+resume.name
-        url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
-
+        fs = FileSystemStorage(settings.RESUME_URL_ROOT)
+        filename = fs.save(resume.name, resume)
+        # url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
+        print(url)
         apiParserBody = {
             "url": url,
             "userkey": settings.RESUME_PARSE_KEY,
@@ -795,6 +804,7 @@ def createCandidate(request):
                         with transaction.atomic():
                             filled_webform.save()
                             candidate.webform = filled_webform
+                            candidate.email = email
                             candidateExperiences = getCandidateExperiencesFromResumeJson(res)
                             candidateQualifications = getCandidateQualificationsFromResumeJson(res)
                             candidate.save()
@@ -821,7 +831,7 @@ def createCandidate(request):
                     except Exception as e:
                         print("some error occurred while saving the candidate")
                         print(e)
-                        return getErrorResponse('Failed to parse resume and create candidate')
+                        return getErrorResponse('Failed to parse resume and create candidate' + str(e))
 
         return getErrorResponse("Resume parsing API didn't return a valid response")
     return getErrorResponse('Resume required!')
@@ -863,8 +873,15 @@ def getCandidateFromResumeJson(res):
             candidate.country = res["ResumeParserData"]["Address"][0]["Country"]
 
         if res["ResumeParserData"]["WorkedPeriod"]:
-            candidate.exp_years = int ( float(res["ResumeParserData"]["WorkedPeriod"]["TotalExperienceInYear"] ) )
-            candidate.exp_months = res["ResumeParserData"]["WorkedPeriod"]["TotalExperienceInMonths"]
+            try:
+                candidate.exp_years = int ( float(res["ResumeParserData"]["WorkedPeriod"]["TotalExperienceInYear"] ) )
+            except Exception as e:
+                print("Exception occurred while experience string conv to float")  
+            try:
+                candidate.exp_months = int (res["ResumeParserData"]["WorkedPeriod"]["TotalExperienceInMonths"])
+            except Exception as e:
+                print("Exception occurred while experience string conv to int")
+
 
         if res["ResumeParserData"]["Summary"]:
             candidate.cur_job = res["ResumeParserData"]["Summary"]
@@ -917,9 +934,15 @@ def getCandidateExperiencesFromResumeJson(res):
                 candidateExperience.state = experience["Location"]["State"]
                 candidateExperience.country = experience["Location"]["Country"]
             if experience["StartDate"]:
-                candidateExperience.start_date = datetime.strptime(experience["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                try:
+                    candidateExperience.start_date = datetime.strptime(experience["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                except:
+                    print("Start date not in desired format")    
             if experience["EndDate"]:
-                candidateExperience.end_date = datetime.strptime(experience["EndDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                try:
+                    candidateExperience.end_date = datetime.strptime(experience["EndDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                except:
+                    print("End date not in desired format")
             if experience["JobDescription"]:
                 candidateExperience.jobDescription = experience["JobDescription"]
             candidateExperiences.append(candidateExperience)
@@ -952,9 +975,15 @@ def getCandidateQualificationsFromResumeJson(res):
                 candidateQualification.state = qualification["Institution"]["Location"]["State"]
                 candidateQualification.country = qualification["Institution"]["Location"]["Country"]
             if qualification["StartDate"]:
-                candidateQualification.start_date = datetime.strptime(qualification["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                try:
+                    candidateQualification.start_date = datetime.strptime(qualification["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                except:
+                    print("Start date not in desired format")
             if qualification["EndDate"]:
-                candidateQualification.end_date = datetime.strptime(qualification["StartDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                try:
+                    candidateQualification.end_date = datetime.strptime(qualification["EndDate"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                except:
+                    print("End date not in desired format")
             if qualification["Aggregate"]:
                 candidateQualification.grade = str (qualification["Aggregate"]["Value"])
                 candidateQualification.gradeType = qualification["Aggregate"]["MeasureType"]
