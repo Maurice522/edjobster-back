@@ -763,7 +763,7 @@ def createCandidate(request):
     if request.FILES['resume']:#TO-DO imporve if check
         resume = request.FILES['resume']
         url = settings.RESUME_FILE_URL+resume.name
-        url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
+        # url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
 
         apiParserBody = {
             "url": url,
