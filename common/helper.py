@@ -57,16 +57,21 @@ def getStatesForCountry(request):
 def getCitiesForState(request):
 
     id = request.GET.get('id', None)
+    query = request.GET.get("query", None)
 
-    if not id:
+    if not id and not query:
         return {
             'code': 400,
-            'msg': 'State id required'
+            'msg': 'State info required'
         }
-
-    cityList = City.getByState(id)
+    
+    if id:
+        cityList = City.getByState(id)
+    
+    if query: 
+        cityList = City.search(query)
+    
     cities = CitySerializer(cityList, many=True)
-
     return {
         'code': 200,
         'cities': cities.data,

@@ -104,6 +104,10 @@ class City(models.Model):
         if state:
             return City.objects.filter(state=state)
         return []
+    
+    @staticmethod
+    def search(query):
+        return City.objects.filter(name=f"%{query}%")
 
 
 class NoteType(models.Model):
