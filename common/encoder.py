@@ -1,9 +1,10 @@
 import base64
-
+import json
 def encode(oid):
-    enc = str(base64.b64encode(bytes(str(oid), 'utf-8')))
+    enc = str(base64.b64encode(bytes(str(oid), 'latin-1')))
     enc = enc[2 : len(enc)-1]
     return enc
 
 def decode(id):
-    return base64.b64decode(id).decode('utf-8')
+    res=base64.b64decode(id).decode('latin-1')
+    return base64.b64decode(id).decode('latin-1')

@@ -335,8 +335,8 @@ def getJobDetails(request):
     if not id:
         return getErrorResponse('Invalid request')
 
-    job = Job.getByIdAndCompany(decode(id), company)
-    # job = Job.getById(id)
+    job = Job.getByIdAndCompany((id), company)
+    #job = Job.getById(id)
     if not job:
         return getErrorResponse('Job not found')
 
@@ -357,7 +357,7 @@ def saveJob(request):
     id = data.get('id', None)
 
     if id:
-        job = Job.getByIdAndCompany(decode(id), company)
+        job = Job.getByIdAndCompany((id), company)
         if not category:
             return getErrorResponse( 'Job not found')
     else:
@@ -535,7 +535,7 @@ def deleteJob(request):
     company = Company.getByUser(request.user)
 
     if id:
-        job = Job.getByIdAndCompany(decode(id), company)
+        job = Job.getByIdAndCompany((id), company)
         if not job:
             return getErrorResponse('Job not found')
 

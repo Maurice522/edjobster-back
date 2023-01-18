@@ -57,6 +57,10 @@ class State(models.Model):
         if country:
             return State.objects.filter(country=country)
         return []
+    
+    @staticmethod
+    def search(query):
+        return State.objects.filter(name=query)
 
 
 class City(models.Model):
@@ -107,7 +111,7 @@ class City(models.Model):
     
     @staticmethod
     def search(query):
-        return City.objects.filter(name=f"%{query}%")
+        return City.objects.filter(name=query)
 
 
 class NoteType(models.Model):

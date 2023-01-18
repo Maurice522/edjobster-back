@@ -26,6 +26,7 @@ def makeResponse(data):
 
 def isValidUuid(val):
     try:
+        #val=Account.objects.filter(id=val).first()
         uuid.UUID(str(val))
         return True
     except ValueError:

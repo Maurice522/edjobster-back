@@ -144,7 +144,7 @@ class CandidateQualification(models.Model):
 
     id = models.AutoField(primary_key=True)
     candidate = models.ForeignKey(Candidate, null=True, verbose_name='candidate', on_delete=models.CASCADE)
-    institue_name = models.TextField(max_length=300, null=True, blank=True)
+    institute_name = models.TextField(max_length=300, null=True, blank=True)
     degree = models.CharField(max_length=200, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)

@@ -175,7 +175,7 @@ def getApplications(request):
     if not job_id:
         return getErrorResponse('Job id required')
 
-    job = Job.getByIdAndCompany(decode(job_id), company)        
+    job = Job.getByIdAndCompany((job_id), company)        
     if not job:
         return getErrorResponse('Job not found')
 

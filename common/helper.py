@@ -38,16 +38,19 @@ def getCountries(request):
 def getStatesForCountry(request):
 
     id = request.GET.get('id', None)
-
-    if not id:
+    query = request.GET.get('query',None)
+    if not id and not query:
         return {
             'code': 400,
             'msg': 'Country id required'
         }
 
-    stateList = State.getByCountry(id)
+    if id:
+        stateList = State.getByCountry(id)
+    
+    if query:
+        stateList=State.search(query)
     states = StateSerializer(stateList, many=True)
-
     return {
         'code': 200,
         'states': states.data,

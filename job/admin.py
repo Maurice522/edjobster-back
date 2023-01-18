@@ -4,4 +4,22 @@ from django.contrib import admin
 from .models import Job, Assesment, AssesmentQuestion, AssesmentCategory
 my_modules = [Job, Assesment, AssesmentQuestion, AssesmentCategory]
 
-admin.site.register(my_modules)
+class JobAdmin(admin.ModelAdmin):
+    list_display=('id','company','vacancies')
+    list_filter=('id',)
+admin.site.register(Job,JobAdmin)
+
+class AssessmentAdmin(admin.ModelAdmin):
+    list_display=('id','company','category','name')
+    list_filter=('id',)
+admin.site.register(Assesment,AssessmentAdmin)
+
+class AssesmentQuestionAdmin(admin.ModelAdmin):
+    list_display=('id','created','type')
+    list_filter=('id',)
+admin.site.register(AssesmentQuestion,AssesmentQuestionAdmin)
+
+class AssesmentCategoryAdmin(admin.ModelAdmin):
+    list_display=('id','company','name')
+    list_filter=('id',)
+admin.site.register(AssesmentCategory,AssesmentCategoryAdmin)
