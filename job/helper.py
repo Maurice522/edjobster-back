@@ -299,7 +299,7 @@ def getJobs(request):
 
     company = Company.getByUser(request.user)
     page_no = request.GET.get('page', 1)
-
+    print(request.user)
     try:
         page_no = int(page_no)
     except Exception as e:

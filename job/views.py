@@ -19,6 +19,7 @@ class AssesmentCategoryApi(APIView):
     # permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        print(request.user)
         data = helper.getAssesmentCategories(request)
         return makeResponse(data)
 
