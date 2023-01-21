@@ -36,6 +36,9 @@ urlpatterns = [
     path('login/', TokenObtainPairView.as_view(), name='login'),
     path('refreshtoken/', TokenRefreshView.as_view(), name='refreshtoken'),
     path('verifytoken/', TokenVerifyView.as_view, name='verifytoken'),
+
+    # URL to approve and verify user in the front end of the application by the Admin
+    path('approve-user/', views.ApproveUser.as_view(), name='approve-user'),
 ]
 
 urlpatterns += static(settings.LOGO_URL, document_root=settings.LOGO_URL_ROOT)

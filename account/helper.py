@@ -1083,7 +1083,7 @@ def activateMember(request):
     }
 
 def approveMember(request):
-    
+ 
     adminUser = request.user
     data = request.data
     print('approveMember >> ', data)
@@ -1279,3 +1279,65 @@ def verifyToken(request):
 
 def activateEmail(tokenId):
     return TokenEmailVerification.getByTokenId(decode(tokenId))
+
+
+def approveVerifyMember(request):
+ 
+    adminUser = request.user
+    data = request.data
+    print('approving and Verifying >> ', data)
+
+    status = data.get('status', None)
+    accountId = data.get('account_id', None)
+
+    if adminUser.role != Account.ADMIN:
+        return {
+            'code': 400,
+            'msg': 'Only admin can add members'
+        }
+
+    print('activate >> ', adminUser.account_id, accountId)
+
+    if not status or not accountId:
+        return {
+            'code': 400,
+            'msg': 'Bad request!'
+        }
+
+    account = Account.getById(accountId)
+    if not account:
+        return {
+            'code': 400,
+            'msg': 'Member not found'
+        }
+
+    print('activate >> ', adminUser, account)
+
+    if adminUser == account:
+        return {
+            'code': 400,
+            'msg': 'Cannot deactivate account of yourself'
+        }
+
+    if status not in ['A', 'D']:
+        return {
+            'code': 400,
+            'msg': 'Invalid status'
+        }
+
+    msg = ''
+    if status == 'A':
+        msg = 'Account activated successfully!'
+        account.approved = True
+        account.verified = True
+    else:
+        msg = 'Account deactivated successfully!'
+        account.approved = False
+        account.verified = False
+
+    account.save()
+
+    return {
+        'code': 200,
+        'msg': msg
+    }    
