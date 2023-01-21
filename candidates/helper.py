@@ -12,7 +12,7 @@ from job.models import Job
 from rest_framework.response import Response
 from rest_framework.authentication import BaseAuthentication
 from django.contrib.auth import authenticate
-from common.utils import isValidUuid, getErrorResponse
+from common.utils import isValidUuid, getErrorResponse, getDomainFromEmail
 from common.models import Country, NoteType, State, City
 import json
 from settings.models import Degree, Department, Pipeline, Webform
@@ -1029,3 +1029,163 @@ def parseResume(request, candidate=None):
             return getErrorResponse('Failed to parse resume')
 
     return getErrorResponse('Resume required!') 
+
+
+# creating a Candidate using the online Form only and not the Resume Parser
+
+def createCandidatewithoutResumeParser(request):
+
+    account = request.user
+
+    # Paranoid validation :p
+    company = Company.getById(account.company_id)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Company not found!'
+        }
+
+    data = request.data
+
+    # Validating the job id 
+    job_id = data.get('job_id')
+
+    if not job_id: 
+        return getErrorResponse('Bad request')
+    
+    job = Job.getById(decode(job_id))
+    if not job:
+        return {
+            'code': 400,
+            'data': 'Job not found!'
+        }
+
+    # entering Candidate Details
+    first_name = data.get('first_name')
+
+    if not first_name or len(first_name)<3:
+        return {
+            'code': 400,
+            'msg': 'Enter a valid First Name!'
+        }
+    
+    # Middle Name and last name are optional
+    middle_name = data.get('middle_name', None)
+    last_name = data.get('last_name', None)
+
+    
+    # Checking the mobile number because yess, we are paranoid
+    mobile = data.get('mobile', None)
+    
+    if not mobile or len(mobile)<10:
+        return {
+            'code': 400,
+            'msg': 'Enter a valid Mobile Number!'
+        }
+    if Candidate.getByPhone(job=job, mobile=mobile).exists():
+        return getErrorResponse("Mobile Number already exists for other candidate")
+
+    # Checking and validating email because once again we will be acting paranoid!
+    email = data.get('email', None)
+    if not email or not getDomainFromEmail(email):
+        return {
+            'code': 400,
+            'msg': 'Invalid email address'
+        }
+    if Candidate.getByEmail(job=job, email=email).exists():
+        return getErrorResponse("Email already exists for other candidate")
+    
+    # optional
+    email_alt = data.get('alt_email', None)
+    if email_alt and not getDomainFromEmail(email):
+        return {
+            'code': 400,
+            'msg': 'Invalid email address'
+        }
+
+    # Checing the oprions in Marital State, because yesss, this could be an error
+    marital_status = data.get('marital_status', None)
+    if marital_status and marital_status not in ['Single', 'Married']:
+        return {
+            'code': 400,
+            'msg': 'Invalid marital status!! \n Enter either \'Single\' or \'Married\''
+        }
+
+    # Checking the gender options becauseeee yessss!!! we are paranoid
+    gender = data.get('gender', None)
+    if gender and gender not in ['Female', 'Male']:
+        return {
+            'code': 400,
+            'msg' : 'Invalid gender!! \n Enter either \'Male\' or \'Female\''
+        }
+    
+    # front end select, so no validation required
+    date_of_birth = datetime.strptime(data.get('date_of_birth', None),'%Y-%m-%d').date()
+    
+    last_applied = data.get('last_applied', None)
+    pincode = data.get('pincode', None)
+    street = data.get('address', None)
+    city = data.get('city', None)
+    state = data.get('state', None)
+    country = data.get('country', None)
+
+    # Calculating Age
+    today = date.today()
+    age =  today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+
+    if age<18:
+        return {
+            'code': 400,
+            'msg' : 'Candidate\'s age should be greater than 18 yrs!'
+        }
+
+    # These are optional fields
+    exp_years = data.get('exp_years', None)
+    exp_months = data.get('exp_months', None)
+
+
+    # FINALLY, The moment where we create our candidate
+    candidate = Candidate()
+    candidate.job = job
+    candidate.first_name = first_name
+
+    if middle_name:
+        candidate.middle_name = middle_name
+
+    if last_name:
+        candidate.last_name = last_name
+
+    candidate.mobile = mobile
+    candidate.email = email
+    
+    if email_alt: 
+        candidate.email_alt = email_alt
+
+    if marital_status: 
+        candidate.marital_status = marital_status
+    
+    if gender:
+        gender = gender
+    
+    candidate.date_of_birth = date_of_birth
+    candidate.age = age
+    candidate.last_applied = last_applied
+    candidate.pincode = pincode
+    candidate.street = street
+    candidate.city = city
+    candidate.state = state
+    candidate.country = country
+
+    if exp_months:
+        candidate.exp_months = exp_months
+    
+    if exp_years:
+        candidate.exp_years = exp_years
+
+    # Saveddd siuuuuuuuu
+    candidate.save()
+
+    return {
+        'code': 200, 
+        'data': "Candidate Created Successfully!!"
+    }

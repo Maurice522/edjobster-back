@@ -100,4 +100,12 @@ class NoteApi(APIView):
 
     def delete(self, request):
         data = helper.deleteNote(request)
-        return makeResponse(data)            
+        return makeResponse(data)     
+
+class CreateCandidateUsingWebForm(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.createCandidatewithoutResumeParser(request)
+        return makeResponse(data) 
