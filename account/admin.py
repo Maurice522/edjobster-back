@@ -5,7 +5,7 @@ from .models import Account, Company, TokenEmailVerification
 
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ('first_name','last_name','account_id','role','company')
+    list_display = ('account_id', 'first_name','last_name','role','company')
     list_filter = ("account_id",)
     search_fields = ['role', 'mobile', 'company']
 

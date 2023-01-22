@@ -184,7 +184,7 @@ class Job(models.Model):
     members = ArrayField(models.CharField(max_length=100), blank=True, default=list)
     type = models.CharField(max_length=1, choices=TYPE, default=FULL_TIME)
     nature = models.CharField(max_length=1, choices=NATURE, default=PHYSICAL)
-    educations = ArrayField(models.IntegerField(default=0), null=True, default=None)
+    educations = ArrayField(models.IntegerField(default=0), null=True, default=None, blank=True)
     speciality = models.CharField(max_length=250, null=True, blank=True)
     description = models.TextField(max_length=3000, null=True, blank=True)
     exp_min = models.IntegerField(default=0)
@@ -207,8 +207,8 @@ class Job(models.Model):
     active = models.BooleanField(default=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    # webform_id = models.ForeignKey(Webform,related_name='webform_id',null=True,on_delete=models.CASCADE)
-    webform_id = models.CharField(max_length=50, null=True, blank=True)
+    webform = models.ForeignKey(Webform,related_name='webform_id',null=True,on_delete=models.CASCADE)
+    # webform_id = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return str(self.company)+' '+str(self.title)[:20]
