@@ -33,7 +33,7 @@ def scheduleInterview(request):
     if not job_id:
         return getErrorResponse('Job id required')
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return getErrorResponse('Invalid Job')
 
