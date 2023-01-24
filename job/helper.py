@@ -15,6 +15,7 @@ from common.models import Country, State, City
 import json
 
 from settings.models import Degree, Department, Pipeline, Webform
+from candidates.models import Candidate
 from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
 from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
 from account.serializer import CompanySerializer
@@ -547,3 +548,42 @@ def deleteJob(request):
         }
 
     return getErrorResponse('Invalid request')    
+
+
+def getJobCandidateList(request):
+    company = Company.getByUser(request.user)
+
+    # Getting the final job list
+    results = {}
+
+    # Making the job dictionary
+    jobs = Job.getForCompany(company=company)
+    job_map = {}
+    candidate_map = {}
+    job_candidates_map = {}
+
+    for job in jobs:
+        job_map[job.id] = job.title
+        candidates = Candidate.getByJob(job=job)
+        candidate_array = []
+        for candidate in candidates:
+            name = ""
+            if candidate.first_name:
+                name+=str(candidate.first_name)
+            if candidate.middle_name:
+                name = name + " " + str(candidate.middle_name)
+            if candidate.last_name:
+                name = name + " " + str(candidate.last_name)
+            candidate_map[candidate.id] = name 
+            candidate_array.append(candidate.id)
+        job_candidates_map[job.id] = candidate_array
+
+    results["job_details"] = job_map
+    results["candidate_details"] = candidate_map
+    results["job_candidates_map"] = job_candidates_map
+
+
+    return {
+        'code': 200,
+        'data': results
+    }

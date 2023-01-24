@@ -148,4 +148,10 @@ class BoardApi(APIView):
 
     def post(self, request):
         data = helper.getJobsBoard(request)
-        return makeResponse(data)        
+        return makeResponse(data)     
+
+class JobCandidateList(APIView):
+
+    def get(self, request):
+        data = helper.getJobCandidateList(request) 
+        return makeResponse(data)  
