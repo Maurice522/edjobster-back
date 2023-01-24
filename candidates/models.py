@@ -71,6 +71,11 @@ class Candidate(models.Model):
   
     exp_years = models.IntegerField(null=True,blank=True)
     exp_months = models.IntegerField(null=True,blank=True)
+
+    # Addition of admission_date and graduation_date
+    admission_date = models.DateField(default=None,null=True, blank=True)
+    graduation_date = models.DateField(default=None,null=True, blank=True)
+
     # qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION)
     cur_job = models.CharField(max_length=100, null=True, blank=True)
     cur_employer = models.CharField(max_length=100, null=True, blank=True)
