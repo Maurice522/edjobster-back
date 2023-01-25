@@ -552,19 +552,32 @@ def deleteJob(request):
 
 def getJobCandidateList(request):
     company = Company.getByUser(request.user)
+    if not company: 
+        return getErrorResponse("Company not found!!")
 
     # Getting the final job list
     results = {}
 
     # Making the job dictionary
     jobs = Job.getForCompany(company=company)
+
+    if not jobs: 
+        return getErrorResponse("Job not found!!")
+
     job_map = {}
-    candidate_map = {}
-    job_candidates_map = {}
+    
 
     for job in jobs:
+        # Contains info of the candidates
+        candidate_map = {}
+        # Contains info of the job_candidate map
+        job_candidates_map = {}
         job_map[job.id] = job.title
         candidates = Candidate.getByJob(job=job)
+
+        if not candidates:
+            return getErrorResponse("No Candidates applied for this job!")
+
         candidate_array = []
         for candidate in candidates:
             name = ""
@@ -576,11 +589,10 @@ def getJobCandidateList(request):
                 name = name + " " + str(candidate.last_name)
             candidate_map[candidate.id] = name 
             candidate_array.append(candidate.id)
-        job_candidates_map[job.id] = candidate_array
-
-    results["job_details"] = job_map
-    results["candidate_details"] = candidate_map
-    results["job_candidates_map"] = job_candidates_map
+        job_candidates_map["candidates"] = candidate_array
+        job_candidates_map["name"] = job.title
+        # Final map
+        results[job.id] = job_candidates_map
 
 
     return {

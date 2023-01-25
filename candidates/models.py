@@ -64,10 +64,10 @@ class Candidate(models.Model):
     street = models.CharField(max_length=100, null=True, blank=True)
     pincode = models.CharField(max_length=10, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
-    #state = models.CharField(max_length=10, null=True, blank=True)
-    #country = models.CharField(max_length=50, null=True, blank=True)
-    state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
-    country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
+    state = models.CharField(max_length=10, null=True, blank=True)
+    country = models.CharField(max_length=50, null=True, blank=True)
+    # state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
+    # country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
   
     exp_years = models.IntegerField(null=True,blank=True)
     exp_months = models.IntegerField(null=True,blank=True)
@@ -77,7 +77,7 @@ class Candidate(models.Model):
     graduation_date = models.DateField(default=None,null=True, blank=True)
 
     # qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION)
-    qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION)
+    qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION, blank = True, null = True)
     cur_job = models.CharField(max_length=100, null=True, blank=True)
     cur_employer = models.CharField(max_length=100, null=True, blank=True)
     certifications = models.TextField(null=True, blank=True)
