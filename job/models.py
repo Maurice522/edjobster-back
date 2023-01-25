@@ -149,16 +149,20 @@ class Job(models.Model):
         (PHYSICAL, 'Physical'),
         (REMOTE, 'Remote')
     ]
-    HIGH_SCHOOL="High School"
-    JUNIOR_COLLEGE = 'Junior College'
+
+
+    HIGH_SCHOOL='School'
+    JUNIOR_COLLEGE = 'JuniorCollege'
     BACHELORS = 'Bachelors'
     MASTERS = 'Masters'
 
+    EDUCATIONS = [HIGH_SCHOOL,JUNIOR_COLLEGE,BACHELORS,MASTERS]
+
     EDUCATION=[
-        (HIGH_SCHOOL,"High School"),
-        (JUNIOR_COLLEGE,"Junior College"),
-        (BACHELORS,"Bachelors"),
-        (MASTERS,"Masters")
+        (HIGH_SCHOOL,'HighSchool'),
+        (JUNIOR_COLLEGE,'JuniorCollege'),
+        (BACHELORS,'Bachelors'),
+        (MASTERS,'Masters')
     ]
 
     FULL_TIME = 'F'
@@ -195,7 +199,7 @@ class Job(models.Model):
     members = ArrayField(models.CharField(max_length=100), blank=True, default=list)
     type = models.CharField(max_length=1, choices=TYPE, default=FULL_TIME)
     nature = models.CharField(max_length=1, choices=NATURE, default=PHYSICAL)
-    educations = models.CharField(max_length=20, choices=EDUCATION, default=HIGH_SCHOOL)
+    educations = models.CharField(max_length=20,null=True,choices=EDUCATION,default=HIGH_SCHOOL)
     speciality = models.CharField(max_length=250, null=True, blank=True)
     description = models.TextField(max_length=3000, null=True, blank=True)
     exp_min = models.IntegerField(default=0)
