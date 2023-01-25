@@ -161,6 +161,21 @@ class Job(models.Model):
         (MASTERS,"Masters")
     ]
 
+
+    HIGH_SCHOOL='School'
+    JUNIOR_COLLEGE = 'JuniorCollege'
+    BACHELORS = 'Bachelors'
+    MASTERS = 'Masters'
+
+    EDUCATIONS = [HIGH_SCHOOL,JUNIOR_COLLEGE,BACHELORS,MASTERS]
+
+    EDUCATION=[
+        (HIGH_SCHOOL,'HighSchool'),
+        (JUNIOR_COLLEGE,'JuniorCollege'),
+        (BACHELORS,'Bachelors'),
+        (MASTERS,'Masters')
+    ]
+
     FULL_TIME = 'F'
     PART_TIME = 'P'
     TYPES = [FULL_TIME, PART_TIME]
@@ -195,8 +210,7 @@ class Job(models.Model):
     members = ArrayField(models.CharField(max_length=100), blank=True, default=list)
     type = models.CharField(max_length=1, choices=TYPE, default=FULL_TIME)
     nature = models.CharField(max_length=1, choices=NATURE, default=PHYSICAL)
-    # educations = ArrayField(models.IntegerField(default=0), null=True, default=None, blank=True)
-    educations = models.CharField(max_length=30, choices=EDUCATION, default=HIGH_SCHOOL, blank=True)
+    educations = models.CharField(max_length=20,null=True,choices=EDUCATION,default=HIGH_SCHOOL)
     speciality = models.CharField(max_length=250, null=True, blank=True)
     description = models.TextField(max_length=3000, null=True, blank=True)
     exp_min = models.IntegerField(default=0)
