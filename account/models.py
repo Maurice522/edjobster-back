@@ -41,7 +41,7 @@ class Account(AbstractUser):
         super(Account, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.account_id)
+        return str(self.first_name)+ " " + str(self.last_name)
 
     class Meta:
         verbose_name = 'Account'

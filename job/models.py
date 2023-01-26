@@ -3,7 +3,7 @@ from account.models import Account, Company
 from django.contrib.postgres.fields import ArrayField
 from common.models import Country, State, City
 from common.utils import generateFileName
-from settings.models import Department, Pipeline, Webform
+from settings.models import Department, Pipeline, Webform, Location
 
 class AssesmentCategory(models.Model):
     id = models.AutoField(primary_key=True)
@@ -219,12 +219,13 @@ class Job(models.Model):
     salary_max = models.CharField(max_length=50, null=True, blank=True, default='')
     salary_type = models.CharField(max_length=1, choices=PAY_TYPE, default=MONTHY)
     currency = models.CharField(max_length=10, null=True, blank=True)
-    city = models.CharField(max_length=50, null=True, blank=True)
+    # city = models.CharField(max_length=50, null=True, blank=True)
     # state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
-    state =  models.CharField(max_length=50, null=True, blank=True)
+    # state =  models.CharField(max_length=50, null=True, blank=True)
     # country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
-    country =  models.CharField(max_length=50, null=True, blank=True)
+    # country =  models.CharField(max_length=50, null=True, blank=True)
     # created_by =  models.ForeignKey(Account, related_name='createdby', default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
+    location = models.ForeignKey(Location,null=True, blank=True, on_delete = models.SET_NULL)
     created_by =  models.CharField(max_length=50, null=True, blank=True)
     document = models.FileField(upload_to='media/jobs/', default=None, null=True, blank=True)  
     job_boards = ArrayField(models.CharField(max_length=50), blank=True)
