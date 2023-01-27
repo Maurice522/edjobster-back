@@ -60,8 +60,8 @@ class JobListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = ['id', 'title', 'owner_id', 'vacancies', 'department', 'type',
-         'nature', 'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 
-         'city', 'state_name', 'country_name', 'created', 'updated', 'active', 'webform_id']
+         'nature', 'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 'location', 
+         'created', 'updated', 'active', 'webform_id']
 
     def get_id(self, obj):
         return encode(obj.id)
@@ -98,7 +98,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
         model = Job
         fields = [
              'id', 'title', 'vacancies', 'department', 'owner', 'assesment', 'members', 'type', 'nature', 'educations', 'speciality', 'description',
-             'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 'city', 'state', 'country', 'created_by', 'document', 
+             'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 'location', 'created_by', 'document', 
              'job_boards', 'pipeline', 'active', 'updated', 'created', 'webform']
 
     def get_department(self, obj):
