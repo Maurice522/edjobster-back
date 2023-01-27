@@ -14,7 +14,7 @@ from common.utils import isValidUuid, getErrorResponse
 from common.models import Country, State, City
 import json
 
-from settings.models import Degree, Department, Pipeline, Webform
+from settings.models import Degree, Department, Location, Pipeline, Webform
 from candidates.models import Candidate
 from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
 from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
@@ -386,8 +386,7 @@ def saveJob(request):
     salary_max = data.get('salary_max', None)   
     salary_type = data.get('salary_type', None)   
     currency = data.get('currency', None)   
-    city = data.get('city', None)   
-    state_id = data.get('state', None)   
+    location = data.get('location', None) 
     job_board_ids = data.get('job_boards', None)   
     pipeline_id = data.get('pipeline', None)   
     active = data.get('active', None)
@@ -463,16 +462,13 @@ def saveJob(request):
     if not currency:
         return getErrorResponse('Currency required')
 
-    if not city:
-        return getErrorResponse('City required')    
+    if not location:
+        return getErrorResponse('Location required')    
 
-    if not state_id:
-        return getErrorResponse('State required')
-
-    state = State.getById(state_id)
-    if not state:
-        return getErrorResponse('State not found')     
-
+    location = Location.getById(location,company)
+    if not location:
+        return getErrorResponse('Location not found')
+ 
     #ADD JOB BOARDS ONCE READY
     if not pipeline_id:
         return getErrorResponse('Pipeline required')
@@ -507,9 +503,8 @@ def saveJob(request):
     job.salary_max = salary_max
     job.salary_type = salary_type
     job.currency = currency
-    job.city = city
-    job.state = state
-    job.country = state.country
+    # Removed state and city
+    job.location = location
     job.created_by = request.user
     job.pipeline = pipeline.id
     job.active = active
