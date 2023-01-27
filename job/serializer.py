@@ -5,8 +5,8 @@ from common.models import Country, State
 from rest_framework import serializers
 from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job
 from common.encoder import encode
-from settings.serializer import DepartmentSerializer, DegreeSerializer, PipelineSerializer, WebformDataSerializer
-from settings.models import Degree, Department, Pipeline, Webform
+from settings.serializer import DepartmentSerializer, DegreeSerializer, LocationSerializer, PipelineSerializer, WebformDataSerializer
+from settings.models import Degree, Department, Location, Pipeline, Webform
 from account.serializer import AccountSerializer
 from common.serializer import CitySerializer, StateSerializer, CountrySerializer
 from django.conf import settings
@@ -53,8 +53,9 @@ class JobListSerializer(serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
     owner_id = serializers.SerializerMethodField()
-    state_name = serializers.CharField(source='state')
-    country_name = serializers.CharField(source='country')
+    # state_name = serializers.CharField(source='state')
+    # country_name = serializers.CharField(source='country')
+    location = serializers.CharField(source='location')
     department = serializers.SerializerMethodField()
 
     class Meta:
@@ -78,14 +79,22 @@ class JobListSerializer(serializers.ModelSerializer):
                 return department.name
         return None
 
+    def get_location(self, obj):
+        if obj.location:
+            location = Location.getById(obj.location, obj.company)
+            if location:
+                return LocationSerializer(location).data
+        return None
+
 class JobDetailsSerializer(serializers.ModelSerializer):
 
     department = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
     assesment = serializers.SerializerMethodField()
     members = serializers.SerializerMethodField()
-    state = serializers.SerializerMethodField()
-    country = serializers.SerializerMethodField()
+    # state = serializers.SerializerMethodField()
+    # country = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
     document = serializers.SerializerMethodField()
     pipeline = serializers.SerializerMethodField()
     educations = serializers.SerializerMethodField()
@@ -163,4 +172,11 @@ class JobDetailsSerializer(serializers.ModelSerializer):
             webform = Webform.getByWebformId(obj.webform_id)
             if webform:
                 return WebformDataSerializer(webform).data
-        return None          
+        return None        
+
+    def get_location(self, obj):
+        if obj.location:
+            location = Location.getById(obj.location, obj.company)
+            if location:
+                return LocationSerializer(location).data
+        return None
