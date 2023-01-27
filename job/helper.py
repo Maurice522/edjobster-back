@@ -386,7 +386,7 @@ def saveJob(request):
     salary_max = data.get('salary_max', None)   
     salary_type = data.get('salary_type', None)   
     currency = data.get('currency', None)   
-    location = data.get('location', None) 
+    location = data.get('address', None) 
     job_board_ids = data.get('job_boards', None)   
     pipeline_id = data.get('pipeline', None)   
     active = data.get('active', None)
