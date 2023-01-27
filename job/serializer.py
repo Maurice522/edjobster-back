@@ -55,7 +55,7 @@ class JobListSerializer(serializers.ModelSerializer):
     owner_id = serializers.SerializerMethodField()
     # state_name = serializers.CharField(source='state')
     # country_name = serializers.CharField(source='country')
-    location = serializers.CharField(source='location')
+    location = serializers.SerializerMethodField()
     department = serializers.SerializerMethodField()
 
     class Meta:
@@ -81,9 +81,7 @@ class JobListSerializer(serializers.ModelSerializer):
 
     def get_location(self, obj):
         if obj.location:
-            location = Location.getById(obj.location, obj.company)
-            if location:
-                return LocationSerializer(location).data
+            return LocationSerializer(obj.location).data
         return None
 
 class JobDetailsSerializer(serializers.ModelSerializer):
@@ -176,7 +174,5 @@ class JobDetailsSerializer(serializers.ModelSerializer):
 
     def get_location(self, obj):
         if obj.location:
-            location = Location.getById(obj.location, obj.company)
-            if location:
-                return LocationSerializer(location).data
+            return LocationSerializer(obj.location).data
         return None
