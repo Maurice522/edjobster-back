@@ -701,7 +701,11 @@ def applyWebformJob(request):
 
 def getCandidates(request):
 
+    # company = request.data.get('company')
+    # company = Company.getById(company)
     company = Company.getByUser(request.user)
+    print(company)
+    
     if not company:
         return getErrorResponse('Company required')
 
