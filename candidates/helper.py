@@ -1053,7 +1053,7 @@ def createCandidatewithoutResumeParser(request):
     if not job_id: 
         return getErrorResponse('Bad request')
     
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return {
             'code': 400,
