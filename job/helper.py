@@ -437,7 +437,7 @@ def saveJob(request):
     if not nature or not nature in Job.NATURES:
         return getErrorResponse('invalid job nature')
 
-    if not education or not isinstance(education, list):
+    if not education: # or not isinstance(education, list):
         return getErrorResponse('Invalid education list')
     
     if not speciality:
