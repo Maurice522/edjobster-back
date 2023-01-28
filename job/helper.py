@@ -331,6 +331,8 @@ def getJobs(request):
 def getJobDetails(request):
 
     company = Company.getByUser(request.user)
+    print(request.user)
+    
     id = request.GET.get('id', None)
 
     if not id:
@@ -552,6 +554,7 @@ def deleteJob(request):
 
 def getJobCandidateList(request):
     company = Company.getByUser(request.user)
+    print(request.user)
     if not company: 
         return getErrorResponse("Company not found!!")
 
