@@ -233,7 +233,7 @@ def candidateDetails(request):
 
     company = Company.getByUser(request.user)
 
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if not candidate:
         return getErrorResponse('Candidate not found')
@@ -1222,7 +1222,7 @@ def updatePipelineStatus(request):
     # 1. Selected pipeline stage status already exists and same with pipeline stage
     candidate.pipeline_stage = data.get('pipeline-stage')
     candidate.save()
-    
+
     return {
         'code': 200, 
         'data': "Candidate Pipeline Updated Successfully!!"
