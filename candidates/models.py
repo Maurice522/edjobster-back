@@ -80,6 +80,8 @@ class Candidate(models.Model):
     qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION, blank = True, null = True)
     cur_job = models.CharField(max_length=100, null=True, blank=True)
     cur_employer = models.CharField(max_length=100, null=True, blank=True)
+    pipeline_stage_status = models.CharField(max_length=100, null=True, blank=True)
+    pipeline_stage = models.CharField(max_length=100, null=True, blank=True)
     certifications = models.TextField(null=True, blank=True)
     fun_area = models.TextField(null=True, blank=True)
     subjects = models.TextField(null=True, blank=True)

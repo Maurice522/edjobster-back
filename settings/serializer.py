@@ -46,16 +46,25 @@ class PipelineSerializer(serializers.ModelSerializer):
 
 
 class PipelineStagListSerializer(serializers.ModelSerializer):
-
+    pipeline = serializers.SerializerMethodField()
     class Meta:
         model = PipelineStage
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'pipeline', 'status']
+    def get_pipeline(self, obj):
+        if obj.pipeline:
+            return PipelineSerializer(obj.pipeline).data
+        return None 
 
 class PipelineStageSerializer(serializers.ModelSerializer):
-
+    pipeline = serializers.SerializerMethodField()
     class Meta:
         model = PipelineStage
-        fields = ['id', 'name', 'status']
+        fields = ['id', 'name', 'status', 'pipeline']
+   
+    def get_pipeline(self, obj):
+        if obj.pipeline:
+            return PipelineSerializer(obj.pipeline).data
+        return None 
 
 class EmailFieldSerializer(serializers.ModelSerializer):
 

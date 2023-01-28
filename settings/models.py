@@ -180,9 +180,11 @@ class PipelineStage(models.Model):
     status = ArrayField(models.CharField(max_length=50), blank=True, default=list)    
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    pipeline = models.OneToOneField(
+        'Pipeline', default=None, null=True, verbose_name='Pipeline', on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.company)+' '+str(self.name)[:20]
+        return str(self.pipeline)+' '+str(self.name)[:20]
 
     class Meta:
         verbose_name = 'PipelineStage'
@@ -197,6 +199,11 @@ class PipelineStage(models.Model):
     @staticmethod
     def getByName(name, company):
         return Department.objects.filter(company=company, name=name).exists()
+
+    def getByPipeline(pipeline, company):
+        if PipelineStage.objects.filter(company = company, pipeline=pipeline).exists():
+            return PipelineStage.objects.filter(company = company, pipeline=pipeline)
+        return None
 
     @staticmethod
     def getAll():

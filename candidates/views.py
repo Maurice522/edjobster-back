@@ -109,3 +109,11 @@ class CreateCandidateUsingWebForm(APIView):
     def post(self, request):
         data = helper.createCandidatewithoutResumeParser(request)
         return makeResponse(data) 
+
+class UpdateCandidatePipelineStatus(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.updatePipelineStatus(request)
+        return makeResponse(data) 

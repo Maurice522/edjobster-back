@@ -1189,3 +1189,41 @@ def createCandidatewithoutResumeParser(request):
         'code': 200, 
         'data': "Candidate Created Successfully!!"
     }
+
+def updatePipelineStatus(request):
+    account = request.user
+
+    # Paranoid validation :p
+    company = Company.getById(account.company_id)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Company not found!'
+        }
+    
+    data = request.data
+
+    # Validating the candidate id 
+    candidate_id = data.get('id')
+
+    if not candidate_id: 
+        return getErrorResponse('Bad request')
+
+    candidate = Candidate.getByIdAndCompany(id=candidate_id, company=company)
+    if not candidate:
+        return {
+            'code': 400,
+            'data': 'Candidate not found!'
+        }
+    
+    # Provide valid options from front end
+    candidate.pipeline_stage_status = data.get('pipeline-stage-status')
+    # Need validation
+    # 1. Selected pipeline stage status already exists and same with pipeline stage
+    candidate.pipeline_stage = data.get('pipeline-stage')
+    candidate.save()
+    
+    return {
+        'code': 200, 
+        'data': "Candidate Pipeline Updated Successfully!!"
+    }

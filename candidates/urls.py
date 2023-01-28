@@ -14,6 +14,7 @@ urlpatterns = [
     path('notes/', views.NoteApi.as_view(), name='notes'),
     path('create-candidate/', views.CreateCandidateUsingResume.as_view(), name='create-candidate'),
     path('create-candidate-web/', views.CreateCandidateUsingWebForm.as_view(), name='create-candidate-web'),
+    path('update-candidate-pipeline-status/',views.UpdateCandidatePipelineStatus.as_view(), name='update-candidate-pipeline-status')
 ]
 
 urlpatterns += static(settings.RESUME_URL, document_root=settings.RESUME_URL_ROOT)
