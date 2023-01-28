@@ -3,7 +3,7 @@ from os import access
 from account.models import Account, Company
 from common.models import Country, State
 from rest_framework import serializers
-from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job
+from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job, JobNotes
 from common.encoder import encode
 from settings.serializer import DepartmentSerializer, DegreeSerializer, LocationSerializer, PipelineSerializer, WebformDataSerializer
 from settings.models import Degree, Department, Location, Pipeline, Webform
@@ -90,8 +90,8 @@ class JobDetailsSerializer(serializers.ModelSerializer):
     owner = serializers.SerializerMethodField()
     assesment = serializers.SerializerMethodField()
     members = serializers.SerializerMethodField()
-    # state = serializers.SerializerMethodField()
-    # country = serializers.SerializerMethodField()
+    # # state = serializers.SerializerMethodField()
+    # # country = serializers.SerializerMethodField()
     location = serializers.SerializerMethodField()
     document = serializers.SerializerMethodField()
     pipeline = serializers.SerializerMethodField()
@@ -99,7 +99,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
     webform = serializers.SerializerMethodField()
 
     def get_id(self, obj):
-        return encode(obj.id)
+        return obj.id
         
     class Meta:
         model = Job
@@ -110,6 +110,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
 
     def get_department(self, obj):
         if obj.department:
+            print(f"The department is {obj.department}, of company {obj.company}")
             department = Department.getById(obj.department, obj.company)
             if department:
                 return DepartmentSerializer(department).data
@@ -117,6 +118,7 @@ class JobDetailsSerializer(serializers.ModelSerializer):
 
     def get_educations(self, obj):
         if obj.educations:
+            print(f"The Education is {obj.educations}, of company {obj.company}")
             educations = Degree.getByIds(obj.educations, obj.company)
             if educations:
                 return DegreeSerializer(educations, many=True).data
@@ -148,31 +150,45 @@ class JobDetailsSerializer(serializers.ModelSerializer):
             return settings.JOB_DOC_FILE_URL+obj.document.name[11:]
         return None           
 
-    def get_state(self, obj):
-        if obj.state:
-            return StateSerializer(obj.state).data
-        return None  
+    # def get_state(self, obj):
+    #     if obj.state:
+    #         return StateSerializer(obj.state).data
+    #     return None  
 
-    def get_country(self, obj):
-        if obj.country:
-            return CountrySerializer(obj.country).data
-        return None          
+    # def get_country(self, obj):
+    #     if obj.country:
+    #         return CountrySerializer(obj.country).data
+    #     return None          
 
     def get_pipeline(self, obj):
         if obj.pipeline:
+            print(f"One of the member is {obj.pipeline}")
             pipeline = Pipeline.getById(obj.pipeline, obj.company)
             if pipeline:
                 return PipelineSerializer(pipeline).data
         return None  
 
     def get_webform(self, obj):
-        if obj.webform_id:
-            webform = Webform.getByWebformId(obj.webform_id)
-            if webform:
-                return WebformDataSerializer(webform).data
+        if obj.webform:
+            print(f"Webform is {obj.webform}")
+            return WebformDataSerializer(obj.webform).data
         return None        
 
     def get_location(self, obj):
         if obj.location:
+            print(f"Location is {obj.location}")
             return LocationSerializer(obj.location).data
         return None
+
+class JobNotesSerializer(serializers.ModelSerializer):
+    job_id = serializers.CharField(source='job.id')
+    added_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = JobNotes
+        fields = ['id', 'job_id', 'added_by', 'note', 'created', 'updated']       
+
+    def get_added_by(self, obj):
+        if obj.added_by:
+            return AccountSerializer(obj.added_by).data
+        return None    

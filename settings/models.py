@@ -154,7 +154,10 @@ class Degree(models.Model):
 
     @staticmethod
     def getByIds(ids, company):
-        return Degree.objects.filter(company=company, id__in=ids)
+        # Old code for multiple degrees
+        # return Degree.objects.filter(company=company, id__in=ids)
+        # New code for single degree as of now
+        return Degree.objects.filter(company=company, id=ids)
 
     @staticmethod
     def getByName(name, company):

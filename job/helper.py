@@ -16,8 +16,8 @@ import json
 
 from settings.models import Degree, Department, Location, Pipeline, Webform
 from candidates.models import Candidate
-from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
-from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
+from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job, JobNotes
+from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer, JobNotesSerializer
 from account.serializer import CompanySerializer
 from django.core.paginator import Paginator
 
@@ -336,13 +336,15 @@ def getJobDetails(request):
     if not id:
         return getErrorResponse('Invalid request')
 
-    job = Job.getByIdAndCompany((id), company)
+    job = Job.getByIdAndCompany(id, company)
     #job = Job.getById(id)
     if not job:
         return getErrorResponse('Job not found')
 
+    
     serializer = JobDetailsSerializer(job, many=False)
     data = serializer.data
+    
 
     return {
         'code': 200,
@@ -594,3 +596,88 @@ def getJobCandidateList(request):
         'code': 200,
         'data': results
     }
+
+def getAllNotes(request):
+    job_id = request.GET.get('job')
+    if not job_id:
+        return getErrorResponse('Invalid request')
+
+    company = Company.getByUser(request.user)
+
+    job = Job.getByIdAndCompany(job_id, company)
+
+    if not job:
+        return getErrorResponse('Job not found')
+
+    notes = JobNotes.getForJob(job)
+    serializer = JobNotesSerializer(notes, many=True)  
+
+    return {
+        'code': 200,
+        'notes': serializer.data 
+    }
+
+def getNotesForJob(job):
+    notes = JobNotes.getForJob(job)
+    serializer = JobNotesSerializer(notes, many=True)  
+    return serializer.data  
+
+def saveNote(request):
+
+    data = request.data
+
+    job_id = data.get('job')
+    if not job_id:
+        return getErrorResponse('Invalid request')
+
+    company = Company.getByUser(request.user)
+
+    job= Job.getByIdAndCompany(job_id, company)
+
+    if not job:
+        return getErrorResponse('Job not found')    
+     
+    text = data.get('note', None)        
+    if not text:
+        return getErrorResponse('Note text required')    
+
+    id = data.get('id', None)
+    if id:
+        note = JobNotes.getById(id, job)
+        if not note:
+            return getErrorResponse('Note not found')
+    else:
+        note = JobNotes()
+
+    note.type = type
+    note.added_by = request.user
+    note.note = text
+    note.job = job
+    note.save()
+
+    return {
+        'code': 200,
+        'msg': 'Note added successfully',
+        'notes': getNotesForJob(job)
+    }
+
+def deleteNote(request):
+    note_id = request.GET.get('id')
+    if not note_id:
+        return getErrorResponse('Invalid request')
+
+    company = Company.getByUser(request.user)
+
+    note = JobNotes.getByIdAndCompany(note_id, company)
+
+    if note:
+        job = note.job
+        note.delete()
+
+        return {
+            'code': 200,
+            'msg': 'Note deleted successfully',
+            'notes': getNotesForJob(job)
+        }
+    
+    return getErrorResponse('Note not found')

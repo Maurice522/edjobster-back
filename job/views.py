@@ -155,3 +155,21 @@ class JobCandidateList(APIView):
     def get(self, request):
         data = helper.getJobCandidateList(request) 
         return makeResponse(data)  
+
+
+class JobNotesApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getAllNotes(request)
+        return makeResponse(data)
+
+    def post(self, request):
+        data = helper.saveNote(request)
+        return makeResponse(data)
+
+    def delete(self, request):
+        data = helper.deleteNote(request)
+        return makeResponse(data)
