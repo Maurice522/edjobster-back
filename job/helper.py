@@ -331,6 +331,7 @@ def getJobs(request):
 def getJobDetails(request):
 
     company = Company.getByUser(request.user)
+    print(request.user)
     id = request.GET.get('id', None)
 
     if not id:

@@ -34,13 +34,14 @@ def scheduleInterview(request):
         return getErrorResponse('Job id required')
 
     job = Job.getById(job_id)
+    
     if not job:
         return getErrorResponse('Invalid Job')
 
     if not candidate_id:
         return getErrorResponse('Candidate required')
     
-    candidate = Candidate.getById(decode(candidate_id), job)
+    candidate = Candidate.getById(candidate_id, job)
     if not candidate:
         return getErrorResponse('Candidate not found')
 
@@ -61,11 +62,14 @@ def scheduleInterview(request):
 
     location = None
     company = Company.getByUser(request.user)
+    # company = request.data.get('company')
+    # company = Company.getById(company)
 
     if type == Interview.IN_PERSON: 
         if not location_id:
             return getErrorResponse('Interview location is required for In person interview')
         location = Location.getById(location_id, company)
+        print(location, 'location here')
         if not location:
             return getErrorResponse('Location not found')
 

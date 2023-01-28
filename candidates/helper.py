@@ -701,7 +701,11 @@ def applyWebformJob(request):
 
 def getCandidates(request):
 
+    # company = request.data.get('company')
+    # company = Company.getById(company)
     company = Company.getByUser(request.user)
+    print(company)
+    
     if not company:
         return getErrorResponse('Company required')
 
@@ -1053,7 +1057,7 @@ def createCandidatewithoutResumeParser(request):
     if not job_id: 
         return getErrorResponse('Bad request')
     
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return {
             'code': 400,
