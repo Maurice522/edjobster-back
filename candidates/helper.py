@@ -252,21 +252,21 @@ def updateApplication(request):
 
     candidate_id = data.get('id', None)
     first_name = data.get('first_name', None)
-    middle_name = data.get('first_name', None)
-    last_name = data.get('first_name', None)
+    middle_name = data.get('middle_name', None)
+    last_name = data.get('last_name', None)
     job_id = data.get('job_id', None)
-    phone = data.get('first_name', None)
-    mobile = data.get('first_name', None)
-    email = data.get('first_name', None)
-    email_alt = data.get('first_name', None)
-    marital_status = data.get('first_name', None)
-    date_of_birth = data.get('first_name', None)
-    last_applied = data.get('first_name', None)
+    phone = data.get('phone', None)
+    mobile = data.get('mobile', None)
+    email = data.get('email', None)
+    email_alt = data.get('email_alt', None)
+    marital_status = data.get('marital_status', None)
+    date_of_birth = data.get('date_of_birth', None)
+    last_applied = data.get('last_applied', None)
 
-    street = data.get('first_name', None)
-    pincode = data.get('first_name', None)
+    street = data.get('street', None)
+    pincode = data.get('pincode', None)
     city = data.get('city', None)
-    state_id = data.get('first_name', None)
+    state_id = data.get('state_id', None)
 
     exp_years = data.get('exp_years', None)
     exp_months = data.get('exp_months', 0)
@@ -281,7 +281,11 @@ def updateApplication(request):
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
+
+    company = request.data.get('company')
+    company = Company.getById(company)
+
+    # company = Company.getByUser(request.user)
     candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
@@ -307,7 +311,8 @@ def updateApplication(request):
     if not pincode:
         return getErrorResponse('pincode required')  
      
-    if int(pincode) != pincode and len(str(pincode)) != 6:
+    if len(pincode) != 6:
+        print(pincode, len(pincode))
         return getErrorResponse('invalid pincode')   
     if not city:
         return getErrorResponse('city required')          
@@ -332,10 +337,8 @@ def updateApplication(request):
         candidate = Candidate.getByEmail(job=job, email=email)
         if candidate:
             return getErrorResponse("Email already exists for other candidate")
-    if candidate.mobile != mobile:
-        candidate = Candidate.getByPhone(job=job, mobile=mobile)
-        if candidate:
-            return getErrorResponse("Mobile already exists for other candidate")
+    if Candidate.getByPhone(job=job, mobile=mobile):
+        return getErrorResponse("Mobile already exists for other candidate")
 
     if request.FILES != None:
         print("files")
@@ -370,7 +373,7 @@ def updateApplication(request):
     candidate.fun_area = fun_area            
     candidate.subjects = subjects            
     candidate.skills = skills
-
+    print(candidate, 'candidate here')
     candidate.save()
 
     return {
@@ -1039,10 +1042,13 @@ def parseResume(request, candidate=None):
 
 def createCandidatewithoutResumeParser(request):
 
-    account = request.user
+    # account = request.user
+    account = request.data.get('company')
+    # account = Company.getById(account)
 
     # Paranoid validation :p
-    company = Company.getById(account.company_id)
+    # company = Company.getById(account.company_id)
+    company = Company.getById(account)
     if not company:
         return {
             'code': 400,
@@ -1180,8 +1186,20 @@ def createCandidatewithoutResumeParser(request):
     candidate.pincode = pincode
     candidate.street = street
     candidate.city = city
-    candidate.state = state
-    candidate.country = country
+    if not state:
+        return {
+            'code': 400,
+            'msg': 'State required'
+        }
+    else:
+        candidate.state = State.getById(state)
+    if not country:
+        return {
+            'code': 400,
+            'msg': 'Country required'
+        }
+    else:
+        candidate.country = Country.getById(country)
 
     if exp_months:
         candidate.exp_months = exp_months
