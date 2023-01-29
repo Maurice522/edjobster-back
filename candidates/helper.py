@@ -228,12 +228,11 @@ def deleteApplication(request):
 
 def candidateDetails(request):
     candidate_id = request.GET.get('id')
+
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
-
-    candidate = Candidate.getByIdAndCompany(candidate_id, company)
+    candidate = Candidate.getById(candidate_id)
 
     if not candidate:
         return getErrorResponse('Candidate not found')

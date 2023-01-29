@@ -223,6 +223,8 @@ class Pipeline(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
+    
+
     def __str__(self):
         return str(self.company)+' '+str(self.name)[:20]
 

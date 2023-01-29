@@ -102,8 +102,8 @@ class Candidate(models.Model):
         verbose_name_plural = 'Candidates'
 
     @staticmethod
-    def getById(id, job):
-        if Candidate.objects.filter(job=job, id=id).exists():
+    def getById(id):
+        if Candidate.objects.filter(id=id).exists():
             return Candidate.objects.get(id=id)
         return None
 
