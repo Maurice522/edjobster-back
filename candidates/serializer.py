@@ -27,10 +27,10 @@ class CandidateListSerializer(serializers.ModelSerializer):
                   'job_id', 'job_title', 'webform_id']
 
     def get_job_id(self, obj):
-        return encode(obj.job.id)
+        return obj.job.id
     
     def get_id(self, obj):
-        return encode(obj.id)
+        return obj.id
     
     def get_state(self, obj):
         if obj.state:

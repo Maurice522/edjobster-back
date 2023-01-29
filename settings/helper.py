@@ -341,9 +341,23 @@ def deleteDecignation(request):
 
 #PIPELINES
 def getPipelineStages(request):
-
+    pipeline_id = request.GET.get('id')
     company = Company.getByUser(request.user)
-    pipelineStages = PipelineStage.getForCompany(company=company)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+    
+    pipeline = Pipeline.getById(id = pipeline_id, company=company)
+
+    if not pipeline:
+        return {
+            'code': 400,
+            'msg': 'Pipeline not Valid'
+        }
+
+    pipelineStages = PipelineStage.getByPipeline(company=company, pipeline=pipeline)
 
     serializer = PipelineStagListSerializer(pipelineStages, many=True)
 
@@ -353,43 +367,46 @@ def getPipelineStages(request):
     }    
 
 def savePipelineStage(request):
-
+    pipeline_id = request.GET.get('id')
     company = Company.getByUser(request.user)    
     
     data = request.data    
-    name = data.get('name', None)   
 
-    if not name:
+    pipeline = Pipeline.getById(id = pipeline_id, company=company)
+
+    if not pipeline:
         return {
             'code': 400,
-            'msg': 'Invalid request'
+            'msg': 'Pipeline not Valid'
         }
 
     id = data.get('id', None)
 
+    update = False
+
     if id:
-        pipelineStage = PipelineStage.getById(id, company)
+        pipelineStage = PipelineStage.getByPipeline(company=company, pipeline=pipeline)
         if not pipelineStage:
             return {
                 'code': 400,
                 'msg': 'Pipeline Stage not found'
             }
-        if pipelineStage.name != name and PipelineStage.getByName(name=name, company=company):
-            return {
-                'code': 400,
-                'msg': 'Pipeline Stage with name '+name+' already exists.'
-            } 
+        update = True
     else:
-        if PipelineStage.getByName(name=name, company=company):
-            return {
-                'code': 400,
-                'msg': 'pipeline Stage with name '+name+' already exists.'
-            } 
         pipelineStage = PipelineStage()    
         pipelineStage.company = company
+
+        
     
-    pipelineStage.name = name
-    pipelineStage.save()
+    if data.get('name'):
+        pipelineStage.name = data.get('name')
+
+    if data.get('status'):
+        pipelineStage.status = data.get('status')
+    pipelineStage.pipeline = pipeline
+
+    if not update: 
+        pipelineStage.save()
 
     return getPipelineStages(request)
 
@@ -409,8 +426,7 @@ def deletePipelineStage(request):
         pipelineStage.delete()
         return {
             'code': 200,
-            'msg': 'Pipeline Stage deleted succesfully!',
-            'data': getPipelineStages(request)['data']
+            'msg': 'Pipeline Stage deleted succesfully!'
         }
 
     return {
@@ -491,44 +507,28 @@ def getPipelines(request):
 
 def savePipeline(request):
 
-    company = Company.getByUser(request.user)    
+    company = request.data.get('company', None)   
+    company = Company.getByUser(company)
+    # company = Company.getByUser(request.user)    
     
     data = request.data    
     name = data.get('name', None)   
-    fields = data.get('fields', None)   
     
-    if not name or not fields or not isinstance(fields, list):
+    if not name:
         return {
             'code': 400,
             'msg': 'Invalid request'
         }
 
-    id = data.get('id', None)
+    if Pipeline.getByName(name=name, company=company):
+        return {
+            'code': 400,
+            'msg': 'Pipeline with name '+name+' already exists.'
+        } 
 
-    if id:
-        pipeline = Pipeline.getById(id, company)
-        if not pipeline:
-            return {
-                'code': 400,
-                'msg': 'Pipeline not found'
-            }
-        if pipeline.name != name and Pipeline.getByName(name=name, company=company):
-            return {
-                'code': 400,
-                'msg': 'Pipeline with name '+name+' already exists.'
-            } 
-    else:
-        if Pipeline.getByName(name=name, company=company):
-            return {
-                'code': 400,
-                'msg': 'Pipeline with name '+name+' already exists.'
-            } 
-
-        pipeline = Pipeline()    
-        pipeline.company = company
-
+    pipeline = Pipeline()    
+    pipeline.company = company
     pipeline.name = name
-    pipeline.fields = fields
     pipeline.save()
 
     return getPipelines(request)

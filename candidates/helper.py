@@ -214,7 +214,7 @@ def deleteApplication(request):
 
     company = Company.getByUser(request.user)
 
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if candidate:
         candidate.delete()
@@ -228,12 +228,11 @@ def deleteApplication(request):
 
 def candidateDetails(request):
     candidate_id = request.GET.get('id')
+
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
-
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getById(candidate_id)
 
     if not candidate:
         return getErrorResponse('Candidate not found')
@@ -252,21 +251,21 @@ def updateApplication(request):
 
     candidate_id = data.get('id', None)
     first_name = data.get('first_name', None)
-    middle_name = data.get('first_name', None)
-    last_name = data.get('first_name', None)
+    middle_name = data.get('middle_name', None)
+    last_name = data.get('last_name', None)
     job_id = data.get('job_id', None)
-    phone = data.get('first_name', None)
-    mobile = data.get('first_name', None)
-    email = data.get('first_name', None)
-    email_alt = data.get('first_name', None)
-    marital_status = data.get('first_name', None)
-    date_of_birth = data.get('first_name', None)
-    last_applied = data.get('first_name', None)
+    phone = data.get('phone', None)
+    mobile = data.get('mobile', None)
+    email = data.get('email', None)
+    email_alt = data.get('email_alt', None)
+    marital_status = data.get('marital_status', None)
+    date_of_birth = data.get('date_of_birth', None)
+    last_applied = data.get('last_applied', None)
 
-    street = data.get('first_name', None)
-    pincode = data.get('first_name', None)
+    street = data.get('street', None)
+    pincode = data.get('pincode', None)
     city = data.get('city', None)
-    state_id = data.get('first_name', None)
+    state_id = data.get('state_id', None)
 
     exp_years = data.get('exp_years', None)
     exp_months = data.get('exp_months', 0)
@@ -281,8 +280,12 @@ def updateApplication(request):
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
+
+    # company = request.data.get('company')
+    # company = Company.getById(company)
+
     company = Company.getByUser(request.user)
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
         return getErrorResponse('candidate not found')
@@ -290,7 +293,7 @@ def updateApplication(request):
     if not job_id:
         return getErrorResponse('Job id required')
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return getErrorResponse('Invalid Job')
 
@@ -307,7 +310,8 @@ def updateApplication(request):
     if not pincode:
         return getErrorResponse('pincode required')  
      
-    if int(pincode) != pincode and len(str(pincode)) != 6:
+    if len(pincode) != 6:
+        print(pincode, len(pincode))
         return getErrorResponse('invalid pincode')   
     if not city:
         return getErrorResponse('city required')          
@@ -332,10 +336,8 @@ def updateApplication(request):
         candidate = Candidate.getByEmail(job=job, email=email)
         if candidate:
             return getErrorResponse("Email already exists for other candidate")
-    if candidate.mobile != mobile:
-        candidate = Candidate.getByPhone(job=job, mobile=mobile)
-        if candidate:
-            return getErrorResponse("Mobile already exists for other candidate")
+    if Candidate.getByPhone(job=job, mobile=mobile):
+        return getErrorResponse("Mobile already exists for other candidate")
 
     if request.FILES != None:
         print("files")
@@ -370,7 +372,7 @@ def updateApplication(request):
     candidate.fun_area = fun_area            
     candidate.subjects = subjects            
     candidate.skills = skills
-
+    print(candidate, 'candidate here')
     candidate.save()
 
     return {
@@ -388,7 +390,7 @@ def updateResume(request):
         return getErrorResponse('Invalid request')
 
     company = Company.getByUser(request.user)
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
         return getErrorResponse('candidate not found')
@@ -561,7 +563,7 @@ def applyWebformJob(request):
         return getErrorResponse('Job id required!')
 
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return getErrorResponse('Invalid Job')
 
@@ -701,7 +703,11 @@ def applyWebformJob(request):
 
 def getCandidates(request):
 
+    # company = request.data.get('company')
+    # company = Company.getById(company)
     company = Company.getByUser(request.user)
+    print(company)
+    
     if not company:
         return getErrorResponse('Company required')
 
@@ -1036,9 +1042,12 @@ def parseResume(request, candidate=None):
 def createCandidatewithoutResumeParser(request):
 
     account = request.user
+    # account = request.data.get('company')
+    # account = Company.getById(account)
 
     # Paranoid validation :p
     company = Company.getById(account.company_id)
+    # company = Company.getById(account)
     if not company:
         return {
             'code': 400,
@@ -1054,7 +1063,7 @@ def createCandidatewithoutResumeParser(request):
     if not job_id: 
         return getErrorResponse('Bad request')
     
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return {
             'code': 400,
@@ -1143,6 +1152,9 @@ def createCandidatewithoutResumeParser(request):
     # These are optional fields
     exp_years = data.get('exp_years', None)
     exp_months = data.get('exp_months', None)
+    admission_date = data.get('admission_date', None)
+    graduation_date = data.get('graduation_date', None)
+    
 
 
     # FINALLY, The moment where we create our candidate
@@ -1174,14 +1186,32 @@ def createCandidatewithoutResumeParser(request):
     candidate.pincode = pincode
     candidate.street = street
     candidate.city = city
-    candidate.state = state
-    candidate.country = country
+    if not state:
+        return {
+            'code': 400,
+            'msg': 'State required'
+        }
+    else:
+        candidate.state = State.getById(state)
+    if not country:
+        return {
+            'code': 400,
+            'msg': 'Country required'
+        }
+    else:
+        candidate.country = Country.getById(country)
 
     if exp_months:
         candidate.exp_months = exp_months
     
     if exp_years:
         candidate.exp_years = exp_years
+    
+    if admission_date: 
+        candidate.admission_date = admission_date
+
+    if graduation_date:
+        candidate.graduation_date = graduation_date
 
     # Saveddd siuuuuuuuu
     candidate.save()
@@ -1189,4 +1219,42 @@ def createCandidatewithoutResumeParser(request):
     return {
         'code': 200, 
         'data': "Candidate Created Successfully!!"
+    }
+
+def updatePipelineStatus(request):
+    account = request.user
+
+    # Paranoid validation :p
+    company = Company.getById(account.company_id)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Company not found!'
+        }
+    
+    data = request.data
+
+    # Validating the candidate id 
+    candidate_id = data.get('id')
+
+    if not candidate_id: 
+        return getErrorResponse('Bad request')
+
+    candidate = Candidate.getByIdAndCompany(id=candidate_id, company=company)
+    if not candidate:
+        return {
+            'code': 400,
+            'data': 'Candidate not found!'
+        }
+    
+    # Provide valid options from front end
+    candidate.pipeline_stage_status = data.get('pipeline-stage-status')
+    # Need validation
+    # 1. Selected pipeline stage status already exists and same with pipeline stage
+    candidate.pipeline_stage = data.get('pipeline-stage')
+    candidate.save()
+
+    return {
+        'code': 200, 
+        'data': "Candidate Pipeline Updated Successfully!!"
     }

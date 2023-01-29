@@ -154,7 +154,10 @@ class Degree(models.Model):
 
     @staticmethod
     def getByIds(ids, company):
-        return Degree.objects.filter(company=company, id__in=ids)
+        # Old code for multiple degrees
+        # return Degree.objects.filter(company=company, id__in=ids)
+        # New code for single degree as of now
+        return Degree.objects.filter(company=company, id=ids)
 
     @staticmethod
     def getByName(name, company):
@@ -168,26 +171,26 @@ class Degree(models.Model):
     def getForCompany(company):
         return Degree.objects.filter(company=company)
 
+
 # Pipeline
 class PipelineStage(models.Model):
     id = models.AutoField(primary_key=True)
-    company = models.ForeignKey(
-        Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
-    status = ArrayField(models.CharField(max_length=50), blank=True, default=list)    
+    status = ArrayField(models.CharField(max_length=50), blank=True, default=list) 
+    active = models.BooleanField(default=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.company)+' '+str(self.name)[:20]
+        return str(self.name)[:20]
 
     class Meta:
         verbose_name = 'PipelineStage'
         verbose_name_plural = 'PipelineStages'
 
     @staticmethod
-    def getById(id, company):
-        if PipelineStage.objects.filter(company=company, id=id).exists():
+    def getById(id):
+        if PipelineStage.objects.filter(id=id).exists():
             return PipelineStage.objects.get(id=id)
         return None
 
@@ -203,15 +206,21 @@ class PipelineStage(models.Model):
     def getForCompany(company):
         return PipelineStage.objects.filter(company=company)
 
-
 class Pipeline(models.Model):
     id = models.AutoField(primary_key=True)
     company = models.ForeignKey(
         Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
-    fields = ArrayField(models.CharField(max_length=50), blank=True)
-    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True,)
     created = models.DateTimeField(auto_now_add=True)
+    
+    stage1 = models.ForeignKey(PipelineStage, blank=True, null=True, verbose_name='Pipeline Stage 1', related_name='pipeline_stages_1', on_delete=models.CASCADE)
+    stage2 = models.ForeignKey(PipelineStage, blank=True, null=True, verbose_name='Pipeline Stage 2', related_name='pipeline_stages_2', on_delete=models.CASCADE)
+    stage3 = models.ForeignKey(PipelineStage, blank=True, null=True, verbose_name='Pipeline Stage 3', related_name='pipeline_stages_3', on_delete=models.CASCADE)
+    stage4 = models.ForeignKey(PipelineStage, blank=True, null=True, verbose_name='Pipeline Stage 4', related_name='pipeline_stages_4', on_delete=models.CASCADE)
+    stage5 = models.ForeignKey(PipelineStage, blank=True, null=True, verbose_name='Pipeline Stage 5', related_name='pipeline_stages_5', on_delete=models.CASCADE)
+    stage6 = models.ForeignKey(PipelineStage, blank=True, null=True, verbose_name='Pipeline Stage 6', related_name='pipeline_stages_6', on_delete=models.CASCADE)
+    stage7 = models.ForeignKey(PipelineStage, blank=True, null=True, verbose_name='Pipeline Stage 7', related_name='pipeline_stages_7', on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.company)+' '+str(self.name)[:20]
@@ -237,6 +246,22 @@ class Pipeline(models.Model):
     @staticmethod
     def getForCompany(company):
         return Pipeline.objects.filter(company=company)
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Pipeline)
+def create_pipeline_stages(sender, instance, created, **kwargs):
+    if created:
+        stage_list = ["Associated-Screeening", "Applied", "Shortlisted", "Interview", "Offered", "Hired", "Onboarded"]
+        i = 1
+        for stage in stage_list:
+            stage_instance = PipelineStage.objects.create(name=stage)
+            print(stage_instance)
+            cmd =  f"instance.stage{i} = stage_instance"
+            exec(cmd)
+            i+=1
+            instance.save()    
 
 # Email
 class EmailCategory(models.Model):
