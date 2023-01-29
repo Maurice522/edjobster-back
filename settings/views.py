@@ -92,7 +92,6 @@ class PipelineDetails(APIView):
         data = helper.savePipelineStatus(request)
         return makeResponse(data)
 
-
 class PipelineStageApi(APIView):
 
     authentication_classes = [JWTAuthentication]
@@ -127,6 +126,53 @@ class PipelinesApi(APIView):
         data = helper.deletePipeline(request)
         return makeResponse(data)                     
 
+from rest_framework import mixins, generics
+from .models import Pipeline, PipelineStage
+from .serializer import PipelineSerializer, PipelineStageSerializer
+
+class PipelinesDetailApi(mixins.RetrieveModelMixin, generics.GenericAPIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    queryset = Pipeline.objects.all()
+    serializer_class = PipelineSerializer
+    lookup_field = 'id'
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)  
+
+class PipelineStageUpdate(
+    mixins.RetrieveModelMixin,
+    generics.UpdateAPIView
+    ):
+    queryset = PipelineStage.objects.all()
+    serializer_class = PipelineStageSerializer
+    lookup_field = "id"
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+
+class PipelineStageDelete(mixins.RetrieveModelMixin,generics.DestroyAPIView):
+    queryset = PipelineStage.objects.all()
+    serializer_class = PipelineStageSerializer
+    lookup_field = "id"
+
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+
+class PipelinesDetailCompanyApi(mixins.RetrieveModelMixin, generics.GenericAPIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    queryset = Pipeline.objects.all()
+    serializer_class = PipelineSerializer
+    lookup_field = 'company'
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)  
 
 
 class EmailFieldApi(APIView):

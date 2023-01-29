@@ -74,8 +74,8 @@ class JobsList(mixins.ListModelMixin,
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-class JobsDetail(mixins.RetrieveModelMixin,
-                    generics.GenericAPIView):
+class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    
     queryset = Job.objects.all()
     serializer_class = JobsSerializer
 
