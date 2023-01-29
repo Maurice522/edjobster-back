@@ -332,21 +332,19 @@ def getJobDetails(request):
 
     company = Company.getByUser(request.user)
     print(request.user)
+    
     id = request.GET.get('id', None)
-
     if not id:
         return getErrorResponse('Invalid request')
+ 
+    job = Job.getById(id)
 
-    job = Job.getByIdAndCompany(id, company)
-    #job = Job.getById(id)
     if not job:
         return getErrorResponse('Job not found')
 
-    
     serializer = JobDetailsSerializer(job, many=False)
     data = serializer.data
     
-
     return {
         'code': 200,
         'data': data
@@ -355,7 +353,9 @@ def getJobDetails(request):
 def saveJob(request):
 
     company = Company.getByUser(request.user)    
-    
+    # company = request.data.get('company')
+    # company = Company.getById(company)
+
     data = request.data    
 
     id = data.get('id', None)
@@ -438,8 +438,8 @@ def saveJob(request):
     if not nature or not nature in Job.NATURES:
         return getErrorResponse('invalid job nature')
 
-    if not education or not isinstance(education, list):
-        return getErrorResponse('Invalid education list')
+    if not education :
+        return getErrorResponse('Invalid education')
     
     if not speciality:
         return getErrorResponse('Speciality required')
