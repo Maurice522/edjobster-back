@@ -1046,6 +1046,7 @@ def createCandidatewithoutResumeParser(request):
         }
 
     data = request.data
+    print(data)
 
     # Validating the job id 
     job_id = data.get('job_id')
