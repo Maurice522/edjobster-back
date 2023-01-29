@@ -282,10 +282,10 @@ def updateApplication(request):
         return getErrorResponse('Invalid request')
 
 
-    company = request.data.get('company')
-    company = Company.getById(company)
+    # company = request.data.get('company')
+    # company = Company.getById(company)
 
-    # company = Company.getByUser(request.user)
+    company = Company.getByUser(request.user)
     candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
@@ -1042,13 +1042,13 @@ def parseResume(request, candidate=None):
 
 def createCandidatewithoutResumeParser(request):
 
-    # account = request.user
-    account = request.data.get('company')
+    account = request.user
+    # account = request.data.get('company')
     # account = Company.getById(account)
 
     # Paranoid validation :p
-    # company = Company.getById(account.company_id)
-    company = Company.getById(account)
+    company = Company.getById(account.company_id)
+    # company = Company.getById(account)
     if not company:
         return {
             'code': 400,
