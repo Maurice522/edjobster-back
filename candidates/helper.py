@@ -214,7 +214,7 @@ def deleteApplication(request):
 
     company = Company.getByUser(request.user)
 
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if candidate:
         candidate.delete()
@@ -282,7 +282,7 @@ def updateApplication(request):
         return getErrorResponse('Invalid request')
 
     company = Company.getByUser(request.user)
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
         return getErrorResponse('candidate not found')
@@ -290,7 +290,7 @@ def updateApplication(request):
     if not job_id:
         return getErrorResponse('Job id required')
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return getErrorResponse('Invalid Job')
 
@@ -388,7 +388,7 @@ def updateResume(request):
         return getErrorResponse('Invalid request')
 
     company = Company.getByUser(request.user)
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
         return getErrorResponse('candidate not found')
@@ -561,7 +561,7 @@ def applyWebformJob(request):
         return getErrorResponse('Job id required!')
 
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return getErrorResponse('Invalid Job')
 
