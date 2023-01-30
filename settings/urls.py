@@ -5,6 +5,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('location/', views.LocationsApi.as_view(), name='location'),
+    path('location/<int:pk>', views.LocationsDetailApi.as_view(), name='location-detail'),
     path('department/', views.DepartmentApi.as_view(), name='department'),
     path('designation/', views.DesignationApi.as_view(), name='designation'),
     path('degree/', views.DegreeApi.as_view(), name='degree'),
