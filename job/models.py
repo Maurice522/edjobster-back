@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 from common.models import Country, NoteType, State, City
 from common.utils import generateFileName
 from settings.models import Department, Pipeline, Webform, Location
+from django.contrib.postgres.fields import JSONField
 
 class AssesmentCategory(models.Model):
     id = models.AutoField(primary_key=True)
@@ -303,3 +304,20 @@ class JobNotes(models.Model):
     @staticmethod
     def getAll():
         return JobNotes.objects.all()
+
+class ApplicantWebForm(models.Model):
+    id = models.AutoField(primary_key=True)
+    job = models.ForeignKey(Job, verbose_name='Job', on_delete=models.CASCADE)
+    webform = models.ForeignKey(Webform, verbose_name='Web Form', on_delete=models.CASCADE)
+    
+    form = JSONField(null=True, default=None)
+
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'ApplicantWebForm'
+        verbose_name_plural = 'ApplicantWebForms'
+
+    def __str__(self):
+        return str(self.job)+str(self.id)[:20]

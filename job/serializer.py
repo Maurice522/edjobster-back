@@ -3,7 +3,7 @@ from os import access
 from account.models import Account, Company
 from common.models import Country, State
 from rest_framework import serializers
-from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job, JobNotes
+from .models import Assesment, AssesmentCategory, AssesmentQuestion, Job, JobNotes, ApplicantWebForm
 from common.encoder import encode
 from settings.serializer import DepartmentSerializer, DegreeSerializer, LocationSerializer, PipelineSerializer, WebformDataSerializer
 from settings.models import Degree, Department, Location, Pipeline, Webform
@@ -192,3 +192,14 @@ class JobNotesSerializer(serializers.ModelSerializer):
         if obj.added_by:
             return AccountSerializer(obj.added_by).data
         return None    
+
+class ApplicantWebFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApplicantWebForm
+        fields = [
+            'id',
+            'job',
+            'webform',
+            'form',      
+        ]
+        depth=1

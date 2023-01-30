@@ -11,7 +11,8 @@ from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from settings.models import Webform
-from .models import Job
+from .models import Job, ApplicantWebForm
+from .serializer import ApplicantWebFormSerializer
 
 class AssesmentCategoryApi(APIView):
 
@@ -174,4 +175,45 @@ class JobNotesApi(APIView):
 
     def delete(self, request):
         data = helper.deleteNote(request)
+        return makeResponse(data)
+
+# Details ApplicationWebForm view
+class ApplicationWebFormByJobApi(
+    generics.ListAPIView
+    ):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        lookup_field = self.kwargs['lookup_field']
+        lookup_value = self.kwargs['lookup_value']
+        queryset = ApplicantWebForm.objects.filter(**{lookup_field: lookup_value})
+        return queryset
+
+    serializer_class = ApplicantWebFormSerializer
+
+# Update ApplicationWebForm view 
+class ApplicationWebFormUpdateApi(
+    generics.UpdateAPIView
+    ):
+    queryset = ApplicantWebForm.objects.all()
+    serializer_class = ApplicantWebFormSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+    
+# Delete ApplicationWebForm view 
+class ApplicationWebFormDeleteApi(
+    generics.DestroyAPIView
+    ):
+    queryset = ApplicantWebForm.objects.all()
+    serializer_class = ApplicantWebFormSerializer
+
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+ 
+# Create ApplicationWebForm view
+class ApplicationWebFormCreateApi(APIView):
+    def post(self, request):
+        data = helper.saveApplicantWebForms(request)
         return makeResponse(data)
