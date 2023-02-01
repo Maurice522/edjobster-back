@@ -16,10 +16,9 @@ urlpatterns = [
     path('all-job-candidate/',views.JobCandidateList.as_view(), name='all-job-candidate' ), 
     path('a',views.CreateJobApi.as_view(), name = "a"),
 
-    path('applicant-get/<str:lookup_field>/<str:lookup_value>/', views.ApplicationWebFormByJobApi.as_view(), name='applicant-get'),
-    path('applicant-update/<int:pk>', views.ApplicationWebFormUpdateApi.as_view(), name='applicant-update'),
-    path('applicant-delete/<int:pk>', views.ApplicationWebFormDeleteApi.as_view(), name='applicant-delete'),
-    path('applicant/', views.ApplicationWebFormCreateApi.as_view(), name='applicant-create'),
-
+    # path('applicant-get/<str:lookup_field>/<str:lookup_value>/', views.ApplicationWebFormByJobApi.as_view(), name='applicant-get'),
+    # path('applicant-update/<int:pk>', views.ApplicationWebFormUpdateApi.as_view(), name='applicant-update'),
+    # path('applicant-delete/<int:pk>', views.ApplicationWebFormDeleteApi.as_view(), name='applicant-delete'),
+    # path('applicant/', views.ApplicationWebFormCreateApi.as_view(), name='applicant-create'),
 ]
 urlpatterns += static(settings.JOB_DOC_URL, document_root=settings.JOB_DOC_URL_ROOT)

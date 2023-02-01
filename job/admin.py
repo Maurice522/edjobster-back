@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Job, Assesment, AssesmentQuestion, AssesmentCategory, JobNotes, ApplicantWebForm
-my_modules = [Job, Assesment, AssesmentQuestion, AssesmentCategory, JobNotes, ApplicantWebForm]
+from .models import Job, Assesment, AssesmentQuestion, AssesmentCategory, JobNotes
+my_modules = [Job, Assesment, AssesmentQuestion, AssesmentCategory, JobNotes]
 
 class JobAdmin(admin.ModelAdmin):
     list_display=('id','company','vacancies')
@@ -28,8 +28,3 @@ class JobNotesAdmin(admin.ModelAdmin):
     list_display=('id','added_by')
     list_filter=('id',)
 admin.site.register(JobNotes,JobNotesAdmin)
-
-class ApplicantWebformAdmin(admin.ModelAdmin):
-    list_display=('id','job', 'webform')
-    list_filter=('id',)
-admin.site.register(ApplicantWebForm,ApplicantWebformAdmin)

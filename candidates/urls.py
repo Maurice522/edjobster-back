@@ -14,7 +14,12 @@ urlpatterns = [
     path('notes/', views.NoteApi.as_view(), name='notes'),
     path('create-candidate/', views.CreateCandidateUsingResume.as_view(), name='create-candidate'),
     path('create-candidate-web/', views.CreateCandidateUsingWebForm.as_view(), name='create-candidate-web'),
-    path('update-candidate-pipeline-status/',views.UpdateCandidatePipelineStatus.as_view(), name='update-candidate-pipeline-status')
+    path('update-candidate-pipeline-status/',views.UpdateCandidatePipelineStatus.as_view(), name='update-candidate-pipeline-status'),
+
+    path('applicant-get/<str:lookup_field>/<str:lookup_value>/', views.ApplicationWebFormByJobApi.as_view(), name='applicant-get'),
+    path('applicant-update/<int:pk>', views.ApplicationWebFormUpdateApi.as_view(), name='applicant-update'),
+    path('applicant-delete/<int:pk>', views.ApplicationWebFormDeleteApi.as_view(), name='applicant-delete'),
+    path('applicant/', views.ApplicationWebFormCreateApi.as_view(), name='applicant-create'),
 ]
 
 urlpatterns += static(settings.RESUME_URL, document_root=settings.RESUME_URL_ROOT)

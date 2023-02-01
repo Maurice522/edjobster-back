@@ -16,7 +16,7 @@ import json
 
 from settings.models import Degree, Department, Location, Pipeline, Webform
 from candidates.models import Candidate
-from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job, JobNotes, ApplicantWebForm
+from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job, JobNotes
 from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer, JobNotesSerializer
 from account.serializer import CompanySerializer
 from django.core.paginator import Paginator
@@ -682,62 +682,3 @@ def deleteNote(request):
         }
     
     return getErrorResponse('Note not found')
-
-from settings.models import Webform
-def saveApplicantWebForms(request):
-    
-    data = request.data    
-    job_id = data.get('job', None)   
-    webform_id = data.get('webform', None)   
-    form = data.get('form', None)   
-
-    if not job_id:
-        return {
-            'code': 400,
-            'msg': 'Job required'
-        }
-
-    if not webform_id:
-        return {
-            'code': 400,
-            'msg': 'Webform required'
-        }
-        
-    if not form:
-        return {
-            'code': 400,
-            'msg': 'Invalid request'
-        }
-
-    form = json.loads(form)
-    job = Job(id=job_id)
-    if not job:
-        return {
-            'code': 400,
-            'msg': 'Job does not exist'
-        }
-
-    webform = Webform(id=webform_id)
-    if not webform:
-        return {
-            'code': 400,
-            'msg': 'Webform does not exist'
-        }
-    
-    try:
-        instance = ApplicantWebForm()
-        instance.job = job
-        instance.webform = webform
-        instance.form = form
-        instance.save()
-    
-    except:
-        return {
-            'code': 200,
-            'msg': 'Something went wrong :(',
-        }
-
-    return {
-        'code': 200,
-        'msg': 'Applicant webform created successfully',
-    }

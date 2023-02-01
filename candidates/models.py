@@ -220,3 +220,21 @@ class ResumeFiles(models.Model):
     class Meta:
         verbose_name = 'Note'
         verbose_name_plural = 'Notes'
+
+class ApplicantWebForm(models.Model):
+    id = models.AutoField(primary_key=True)
+    job = models.ForeignKey(Job, verbose_name='Job', on_delete=models.CASCADE)
+    candidate = models.ForeignKey(Candidate, verbose_name='Candidate', on_delete=models.CASCADE)
+    webform = models.ForeignKey(Webform, verbose_name='Web Form', on_delete=models.CASCADE)
+    
+    form = JSONField(null=True, default=None)
+
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'ApplicantWebForm'
+        verbose_name_plural = 'ApplicantWebForms'
+
+    def __str__(self):
+        return str(self.job)+str(self.id)[:20]
