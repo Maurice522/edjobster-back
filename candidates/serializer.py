@@ -120,6 +120,7 @@ class ApplicantWebFormSerializer(serializers.ModelSerializer):
             'id',
             'job',
             'webform',
+            'assingment',
             'form',      
         ]
         depth=1

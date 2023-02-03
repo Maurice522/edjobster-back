@@ -1,6 +1,7 @@
 from email.policy import default
 from django.db import models
 from common.models import Country, State, NoteType
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import Q
 from job.models import Job, Account
 from django.contrib.postgres.fields import JSONField
