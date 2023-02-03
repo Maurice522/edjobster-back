@@ -226,7 +226,8 @@ class ApplicantWebForm(models.Model):
     job = models.ForeignKey(Job, verbose_name='Job', on_delete=models.CASCADE)
     candidate = models.ForeignKey(Candidate, verbose_name='Candidate', on_delete=models.CASCADE)
     webform = models.ForeignKey(Webform, verbose_name='Web Form', on_delete=models.CASCADE)
-    
+    assingment = ArrayField(models.CharField(max_length=100), blank=True, null=True)
+
     form = JSONField(null=True, default=None)
 
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
