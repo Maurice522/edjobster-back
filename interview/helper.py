@@ -41,7 +41,7 @@ def scheduleInterview(request):
     if not candidate_id:
         return getErrorResponse('Candidate required')
     
-    candidate = Candidate.getById(candidate_id, job)
+    candidate = Candidate.getById(candidate_id)
     if not candidate:
         return getErrorResponse('Candidate not found')
 
