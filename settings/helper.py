@@ -507,9 +507,9 @@ def getPipelines(request):
 
 def savePipeline(request):
 
-    company = request.data.get('company', None)   
-    company = Company.getByUser(company)
-    # company = Company.getByUser(request.user)    
+    # company = request.data.get('company', None)   
+    # company = Company.getByUser(company)
+    company = Company.getByUser(request.user)    
     
     data = request.data    
     name = data.get('name', None)   

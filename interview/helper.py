@@ -137,18 +137,21 @@ def scheduleInterview(request):
 def getInterviews(request):
 
     company = Company.getByUser(request.user)
+    # company = request.GET.get('company')
+    # company = Company.getByUser(company)
+
     job_id = request.GET.get('job_id')
     candidate_id = request.GET.get('candidate_id')
 
     interviews = []
 
     if job_id:
-        job = Job.getByIdAndCompany(decode(job_id), company)
+        job = Job.getByIdAndCompany(job_id, company)
         if not job:
             return getErrorResponse('Job not found')
         interviews = Interview.getByJob(job)
     elif candidate_id:
-        candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)     
+        candidate = Candidate.getByIdAndCompany(candidate_id, company)     
         if not candidate:
             return getErrorResponse('Candidate not found')   
         interviews = Interview.getByCandidate(candidate)            

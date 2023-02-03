@@ -14,7 +14,7 @@ class DataApi(APIView):
     def get(self, request):
         data = helper.getAllData()
         return makeResponse(data)
-
+    
 
 class CountryApi(APIView):
     def get(self, request):

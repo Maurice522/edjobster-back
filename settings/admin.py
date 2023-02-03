@@ -10,5 +10,6 @@ class PipelineAdmin(admin.ModelAdmin):
 
 admin.site.register(Pipeline, PipelineAdmin)
 admin.site.register(PipelineStage, PipelineAdmin)
+# admin.site.register(Location, PipelineAdmin)
 
 admin.site.register(my_modules)

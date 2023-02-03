@@ -16,7 +16,7 @@ from common.utils import isValidUuid, getErrorResponse, getDomainFromEmail
 from common.models import Country, NoteType, State, City
 import json
 from settings.models import Degree, Department, Pipeline, Webform
-from .models import Candidate, CandidateExperience, CandidateQualification, Note, ResumeFiles
+from .models import Candidate, CandidateExperience, CandidateQualification, Note, ResumeFiles, ApplicantWebForm
 from .serializer import CandidateExperienceSerializer, CandidateListSerializer, CandidateDetailsSerializer, CandidateQualificationSerializer, NoteSerializer
 from common.encoder import decode
 from django.utils.dateparse import parse_date
@@ -1055,6 +1055,7 @@ def createCandidatewithoutResumeParser(request):
         }
 
     data = request.data
+    print(data)
 
     # Validating the job id 
     job_id = data.get('job_id')
@@ -1256,4 +1257,76 @@ def updatePipelineStatus(request):
     return {
         'code': 200, 
         'data': "Candidate Pipeline Updated Successfully!!"
+    }
+
+from settings.models import Webform
+def saveApplicantWebForms(request):
+    
+    data = request.data    
+    job_id = data.get('job', None)   
+    candidate_id = data.get('candidate', None)   
+    webform = data.get('webform', None)   
+    assingment = data.get('assingment', None)
+    form = data.get('form', None)   
+
+    print('info', data)
+    if not candidate_id:
+        return {
+            'code': 400,
+            'msg': 'Candidate required'
+        }
+
+    if not job_id:
+        return {
+            'code': 400,
+            'msg': 'Job required'
+        }
+
+    if not webform and not assingment:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }        
+
+    if not form:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+
+    form = json.loads(form)
+    job = Job(id=job_id)
+    if not job:
+        return {
+            'code': 400,
+            'msg': 'Job does not exist'
+        }
+
+    candidate = Candidate(id=candidate_id)
+    if not candidate:
+        return {
+            'code': 400,
+            'msg': 'Webform does not exist'
+        }
+    
+    # try:
+    instance = ApplicantWebForm()
+    instance.job = job
+    instance.candidate = candidate
+    if webform:
+        instance.webform = json.loads(webform)
+    if assingment:
+        instance.assingment = json.loads(assingment)
+    instance.form = form
+    instance.save()
+    
+    # except:
+    #     return {
+    #         'code': 200,
+    #         'msg': 'Something went wrong :(',
+    #     }
+
+    return {
+        'code': 200,
+        'msg': 'Applicant webform created successfully',
     }

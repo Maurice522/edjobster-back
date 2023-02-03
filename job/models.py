@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 from common.models import Country, NoteType, State, City
 from common.utils import generateFileName
 from settings.models import Department, Pipeline, Webform, Location
+from django.contrib.postgres.fields import JSONField
 
 class AssesmentCategory(models.Model):
     id = models.AutoField(primary_key=True)
@@ -43,6 +44,7 @@ class Assesment(models.Model):
     company = models.ForeignKey(Company, default=None, null=False, verbose_name='Company', on_delete=models.CASCADE)
     category = models.ForeignKey(AssesmentCategory, default=None, null=False, verbose_name='Category', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
+    form = JSONField(null=True, default=None)
     created_by =  models.ForeignKey(Account, default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)

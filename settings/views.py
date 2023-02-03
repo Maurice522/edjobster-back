@@ -28,6 +28,22 @@ class LocationsApi(APIView):
         data = helper.deleteLocation(request)
         return makeResponse(data)        
 
+from rest_framework import mixins, generics
+from .models import Location
+from .serializer import LocationSerializer
+
+class LocationsDetailApi(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
 class DepartmentApi(APIView):
 
     # authentication_classes = [JWTAuthentication]

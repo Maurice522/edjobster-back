@@ -2,7 +2,7 @@ from account.serializer import AccountSerializer
 from rest_framework import serializers
 from settings.models import Webform
 from settings.serializer import WebformListSerializer
-from .models import Candidate, CandidateExperience, CandidateQualification, Note
+from .models import Candidate, CandidateExperience, CandidateQualification, Note, ApplicantWebForm
 from common.encoder import encode
 from common.serializer import NoteTypeSerializer
 from django.conf import settings
@@ -112,3 +112,15 @@ class CandidateQualificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CandidateQualification
         fields = '__all__'
+        
+class ApplicantWebFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApplicantWebForm
+        fields = [
+            'id',
+            'job',
+            'webform',
+            'assingment',
+            'form',      
+        ]
+        depth=1

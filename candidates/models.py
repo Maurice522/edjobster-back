@@ -1,6 +1,7 @@
 from email.policy import default
 from django.db import models
 from common.models import Country, State, NoteType
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import Q
 from job.models import Job, Account
 from django.contrib.postgres.fields import JSONField
@@ -220,3 +221,22 @@ class ResumeFiles(models.Model):
     class Meta:
         verbose_name = 'Note'
         verbose_name_plural = 'Notes'
+
+class ApplicantWebForm(models.Model):
+    id = models.AutoField(primary_key=True)
+    job = models.ForeignKey(Job, verbose_name='Job', on_delete=models.CASCADE)
+    candidate = models.ForeignKey(Candidate, verbose_name='Candidate', on_delete=models.CASCADE)
+    webform = ArrayField(models.CharField(max_length=100), blank=True, null=True)
+    assingment = ArrayField(models.CharField(max_length=100), blank=True, null=True)
+
+    form = JSONField(null=True, default=None)
+
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'ApplicantWebForm'
+        verbose_name_plural = 'ApplicantWebForms'
+
+    def __str__(self):
+        return str(self.job)+str(self.id)[:20]
