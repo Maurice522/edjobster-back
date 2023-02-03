@@ -616,10 +616,11 @@ def getAllNotes(request):
     if not job_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
+    # company = Company.getByUser(request.user)
+    company = request.GET.get('company')
+    company = Company.getById(company)
 
     job = Job.getByIdAndCompany(job_id, company)
-
     if not job:
         return getErrorResponse('Job not found')
 
@@ -645,7 +646,8 @@ def saveNote(request):
         return getErrorResponse('Invalid request')
 
     company = Company.getByUser(request.user)
-    company = data.get('company')
+    # company = data.get('company')
+    # company = Company.getByUser(request.user)
 
     job= Job.getByIdAndCompany(job_id, company)
 
@@ -664,7 +666,6 @@ def saveNote(request):
     else:
         note = JobNotes()
 
-    note.type = type
     note.added_by = request.user
     note.note = text
     note.job = job

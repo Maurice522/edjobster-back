@@ -8,8 +8,8 @@ from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import mixins, generics
-from .models import ApplicantWebForm
-from .serializer import ApplicantWebFormSerializer
+from .models import ApplicantWebForm, Note
+from .serializer import ApplicantWebFormSerializer, NoteSerializer
 
 class ApplyApi(APIView):
 
@@ -105,6 +105,27 @@ class NoteApi(APIView):
         data = helper.deleteNote(request)
         return makeResponse(data)     
 
+class DetailNoteApi(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Note.objects.all()
+    serializer_class = NoteSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
+# Update Notes view 
+class NotesUpdateApi(
+    generics.UpdateAPIView
+    ):
+    queryset = Note.objects.all()
+    serializer_class = NoteSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
 class CreateCandidateUsingWebForm(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -145,7 +166,16 @@ class ApplicationWebFormUpdateApi(
 
     def perform_update(self, serializer):
         instance = serializer.save()
-    
+
+# Update ApplicationWebForm view 
+class ApplicationWebFormUpdateApi(
+    generics.UpdateAPIView
+    ):
+    queryset = ApplicantWebForm.objects.all()
+    serializer_class = ApplicantWebFormSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
 # Delete ApplicationWebForm view 
 class ApplicationWebFormDeleteApi(
     generics.DestroyAPIView

@@ -83,12 +83,9 @@ class CandidateDetailsSerializer(serializers.ModelSerializer):
 
 class NoteSerializer(serializers.ModelSerializer):
 
-    type = serializers.SerializerMethodField()
-    added_by = serializers.SerializerMethodField()
-
     class Meta:
         model = Note
-        fields = ['id', 'type', 'added_by', 'note', 'created', 'updated']
+        fields = ['id','candidate', 'note', 'created', 'updated']
 
     def get_type(self, obj):
         if obj.type:

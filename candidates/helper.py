@@ -457,12 +457,15 @@ def parseResume(request, candidate=None):
 
 def getAllNotes(request):
     candidate_id = request.GET.get('candidate')
+ 
+    company = Company.getByUser(request.user)
+    # company = request.GET.get('company')
+    # company = Company.getById(company)
+    
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
-
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if not candidate:
         return getErrorResponse('Candidate not found')
@@ -474,8 +477,8 @@ def getAllNotes(request):
 
 def getNotesForCandidate(candidate):
     notes = Note.getForCandidate(candidate)
-    serializer = NoteSerializer(notes, many=True)  
-    return serializer.data  
+    serializer = NoteSerializer(notes, many=True)
+    return serializer.data
 
 def saveNote(request):
 
@@ -485,23 +488,14 @@ def saveNote(request):
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    # company = Company.getByUser(request.user)
-    company = data.get('company', None)
-    company = Company.getById(company)
+    company = Company.getByUser(request.user)
+    # company = data.get('company', None)
+    # company = Company.getById(company)
 
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if not candidate:
         return getErrorResponse('Candidate not found')    
-
-    type_id = data.get('type', None)
-    if not type_id:
-        return getErrorResponse('Note type required')
-
-    type = NoteType.getById(type_id)
-
-    if not type:
-        return getErrorResponse('Invalid note type')        
 
     text = data.get('note', None)        
     if not text:
@@ -515,8 +509,6 @@ def saveNote(request):
     else:
         note = Note()
 
-    note.type = type
-    note.added_by = request.user
     note.note = text
     note.candidate = candidate
     note.save()
@@ -529,6 +521,7 @@ def saveNote(request):
 
 def deleteNote(request):
     note_id = request.GET.get('id')
+    
     if not note_id:
         return getErrorResponse('Invalid request')
 
