@@ -232,10 +232,10 @@ class DeleteMemberApi(APIView):
         data = helper.deleteMember(request)
         return makeResponse(data)
 
-class ApproveUser(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+# class ApproveUser(APIView):
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        data = helper.approveVerifyMember(request)
-        return makeResponse(data)
+#     def post(self, request):
+#         data = helper.approveVerifyMember(request)
+#         return makeResponse(data)

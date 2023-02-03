@@ -645,6 +645,7 @@ def saveNote(request):
         return getErrorResponse('Invalid request')
 
     company = Company.getByUser(request.user)
+    company = data.get('company')
 
     job= Job.getByIdAndCompany(job_id, company)
 

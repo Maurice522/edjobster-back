@@ -1,9 +1,15 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Candidate , CandidateExperience , CandidateQualification, ApplicantWebForm
-my_modules = [Candidate, CandidateExperience, CandidateQualification, ApplicantWebForm]
+from .models import Candidate ,Note , CandidateExperience , CandidateQualification, ApplicantWebForm
+my_modules = [Candidate, CandidateExperience, CandidateQualification, ApplicantWebForm, Note]
 #Registering Candidate on admin panel
+
+class NoteAdmin(admin.ModelAdmin):
+    list_display=('id',)
+    list_filter=('id',)
+admin.site.register(Note,NoteAdmin)
+
 class CandidateAdmin(admin.ModelAdmin):
     list_display=('first_name','last_name','id','job','created',)
     list_filter=('id',)

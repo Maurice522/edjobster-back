@@ -485,7 +485,9 @@ def saveNote(request):
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
+    # company = Company.getByUser(request.user)
+    company = data.get('company', None)
+    company = Company.getById(company)
 
     candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
 
