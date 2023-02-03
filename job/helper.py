@@ -38,7 +38,9 @@ def getAssesmentCategories(request):
 def saveAssesmentCategory(request):
 
     company = Company.getByUser(request.user)    
-    
+    # company = data.get('company', company)   
+    # company = Company.getById(company)    
+      
     data = request.data    
     name = data.get('name', None)   
 
@@ -99,11 +101,14 @@ def getAssesments(request):
 
 def saveAssesment(request):
 
-    company = Company.getByUser(request.user)    
-    
     data = request.data    
+    company = data.get('company', None)   
+    company = Company.getById(company)
+    # company = Company.getByUser(request.user)    
+    
     name = data.get('name', None)   
     cat_id = data.get('category', None)   
+    form = data.get('form', None)   
 
     if not name or not cat_id:
         return {
@@ -111,6 +116,12 @@ def saveAssesment(request):
             'msg': 'Invalid request'
         }
     print(cat_id, company)
+
+    if not form:
+        return {
+            'code': 400,
+            'msg': 'Empty Form'
+        }
 
     category = AssesmentCategory.getById(cat_id, company)
     if not category:
@@ -134,6 +145,8 @@ def saveAssesment(request):
 
     assesment.name = name
     assesment.category = category
+    print(form)
+    assesment.form = form
     assesment.save()
 
     return getAssesments(request)

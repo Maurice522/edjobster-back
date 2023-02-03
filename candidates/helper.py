@@ -1269,6 +1269,7 @@ def saveApplicantWebForms(request):
     assingment = data.get('assingment', None)
     form = data.get('form', None)   
 
+    print('info', data)
     if not candidate_id:
         return {
             'code': 400,
@@ -1281,18 +1282,12 @@ def saveApplicantWebForms(request):
             'msg': 'Job required'
         }
 
-    if not webform:
+    if not webform and not assingment:
         return {
             'code': 400,
-            'msg': 'Webform required'
+            'msg': 'Invalid request'
         }        
 
-    if not assingment:
-        return {
-            'code': 400,
-            'msg': 'Assingment required'
-        }
-        
     if not form:
         return {
             'code': 400,
@@ -1314,20 +1309,22 @@ def saveApplicantWebForms(request):
             'msg': 'Webform does not exist'
         }
     
-    try:
-        instance = ApplicantWebForm()
-        instance.job = job
-        instance.candidate = candidate
-        instance.webform = webform
-        instance.assingment = assingment
-        instance.form = form
-        instance.save()
+    # try:
+    instance = ApplicantWebForm()
+    instance.job = job
+    instance.candidate = candidate
+    if webform:
+        instance.webform = json.loads(webform)
+    if assingment:
+        instance.assingment = json.loads(assingment)
+    instance.form = form
+    instance.save()
     
-    except:
-        return {
-            'code': 200,
-            'msg': 'Something went wrong :(',
-        }
+    # except:
+    #     return {
+    #         'code': 200,
+    #         'msg': 'Something went wrong :(',
+    #     }
 
     return {
         'code': 200,
