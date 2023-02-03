@@ -1265,7 +1265,8 @@ def saveApplicantWebForms(request):
     data = request.data    
     job_id = data.get('job', None)   
     candidate_id = data.get('candidate', None)   
-    webform_id = data.get('webform', None)   
+    webform = data.get('webform', None)   
+    assingment = data.get('assingment', None)
     form = data.get('form', None)   
 
     if not candidate_id:
@@ -1280,10 +1281,16 @@ def saveApplicantWebForms(request):
             'msg': 'Job required'
         }
 
-    if not webform_id:
+    if not webform:
         return {
             'code': 400,
             'msg': 'Webform required'
+        }        
+
+    if not assingment:
+        return {
+            'code': 400,
+            'msg': 'Assingment required'
         }
         
     if not form:
@@ -1300,13 +1307,6 @@ def saveApplicantWebForms(request):
             'msg': 'Job does not exist'
         }
 
-    webform = Webform(id=webform_id)
-    if not webform:
-        return {
-            'code': 400,
-            'msg': 'Webform does not exist'
-        }
-
     candidate = Candidate(id=candidate_id)
     if not candidate:
         return {
@@ -1319,6 +1319,7 @@ def saveApplicantWebForms(request):
         instance.job = job
         instance.candidate = candidate
         instance.webform = webform
+        instance.assingment = assingment
         instance.form = form
         instance.save()
     
