@@ -222,8 +222,8 @@ class ApplicantWebForm(models.Model):
     id = models.AutoField(primary_key=True)
     job = models.ForeignKey(Job, verbose_name='Job', on_delete=models.CASCADE)
     candidate = models.ForeignKey(Candidate, verbose_name='Candidate', on_delete=models.CASCADE)
-    webform = ArrayField(models.CharField(max_length=100), blank=True, null=True)
-    assingment = ArrayField(models.CharField(max_length=100), blank=True, null=True)
+    webform = ArrayField(models.CharField(max_length=1000), blank=True, null=True)
+    assingment = ArrayField(models.CharField(max_length=1000), blank=True, null=True)
 
     form = JSONField(null=True, default=None)
 

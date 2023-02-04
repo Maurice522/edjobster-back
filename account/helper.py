@@ -251,11 +251,11 @@ def signInAccount(request):
             'msg': 'Your account is not active. Please contact support for more details'
         }
 
-    if not account.approved:
-        return {
-            'code': 400,
-            'msg': 'Your account is not approved by admin. You can come back later to check or you can reach out to the admin to approve and activate your account'
-        }        
+    # if not account.approved:
+    #     return {
+    #         'code': 400,
+    #         'msg': 'Your account is not approved by admin. You can come back later to check or you can reach out to the admin to approve and activate your account'
+    #     }        
 
     # if not account.check_password(password):
     #     return {

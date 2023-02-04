@@ -1211,9 +1211,14 @@ def createCandidatewithoutResumeParser(request):
     # Saveddd siuuuuuuuu
     candidate.save()
 
+    candidate_id = Candidate.objects.filter().last()
+
+    serializer = CandidateDetailsSerializer(candidate_id)
+
     return {
         'code': 200, 
-        'data': "Candidate Created Successfully!!"
+        'data': "Candidate Created Successfully!!",
+        'id': serializer.data
     }
 
 def updatePipelineStatus(request):
@@ -1260,7 +1265,7 @@ def saveApplicantWebForms(request):
     data = request.data    
     job_id = data.get('job', None)   
     candidate_id = data.get('candidate', None)   
-    webform = data.get('webform', None)   
+    # webform = data.get('webform', None)   
     assingment = data.get('assingment', None)
     form = data.get('form', None)   
 
@@ -1277,7 +1282,7 @@ def saveApplicantWebForms(request):
             'msg': 'Job required'
         }
 
-    if not webform and not assingment:
+    if  not assingment:
         return {
             'code': 400,
             'msg': 'Invalid request'
@@ -1288,8 +1293,8 @@ def saveApplicantWebForms(request):
             'code': 400,
             'msg': 'Invalid request'
         }
-
-    form = json.loads(form)
+    temp_form= json.dumps(form)
+    form = json.loads(temp_form)
     job = Job(id=job_id)
     if not job:
         return {
@@ -1308,10 +1313,11 @@ def saveApplicantWebForms(request):
     instance = ApplicantWebForm()
     instance.job = job
     instance.candidate = candidate
-    if webform:
-        instance.webform = json.loads(webform)
+    # if form:
+    #     instance.form = json.loads(form)
     if assingment:
-        instance.assingment = json.loads(assingment)
+        temp_assignment= json.dumps(assingment)
+        instance.assingment = json.loads(temp_assignment)
     instance.form = form
     instance.save()
     
