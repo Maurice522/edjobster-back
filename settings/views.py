@@ -4,6 +4,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from .import helper
+from .models import EmailTemplate
+from .serializer import EmailTemplateSerializer
 from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -233,6 +235,18 @@ class EmailTemplateApi(APIView):
     def delete(self, request):
         data = helper.deleteEmailTemmplate(request)
         return makeResponse(data)           
+
+class EmailTemplateDetailApi(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = EmailTemplate.objects.all()
+    serializer_class = EmailTemplateSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
 
 class WebformApi(APIView):
 
