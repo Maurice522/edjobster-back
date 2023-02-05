@@ -208,7 +208,7 @@ class Note(models.Model):
 
 class ResumeFiles(models.Model):
     id = models.AutoField(primary_key=True)
-    resume = models.FileField(upload_to='media/temp/', default=None, null=True, blank=True)  
+    resume = models.FileField(upload_to='media/resume/', default=None, null=True, blank=True)  
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
