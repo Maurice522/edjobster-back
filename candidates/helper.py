@@ -45,7 +45,7 @@ def applyJob(request):
 
     # Making phone compulsary
     mobile = data.get('mobile', None)
-    if email is None or len(str(email).strip())==0:
+    if mobile is None or len(mobile)!=10:
         return getErrorResponse("Please provide candidate Mobile No.")
 
     if Candidate.objects.filter(mobile = mobile).exists():
