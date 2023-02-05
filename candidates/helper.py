@@ -1036,13 +1036,13 @@ def parseResume(request, candidate=None):
 
 def createCandidatewithoutResumeParser(request):
 
-    account = request.user
-    # account = request.data.get('company')
+    # account = request.user
+    account = request.data.get('company')
     # account = Company.getById(account)
 
     # Paranoid validation :p
-    company = Company.getById(account.company_id)
-    # company = Company.getById(account)
+    # company = Company.getById(account.company_id)
+    company = Company.getById(account)
     if not company:
         return {
             'code': 400,
@@ -1149,13 +1149,17 @@ def createCandidatewithoutResumeParser(request):
     exp_months = data.get('exp_months', None)
     admission_date = data.get('admission_date', None)
     graduation_date = data.get('graduation_date', None)
-    
+    resume = data.get('resume', None)    
+
 
 
     # FINALLY, The moment where we create our candidate
     candidate = Candidate()
     candidate.job = job
     candidate.first_name = first_name
+
+    if resume:
+        candidate.resume = resume
 
     if middle_name:
         candidate.middle_name = middle_name
