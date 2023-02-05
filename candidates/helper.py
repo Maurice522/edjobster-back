@@ -42,8 +42,23 @@ def applyJob(request):
     last_name = data.get('last_name', None)
     job_id = data.get('job_id', None)
     phone = data.get('phone', None)
+
+    # Making phone compulsary
     mobile = data.get('mobile', None)
+    if email is None or len(str(email).strip())==0:
+        return getErrorResponse("Please provide candidate Mobile No.")
+
+    if Candidate.objects.filter(mobile = mobile).exists():
+        return getErrorResponse("Canidate with this Mobile No. is already registered")
+
+    # removing duplicate entries
     email = data.get('email', None)
+    if email is None or len(str(email).strip())==0:
+        return getErrorResponse("Please provide candidate email")
+
+    if Candidate.objects.filter(email=email).exists() or Candidate.objects.filter(email_alt=email).exists():
+        return getErrorResponse("Canidate with this email is already registered")
+    
     email_alt = data.get('email_alt', None)
     marital_status = data.get('marital_status', None)
     date_of_birth = data.get('date_of_birth', None)
