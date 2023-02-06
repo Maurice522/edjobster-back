@@ -13,6 +13,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from settings.models import Webform
 from .models import Job, Assesment
 from .serializer import AssesmentSerializer
+from candidates.models import Candidate
+from candidates.serializer import CandidateDetailsSerializer
 
 class AssesmentCategoryApi(APIView):
 
@@ -100,6 +102,29 @@ class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
         data['department'] = serializer.get_department(job)
         data['members'] = serializer.get_members(job)
         return Response(data)
+    
+class JobsCandidates(mixins.RetrieveModelMixin, generics.GenericAPIView):    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Job.objects.all()
+    serializer_class = JobsSerializer
+
+    def get_candidate(self, job):
+        if job:
+            candidate = Candidate.objects.filter(job=job.id)
+            return candidate
+        return None
+    
+    def get(self, request, *args, **kwargs):
+        job = self.get_object()
+        candidates = self.get_candidate(job)
+       
+        candidate_data=[] 
+        for candidate in candidates:
+            data = CandidateDetailsSerializer(candidate).data
+            candidate_data.append(data)
+        return Response(candidate_data)
 
 class JobApi(APIView):
 
