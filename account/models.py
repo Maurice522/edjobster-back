@@ -27,7 +27,6 @@ class Account(AbstractUser):
     photo = models.ImageField(
         upload_to='media/users/photos', default=None, null=True, blank=True)
     verified = models.BooleanField(default=True)
-    approved = models.BooleanField(default=False)
     company_id = models.UUIDField(default=None, null=True, blank=True)
     designation = models.IntegerField(default=None, null=True, blank=True)
     department = models.IntegerField(default=None, null=True, blank=True)
@@ -41,7 +40,7 @@ class Account(AbstractUser):
         super(Account, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.account_id)
+        return str(self.first_name)+ " " + str(self.last_name)
 
     class Meta:
         verbose_name = 'Account'

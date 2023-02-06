@@ -14,10 +14,10 @@ from common.utils import isValidUuid, getErrorResponse
 from common.models import Country, State, City
 import json
 
-from settings.models import Degree, Department, Pipeline, Webform
+from settings.models import Degree, Department, Location, Pipeline, Webform
 from candidates.models import Candidate
-from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job
-from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer
+from .models import AssesmentCategory, Assesment, AssesmentQuestion, Job, JobNotes
+from .serializer import AssesmentSerializer, AssesmentCategorySerializer, AssesmentQuestionListSerializer, AssesmentQuestionDetailsSerializer, JobListSerializer, JobDetailsSerializer, JobNotesSerializer
 from account.serializer import CompanySerializer
 from django.core.paginator import Paginator
 
@@ -38,7 +38,9 @@ def getAssesmentCategories(request):
 def saveAssesmentCategory(request):
 
     company = Company.getByUser(request.user)    
-    
+    # company = data.get('company', company)   
+    # company = Company.getById(company)    
+      
     data = request.data    
     name = data.get('name', None)   
 
@@ -99,11 +101,14 @@ def getAssesments(request):
 
 def saveAssesment(request):
 
-    company = Company.getByUser(request.user)    
-    
     data = request.data    
+    company = data.get('company', None)   
+    company = Company.getById(company)
+    # company = Company.getByUser(request.user)    
+    
     name = data.get('name', None)   
     cat_id = data.get('category', None)   
+    form = data.get('form', None)   
 
     if not name or not cat_id:
         return {
@@ -111,6 +116,12 @@ def saveAssesment(request):
             'msg': 'Invalid request'
         }
     print(cat_id, company)
+
+    if not form:
+        return {
+            'code': 400,
+            'msg': 'Empty Form'
+        }
 
     category = AssesmentCategory.getById(cat_id, company)
     if not category:
@@ -134,6 +145,8 @@ def saveAssesment(request):
 
     assesment.name = name
     assesment.category = category
+    print(form)
+    assesment.form = form
     assesment.save()
 
     return getAssesments(request)
@@ -334,18 +347,17 @@ def getJobDetails(request):
     print(request.user)
     
     id = request.GET.get('id', None)
-
     if not id:
         return getErrorResponse('Invalid request')
+ 
+    job = Job.getById(id)
 
-    job = Job.getByIdAndCompany((id), company)
-    #job = Job.getById(id)
     if not job:
         return getErrorResponse('Job not found')
 
     serializer = JobDetailsSerializer(job, many=False)
     data = serializer.data
-
+    
     return {
         'code': 200,
         'data': data
@@ -354,7 +366,9 @@ def getJobDetails(request):
 def saveJob(request):
 
     company = Company.getByUser(request.user)    
-    
+    # company = request.data.get('company')
+    # company = Company.getById(company)
+
     data = request.data    
 
     id = data.get('id', None)
@@ -388,8 +402,7 @@ def saveJob(request):
     salary_max = data.get('salary_max', None)   
     salary_type = data.get('salary_type', None)   
     currency = data.get('currency', None)   
-    city = data.get('city', None)   
-    state_id = data.get('state', None)   
+    location = data.get('address', None) 
     job_board_ids = data.get('job_boards', None)   
     pipeline_id = data.get('pipeline', None)   
     active = data.get('active', None)
@@ -438,8 +451,8 @@ def saveJob(request):
     if not nature or not nature in Job.NATURES:
         return getErrorResponse('invalid job nature')
 
-    if not education or not isinstance(education, list):
-        return getErrorResponse('Invalid education list')
+    if not education :
+        return getErrorResponse('Invalid education')
     
     if not speciality:
         return getErrorResponse('Speciality required')
@@ -465,16 +478,13 @@ def saveJob(request):
     if not currency:
         return getErrorResponse('Currency required')
 
-    if not city:
-        return getErrorResponse('City required')    
+    if not location:
+        return getErrorResponse('Location required')    
 
-    if not state_id:
-        return getErrorResponse('State required')
-
-    state = State.getById(state_id)
-    if not state:
-        return getErrorResponse('State not found')     
-
+    location = Location.getById(location,company)
+    if not location:
+        return getErrorResponse('Location not found')
+ 
     #ADD JOB BOARDS ONCE READY
     if not pipeline_id:
         return getErrorResponse('Pipeline required')
@@ -509,9 +519,8 @@ def saveJob(request):
     job.salary_max = salary_max
     job.salary_type = salary_type
     job.currency = currency
-    job.city = city
-    job.state = state
-    job.country = state.country
+    # Removed state and city
+    job.location = location
     job.created_by = request.user
     job.pipeline = pipeline.id
     job.active = active
@@ -602,3 +611,90 @@ def getJobCandidateList(request):
         'code': 200,
         'data': results
     }
+
+def getAllNotes(request):
+    job_id = request.GET.get('job')
+    if not job_id:
+        return getErrorResponse('Invalid request')
+
+    # company = Company.getByUser(request.user)
+    company = request.GET.get('company')
+    company = Company.getById(company)
+
+    job = Job.getByIdAndCompany(job_id, company)
+    if not job:
+        return getErrorResponse('Job not found')
+
+    notes = JobNotes.getForJob(job)
+    serializer = JobNotesSerializer(notes, many=True)  
+
+    return {
+        'code': 200,
+        'notes': serializer.data 
+    }
+
+def getNotesForJob(job):
+    notes = JobNotes.getForJob(job)
+    serializer = JobNotesSerializer(notes, many=True)  
+    return serializer.data  
+
+def saveNote(request):
+
+    data = request.data
+
+    job_id = data.get('job')
+    if not job_id:
+        return getErrorResponse('Invalid request')
+
+    company = Company.getByUser(request.user)
+    # company = data.get('company')
+    # company = Company.getByUser(request.user)
+
+    job= Job.getByIdAndCompany(job_id, company)
+
+    if not job:
+        return getErrorResponse('Job not found')    
+     
+    text = data.get('note', None)        
+    if not text:
+        return getErrorResponse('Note text required')    
+
+    id = data.get('id', None)
+    if id:
+        note = JobNotes.getById(id, job)
+        if not note:
+            return getErrorResponse('Note not found')
+    else:
+        note = JobNotes()
+
+    note.added_by = request.user
+    note.note = text
+    note.job = job
+    note.save()
+
+    return {
+        'code': 200,
+        'msg': 'Note added successfully',
+        'notes': getNotesForJob(job)
+    }
+
+def deleteNote(request):
+    note_id = request.GET.get('id')
+    if not note_id:
+        return getErrorResponse('Invalid request')
+
+    company = Company.getByUser(request.user)
+
+    note = JobNotes.getByIdAndCompany(note_id, company)
+
+    if note:
+        job = note.job
+        note.delete()
+
+        return {
+            'code': 200,
+            'msg': 'Note deleted successfully',
+            'notes': getNotesForJob(job)
+        }
+    
+    return getErrorResponse('Note not found')

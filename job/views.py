@@ -11,7 +11,8 @@ from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from settings.models import Webform
-from .models import Job
+from .models import Job, Assesment
+from .serializer import AssesmentSerializer
 
 class AssesmentCategoryApi(APIView):
 
@@ -31,6 +32,16 @@ class AssesmentCategoryApi(APIView):
         data = helper.deleteAssesmentCategory(request)
         return makeResponse(data)    
 
+
+class AssismentDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Assesment.objects.all()
+    serializer_class = AssesmentSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
 class AssesmentQuestionApi(APIView):
 
@@ -74,8 +85,10 @@ class JobsList(mixins.ListModelMixin,
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-class JobsDetail(mixins.RetrieveModelMixin,
-                    generics.GenericAPIView):
+class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
     queryset = Job.objects.all()
     serializer_class = JobsSerializer
 
@@ -155,3 +168,21 @@ class JobCandidateList(APIView):
     def get(self, request):
         data = helper.getJobCandidateList(request) 
         return makeResponse(data)  
+
+
+class JobNotesApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getAllNotes(request)
+        return makeResponse(data)
+
+    def post(self, request):
+        data = helper.saveNote(request)
+        return makeResponse(data)
+
+    def delete(self, request):
+        data = helper.deleteNote(request)
+        return makeResponse(data)

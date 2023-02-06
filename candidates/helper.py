@@ -1,6 +1,7 @@
 from collections import namedtuple
 import email
 from math import degrees
+import base64
 import re
 from unicodedata import category
 from venv import create
@@ -16,7 +17,7 @@ from common.utils import isValidUuid, getErrorResponse, getDomainFromEmail
 from common.models import Country, NoteType, State, City
 import json
 from settings.models import Degree, Department, Pipeline, Webform
-from .models import Candidate, CandidateExperience, CandidateQualification, Note, ResumeFiles
+from .models import Candidate, CandidateExperience, CandidateQualification, Note, ResumeFiles, ApplicantWebForm
 from .serializer import CandidateExperienceSerializer, CandidateListSerializer, CandidateDetailsSerializer, CandidateQualificationSerializer, NoteSerializer
 from common.encoder import decode
 from django.utils.dateparse import parse_date
@@ -41,8 +42,23 @@ def applyJob(request):
     last_name = data.get('last_name', None)
     job_id = data.get('job_id', None)
     phone = data.get('phone', None)
+
+    # Making phone compulsary
     mobile = data.get('mobile', None)
+    if mobile is None or len(mobile)!=10:
+        return getErrorResponse("Please provide candidate Mobile No.")
+
+    if Candidate.objects.filter(mobile = mobile).exists():
+        return getErrorResponse("Canidate with this Mobile No. is already registered")
+
+    # removing duplicate entries
     email = data.get('email', None)
+    if email is None or len(str(email).strip())==0:
+        return getErrorResponse("Please provide candidate email")
+
+    if Candidate.objects.filter(email=email).exists() or Candidate.objects.filter(email_alt=email).exists():
+        return getErrorResponse("Canidate with this email is already registered")
+    
     email_alt = data.get('email_alt', None)
     marital_status = data.get('marital_status', None)
     date_of_birth = data.get('date_of_birth', None)
@@ -130,6 +146,63 @@ def applyJob(request):
         if 'resume' in request.FILES:
             resume = request.FILES['resume']
             candidate.resume = resume
+            url = ''
+            filename = ''
+            if candidate == None:
+                resume = ResumeFiles()
+                resume.resume = resume
+                resume.save()
+                # For production
+                # url = settings.RESUME_FILE_URL+resume.resume.name[11:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(resume.resume.name)
+                filename = resume.resume.name
+
+            else:
+                # For production
+                # url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(candidate.resume.name)
+                filename = candidate.resume.name
+
+                
+            # For production
+            # parse = {
+            #     "url": url,
+            #     "userkey": settings.RESUME_PARSE_KEY,
+            #     "version": settings.RESUME_PARSE_VERSION,
+            #     "subuserid": settings.RESUME_PARSE_USER,
+            # }
+
+            with open(url, "rb") as pdf_file:
+                encoded_resume = base64.b64encode(pdf_file.read())
+
+            encoded_resume = str(encoded_resume)
+            encoded_resume = encoded_resume[2:len(encoded_resume)-1]
+
+            # For development
+            parse = {
+                "filename": str(filename),
+                "filedata": str(encoded_resume),
+                "userkey": settings.RESUME_PARSE_KEY,
+                "version": settings.RESUME_PARSE_VERSION,
+                "subuserid": settings.RESUME_PARSE_USER,
+            }
+
+            response = requests.post(settings.RESUME_PARSE_BINARY_URL, data=json.dumps(parse))
+
+            if response.status_code == 200:
+                res = response.json()
+                if 'error' in res:
+                    error = res.get('error')
+                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+
+                candidate.resume_parse_data = res
+                
+            else:
+                return getErrorResponse('Failed to parse resume')
 
     candidate.first_name = first_name
     candidate.last_name = last_name
@@ -214,7 +287,7 @@ def deleteApplication(request):
 
     company = Company.getByUser(request.user)
 
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if candidate:
         candidate.delete()
@@ -228,12 +301,11 @@ def deleteApplication(request):
 
 def candidateDetails(request):
     candidate_id = request.GET.get('id')
+
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
-
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getById(candidate_id)
 
     if not candidate:
         return getErrorResponse('Candidate not found')
@@ -252,21 +324,21 @@ def updateApplication(request):
 
     candidate_id = data.get('id', None)
     first_name = data.get('first_name', None)
-    middle_name = data.get('first_name', None)
-    last_name = data.get('first_name', None)
+    middle_name = data.get('middle_name', None)
+    last_name = data.get('last_name', None)
     job_id = data.get('job_id', None)
-    phone = data.get('first_name', None)
-    mobile = data.get('first_name', None)
-    email = data.get('first_name', None)
-    email_alt = data.get('first_name', None)
-    marital_status = data.get('first_name', None)
-    date_of_birth = data.get('first_name', None)
-    last_applied = data.get('first_name', None)
+    phone = data.get('phone', None)
+    mobile = data.get('mobile', None)
+    email = data.get('email', None)
+    email_alt = data.get('email_alt', None)
+    marital_status = data.get('marital_status', None)
+    date_of_birth = data.get('date_of_birth', None)
+    last_applied = data.get('last_applied', None)
 
-    street = data.get('first_name', None)
-    pincode = data.get('first_name', None)
+    street = data.get('street', None)
+    pincode = data.get('pincode', None)
     city = data.get('city', None)
-    state_id = data.get('first_name', None)
+    state_id = data.get('state_id', None)
 
     exp_years = data.get('exp_years', None)
     exp_months = data.get('exp_months', 0)
@@ -281,8 +353,12 @@ def updateApplication(request):
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
+
+    # company = request.data.get('company')
+    # company = Company.getById(company)
+
     company = Company.getByUser(request.user)
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
         return getErrorResponse('candidate not found')
@@ -290,7 +366,7 @@ def updateApplication(request):
     if not job_id:
         return getErrorResponse('Job id required')
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return getErrorResponse('Invalid Job')
 
@@ -307,7 +383,8 @@ def updateApplication(request):
     if not pincode:
         return getErrorResponse('pincode required')  
      
-    if int(pincode) != pincode and len(str(pincode)) != 6:
+    if len(pincode) != 6:
+        print(pincode, len(pincode))
         return getErrorResponse('invalid pincode')   
     if not city:
         return getErrorResponse('city required')          
@@ -332,17 +409,73 @@ def updateApplication(request):
         candidate = Candidate.getByEmail(job=job, email=email)
         if candidate:
             return getErrorResponse("Email already exists for other candidate")
-    if candidate.mobile != mobile:
-        candidate = Candidate.getByPhone(job=job, mobile=mobile)
-        if candidate:
-            return getErrorResponse("Mobile already exists for other candidate")
+    if Candidate.getByPhone(job=job, mobile=mobile):
+        return getErrorResponse("Mobile already exists for other candidate")
 
     if request.FILES != None:
         print("files")
         print(request.FILES)
         if 'resume' in request.FILES:
             resume = request.FILES['resume']
-            candidate.resume = resume    
+            candidate.resume = resume
+            url = ''
+            filename = ''
+            if candidate == None:
+                resume = ResumeFiles()
+                resume.resume = resume
+                resume.save()
+                # For production
+                # url = settings.RESUME_FILE_URL+resume.resume.name[11:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(resume.resume.name)
+                filename = resume.resume.name
+
+            else:
+                # For production
+                # url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(candidate.resume.name)
+                filename = candidate.resume.name
+
+                
+            # For production
+            # parse = {
+            #     "url": url,
+            #     "userkey": settings.RESUME_PARSE_KEY,
+            #     "version": settings.RESUME_PARSE_VERSION,
+            #     "subuserid": settings.RESUME_PARSE_USER,
+            # }
+
+            with open(url, "rb") as pdf_file:
+                encoded_resume = base64.b64encode(pdf_file.read())
+
+            encoded_resume = str(encoded_resume)
+            encoded_resume = encoded_resume[2:len(encoded_resume)-1]
+
+            # For development
+            parse = {
+                "filename": str(filename),
+                "filedata": str(encoded_resume),
+                "userkey": settings.RESUME_PARSE_KEY,
+                "version": settings.RESUME_PARSE_VERSION,
+                "subuserid": settings.RESUME_PARSE_USER,
+            }
+
+            response = requests.post(settings.RESUME_PARSE_BINARY_URL, data=json.dumps(parse))
+
+            if response.status_code == 200:
+                res = response.json()
+                if 'error' in res:
+                    error = res.get('error')
+                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+
+                candidate.resume_parse_data = res
+                
+            else:
+                return getErrorResponse('Failed to parse resume')
+
 
     candidate.first_name = first_name            
     candidate.last_name = last_name            
@@ -370,7 +503,7 @@ def updateApplication(request):
     candidate.fun_area = fun_area            
     candidate.subjects = subjects            
     candidate.skills = skills
-
+    print(candidate, 'candidate here')
     candidate.save()
 
     return {
@@ -388,7 +521,7 @@ def updateResume(request):
         return getErrorResponse('Invalid request')
 
     company = Company.getByUser(request.user)
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
     
     if not candidate:
         return getErrorResponse('candidate not found')
@@ -427,7 +560,7 @@ def parseResume(request, candidate=None):
                 resume = ResumeFiles()
                 resume.resume = file
                 resume.save()
-                url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[11:]
+                url = settings.RESUME_FILE_URL+resume.resume.name[11:]
             else:
                 url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
 
@@ -455,12 +588,15 @@ def parseResume(request, candidate=None):
 
 def getAllNotes(request):
     candidate_id = request.GET.get('candidate')
+ 
+    company = Company.getByUser(request.user)
+    # company = request.GET.get('company')
+    # company = Company.getById(company)
+    
     if not candidate_id:
         return getErrorResponse('Invalid request')
 
-    company = Company.getByUser(request.user)
-
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if not candidate:
         return getErrorResponse('Candidate not found')
@@ -472,8 +608,8 @@ def getAllNotes(request):
 
 def getNotesForCandidate(candidate):
     notes = Note.getForCandidate(candidate)
-    serializer = NoteSerializer(notes, many=True)  
-    return serializer.data  
+    serializer = NoteSerializer(notes, many=True)
+    return serializer.data
 
 def saveNote(request):
 
@@ -484,20 +620,13 @@ def saveNote(request):
         return getErrorResponse('Invalid request')
 
     company = Company.getByUser(request.user)
+    # company = data.get('company', None)
+    # company = Company.getById(company)
 
-    candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)
+    candidate = Candidate.getByIdAndCompany(candidate_id, company)
 
     if not candidate:
         return getErrorResponse('Candidate not found')    
-
-    type_id = data.get('type', None)
-    if not type_id:
-        return getErrorResponse('Note type required')
-
-    type = NoteType.getById(type_id)
-
-    if not type:
-        return getErrorResponse('Invalid note type')        
 
     text = data.get('note', None)        
     if not text:
@@ -511,8 +640,6 @@ def saveNote(request):
     else:
         note = Note()
 
-    note.type = type
-    note.added_by = request.user
     note.note = text
     note.candidate = candidate
     note.save()
@@ -525,6 +652,7 @@ def saveNote(request):
 
 def deleteNote(request):
     note_id = request.GET.get('id')
+    
     if not note_id:
         return getErrorResponse('Invalid request')
 
@@ -561,7 +689,7 @@ def applyWebformJob(request):
         return getErrorResponse('Job id required!')
 
 
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return getErrorResponse('Invalid Job')
 
@@ -701,7 +829,11 @@ def applyWebformJob(request):
 
 def getCandidates(request):
 
+    # company = request.data.get('company')
+    # company = Company.getById(company)
     company = Company.getByUser(request.user)
+    print(company)
+    
     if not company:
         return getErrorResponse('Company required')
 
@@ -1035,10 +1167,13 @@ def parseResume(request, candidate=None):
 
 def createCandidatewithoutResumeParser(request):
 
-    account = request.user
+    # account = request.user
+    account = request.data.get('company')
+    # account = Company.getById(account)
 
     # Paranoid validation :p
-    company = Company.getById(account.company_id)
+    # company = Company.getById(account.company_id)
+    company = Company.getById(account)
     if not company:
         return {
             'code': 400,
@@ -1046,6 +1181,7 @@ def createCandidatewithoutResumeParser(request):
         }
 
     data = request.data
+    print(data)
 
     # Validating the job id 
     job_id = data.get('job_id')
@@ -1053,7 +1189,7 @@ def createCandidatewithoutResumeParser(request):
     if not job_id: 
         return getErrorResponse('Bad request')
     
-    job = Job.getById(decode(job_id))
+    job = Job.getById(job_id)
     if not job:
         return {
             'code': 400,
@@ -1142,12 +1278,19 @@ def createCandidatewithoutResumeParser(request):
     # These are optional fields
     exp_years = data.get('exp_years', None)
     exp_months = data.get('exp_months', None)
+    admission_date = data.get('admission_date', None)
+    graduation_date = data.get('graduation_date', None)
+    resume = data.get('resume', None)    
+
 
 
     # FINALLY, The moment where we create our candidate
     candidate = Candidate()
     candidate.job = job
     candidate.first_name = first_name
+
+    if resume:
+        candidate.resume = resume
 
     if middle_name:
         candidate.middle_name = middle_name
@@ -1173,19 +1316,153 @@ def createCandidatewithoutResumeParser(request):
     candidate.pincode = pincode
     candidate.street = street
     candidate.city = city
-    candidate.state = state
-    candidate.country = country
+    if not state:
+        return {
+            'code': 400,
+            'msg': 'State required'
+        }
+    else:
+        candidate.state = State.getById(state)
+    if not country:
+        return {
+            'code': 400,
+            'msg': 'Country required'
+        }
+    else:
+        candidate.country = Country.getById(country)
 
     if exp_months:
         candidate.exp_months = exp_months
     
     if exp_years:
         candidate.exp_years = exp_years
+    
+    if admission_date: 
+        candidate.admission_date = admission_date
+
+    if graduation_date:
+        candidate.graduation_date = graduation_date
 
     # Saveddd siuuuuuuuu
     candidate.save()
 
+    candidate_id = Candidate.objects.filter().last()
+
+    serializer = CandidateDetailsSerializer(candidate_id)
+
     return {
         'code': 200, 
-        'data': "Candidate Created Successfully!!"
+        'data': "Candidate Created Successfully!!",
+        'id': serializer.data
+    }
+
+def updatePipelineStatus(request):
+    account = request.user
+
+    # Paranoid validation :p
+    company = Company.getById(account.company_id)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Company not found!'
+        }
+    
+    data = request.data
+
+    # Validating the candidate id 
+    candidate_id = data.get('id')
+
+    if not candidate_id: 
+        return getErrorResponse('Bad request')
+
+    candidate = Candidate.getByIdAndCompany(id=candidate_id, company=company)
+    if not candidate:
+        return {
+            'code': 400,
+            'data': 'Candidate not found!'
+        }
+    
+    # Provide valid options from front end
+    candidate.pipeline_stage_status = data.get('pipeline-stage-status')
+    # Need validation
+    # 1. Selected pipeline stage status already exists and same with pipeline stage
+    candidate.pipeline_stage = data.get('pipeline-stage')
+    candidate.save()
+
+    return {
+        'code': 200, 
+        'data': "Candidate Pipeline Updated Successfully!!"
+    }
+
+from settings.models import Webform
+def saveApplicantWebForms(request):
+    
+    data = request.data    
+    job_id = data.get('job', None)   
+    candidate_id = data.get('candidate', None)   
+    # webform = data.get('webform', None)   
+    assingment = data.get('assingment', None)
+    form = data.get('form', None)   
+
+    print('info', data)
+    if not candidate_id:
+        return {
+            'code': 400,
+            'msg': 'Candidate required'
+        }
+
+    if not job_id:
+        return {
+            'code': 400,
+            'msg': 'Job required'
+        }
+
+    if  not assingment:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }        
+
+    if not form:
+        return {
+            'code': 400,
+            'msg': 'Invalid request'
+        }
+    temp_form= json.dumps(form)
+    form = json.loads(temp_form)
+    job = Job(id=job_id)
+    if not job:
+        return {
+            'code': 400,
+            'msg': 'Job does not exist'
+        }
+
+    candidate = Candidate(id=candidate_id)
+    if not candidate:
+        return {
+            'code': 400,
+            'msg': 'Webform does not exist'
+        }
+    
+    # try:
+    instance = ApplicantWebForm()
+    instance.job = job
+    instance.candidate = candidate
+    # if form:
+    #     instance.form = json.loads(form)
+    if assingment:
+        temp_assignment= json.dumps(assingment)
+        instance.assingment = json.loads(temp_assignment)
+    instance.form = form
+    instance.save()
+    
+    # except:
+    #     return {
+    #         'code': 200,
+    #         'msg': 'Something went wrong :(',
+    #     }
+
+    return {
+        'code': 200,
+        'msg': 'Applicant webform created successfully',
     }

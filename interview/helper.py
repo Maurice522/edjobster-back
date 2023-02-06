@@ -34,13 +34,14 @@ def scheduleInterview(request):
         return getErrorResponse('Job id required')
 
     job = Job.getById(job_id)
+    
     if not job:
         return getErrorResponse('Invalid Job')
 
     if not candidate_id:
         return getErrorResponse('Candidate required')
     
-    candidate = Candidate.getById(decode(candidate_id), job)
+    candidate = Candidate.getById(candidate_id)
     if not candidate:
         return getErrorResponse('Candidate not found')
 
@@ -61,11 +62,14 @@ def scheduleInterview(request):
 
     location = None
     company = Company.getByUser(request.user)
+    # company = request.data.get('company')
+    # company = Company.getById(company)
 
     if type == Interview.IN_PERSON: 
         if not location_id:
             return getErrorResponse('Interview location is required for In person interview')
         location = Location.getById(location_id, company)
+        print(location, 'location here')
         if not location:
             return getErrorResponse('Location not found')
 
@@ -133,18 +137,21 @@ def scheduleInterview(request):
 def getInterviews(request):
 
     company = Company.getByUser(request.user)
+    # company = request.GET.get('company')
+    # company = Company.getByUser(company)
+
     job_id = request.GET.get('job_id')
     candidate_id = request.GET.get('candidate_id')
 
     interviews = []
 
     if job_id:
-        job = Job.getByIdAndCompany(decode(job_id), company)
+        job = Job.getByIdAndCompany(job_id, company)
         if not job:
             return getErrorResponse('Job not found')
         interviews = Interview.getByJob(job)
     elif candidate_id:
-        candidate = Candidate.getByIdAndCompany(decode(candidate_id), company)     
+        candidate = Candidate.getByIdAndCompany(candidate_id, company)     
         if not candidate:
             return getErrorResponse('Candidate not found')   
         interviews = Interview.getByCandidate(candidate)            

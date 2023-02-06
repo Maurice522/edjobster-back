@@ -2,7 +2,7 @@ from account.serializer import AccountSerializer
 from rest_framework import serializers
 from settings.models import Webform
 from settings.serializer import WebformListSerializer
-from .models import Candidate, CandidateExperience, CandidateQualification, Note
+from .models import Candidate, CandidateExperience, CandidateQualification, Note, ApplicantWebForm
 from common.encoder import encode
 from common.serializer import NoteTypeSerializer
 from django.conf import settings
@@ -27,10 +27,10 @@ class CandidateListSerializer(serializers.ModelSerializer):
                   'job_id', 'job_title', 'webform_id']
 
     def get_job_id(self, obj):
-        return encode(obj.job.id)
+        return obj.job.id
     
     def get_id(self, obj):
-        return encode(obj.id)
+        return obj.id
     
     def get_state(self, obj):
         if obj.state:
@@ -83,12 +83,9 @@ class CandidateDetailsSerializer(serializers.ModelSerializer):
 
 class NoteSerializer(serializers.ModelSerializer):
 
-    type = serializers.SerializerMethodField()
-    added_by = serializers.SerializerMethodField()
-
     class Meta:
         model = Note
-        fields = ['id', 'type', 'added_by', 'note', 'created', 'updated']
+        fields = ['id','candidate', 'note', 'created', 'updated']
 
     def get_type(self, obj):
         if obj.type:
@@ -112,3 +109,15 @@ class CandidateQualificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CandidateQualification
         fields = '__all__'
+        
+class ApplicantWebFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApplicantWebForm
+        fields = [
+            'id',
+            'job',
+            'webform',
+            'assingment',
+            'form',      
+        ]
+        depth=1

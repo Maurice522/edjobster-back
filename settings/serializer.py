@@ -29,33 +29,45 @@ class DesignationSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-
 class DegreeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Degree
         fields = ['id', 'name']
 
+class PipelineStageSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = PipelineStage
+        fields = "__all__"
 
+    def get_pipeline(self, obj):
+        if obj.pipeline:
+            return PipelineSerializer(obj.pipeline).data
+        return None 
 
 class PipelineSerializer(serializers.ModelSerializer):
-
+    stages = PipelineStageSerializer(many=True, read_only=True)
     class Meta:
         model = Pipeline
-        fields = ['id', 'name', 'fields', 'created' , 'updated']
+        fields = ['id', 'name', 'company','stages']
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        stages = []
+        for i in range(1, 8):
+            stages.append(PipelineStageSerializer(getattr(instance, f"stage{i}")).data)
+        representation['stages'] = stages
+        return representation
 
 class PipelineStagListSerializer(serializers.ModelSerializer):
-
+    pipeline = serializers.SerializerMethodField()
     class Meta:
         model = PipelineStage
-        fields = ['id', 'name']
-
-class PipelineStageSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = PipelineStage
-        fields = ['id', 'name', 'status']
+        fields = ['id', 'name', 'pipeline', 'status']
+    def get_pipeline(self, obj):
+        if obj.pipeline:
+            return PipelineSerializer(obj.pipeline).data
+        return None 
 
 class EmailFieldSerializer(serializers.ModelSerializer):
 

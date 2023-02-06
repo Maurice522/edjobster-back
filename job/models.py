@@ -1,9 +1,10 @@
 from django.db import models
 from account.models import Account, Company
 from django.contrib.postgres.fields import ArrayField
-from common.models import Country, State, City
+from common.models import Country, NoteType, State, City
 from common.utils import generateFileName
-from settings.models import Department, Pipeline, Webform
+from settings.models import Department, Pipeline, Webform, Location
+from django.contrib.postgres.fields import JSONField
 
 class AssesmentCategory(models.Model):
     id = models.AutoField(primary_key=True)
@@ -43,6 +44,7 @@ class Assesment(models.Model):
     company = models.ForeignKey(Company, default=None, null=False, verbose_name='Company', on_delete=models.CASCADE)
     category = models.ForeignKey(AssesmentCategory, default=None, null=False, verbose_name='Category', on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True, blank=True)
+    form = JSONField(null=True, default=None)
     created_by =  models.ForeignKey(Account, default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -162,10 +164,10 @@ class Job(models.Model):
     ]
 
 
-    HIGH_SCHOOL='School'
-    JUNIOR_COLLEGE = 'JuniorCollege'
-    BACHELORS = 'Bachelors'
-    MASTERS = 'Masters'
+    HIGH_SCHOOL= 1
+    JUNIOR_COLLEGE = 2
+    BACHELORS = 3
+    MASTERS = 4
 
     EDUCATIONS = [HIGH_SCHOOL,JUNIOR_COLLEGE,BACHELORS,MASTERS]
 
@@ -210,7 +212,7 @@ class Job(models.Model):
     members = ArrayField(models.CharField(max_length=100), blank=True, default=list)
     type = models.CharField(max_length=1, choices=TYPE, default=FULL_TIME)
     nature = models.CharField(max_length=1, choices=NATURE, default=PHYSICAL)
-    educations = models.CharField(max_length=20,null=True,choices=EDUCATION,default=HIGH_SCHOOL)
+    educations = models.IntegerField(null=True,choices=EDUCATION,default=HIGH_SCHOOL)
     speciality = models.CharField(max_length=250, null=True, blank=True)
     description = models.TextField(max_length=3000, null=True, blank=True)
     exp_min = models.IntegerField(default=0)
@@ -219,12 +221,13 @@ class Job(models.Model):
     salary_max = models.CharField(max_length=50, null=True, blank=True, default='')
     salary_type = models.CharField(max_length=1, choices=PAY_TYPE, default=MONTHY)
     currency = models.CharField(max_length=10, null=True, blank=True)
-    city = models.CharField(max_length=50, null=True, blank=True)
+    # city = models.CharField(max_length=50, null=True, blank=True)
     # state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
-    state =  models.CharField(max_length=50, null=True, blank=True)
+    # state =  models.CharField(max_length=50, null=True, blank=True)
     # country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
-    country =  models.CharField(max_length=50, null=True, blank=True)
+    # country =  models.CharField(max_length=50, null=True, blank=True)
     # created_by =  models.ForeignKey(Account, related_name='createdby', default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
+    location = models.ForeignKey(Location,null=True, blank=True, on_delete = models.SET_NULL)
     created_by =  models.CharField(max_length=50, null=True, blank=True)
     document = models.FileField(upload_to='media/jobs/', default=None, null=True, blank=True)  
     job_boards = ArrayField(models.CharField(max_length=50), blank=True)
@@ -264,4 +267,41 @@ class Job(models.Model):
         return Job.objects.filter(company=company)
 
 
+class JobNotes(models.Model):
+    id = models.AutoField(primary_key=True)
+    job = models.ForeignKey(
+        Job, default=None, null=False, verbose_name='Job', on_delete=models.CASCADE)
+    added_by = models.ForeignKey(
+        Account, default=None, null=True, verbose_name='Added by', on_delete=models.SET_NULL)
+    note = models.TextField(max_length=1000, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return str(self.job)+' '+str(self.added_by)[:20]
+
+    class Meta:
+        verbose_name = 'Note'
+        verbose_name_plural = 'Notes'
+
+    @staticmethod
+    def getById(id, job):
+        if JobNotes.objects.filter(id=id, job=job).exists():
+            return JobNotes.objects.get(id=id)
+        return None
+
+    @staticmethod
+    def getForJob(Job):
+        return JobNotes.objects.filter(job=Job)
+
+    @staticmethod
+    def getByIdAndCompany(id, company):
+        if JobNotes.objects.filter(id=id).exists():
+            note = JobNotes.objects.get(id=id)
+            if note.job.company.id == company.id:
+                return note
+        return None
+
+    @staticmethod
+    def getAll():
+        return JobNotes.objects.all()

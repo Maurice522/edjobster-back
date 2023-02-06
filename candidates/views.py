@@ -7,6 +7,9 @@ from .import helper
 from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import mixins, generics
+from .models import ApplicantWebForm, Note
+from .serializer import ApplicantWebFormSerializer, NoteSerializer
 
 class ApplyApi(APIView):
 
@@ -102,6 +105,27 @@ class NoteApi(APIView):
         data = helper.deleteNote(request)
         return makeResponse(data)     
 
+class DetailNoteApi(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Note.objects.all()
+    serializer_class = NoteSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
+# Update Notes view 
+class NotesUpdateApi(
+    generics.UpdateAPIView
+    ):
+    queryset = Note.objects.all()
+    serializer_class = NoteSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
 class CreateCandidateUsingWebForm(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -109,3 +133,61 @@ class CreateCandidateUsingWebForm(APIView):
     def post(self, request):
         data = helper.createCandidatewithoutResumeParser(request)
         return makeResponse(data) 
+
+class UpdateCandidatePipelineStatus(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = helper.updatePipelineStatus(request)
+        return makeResponse(data) 
+
+# Details ApplicationWebForm view
+class ApplicationWebFormByJobApi(
+    generics.ListAPIView
+    ):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        lookup_field = self.kwargs['lookup_field']
+        lookup_value = self.kwargs['lookup_value']
+        queryset = ApplicantWebForm.objects.filter(**{lookup_field: lookup_value})
+        return queryset
+
+    serializer_class = ApplicantWebFormSerializer
+
+# Update ApplicationWebForm view 
+class ApplicationWebFormUpdateApi(
+    generics.UpdateAPIView
+    ):
+    queryset = ApplicantWebForm.objects.all()
+    serializer_class = ApplicantWebFormSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+# Update ApplicationWebForm view 
+class ApplicationWebFormUpdateApi(
+    generics.UpdateAPIView
+    ):
+    queryset = ApplicantWebForm.objects.all()
+    serializer_class = ApplicantWebFormSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+# Delete ApplicationWebForm view 
+class ApplicationWebFormDeleteApi(
+    generics.DestroyAPIView
+    ):
+    queryset = ApplicantWebForm.objects.all()
+    serializer_class = ApplicantWebFormSerializer
+
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+ 
+# Create ApplicationWebForm view
+class ApplicationWebFormCreateApi(APIView):
+    def post(self, request):
+        data = helper.saveApplicantWebForms(request)
+        return makeResponse(data)

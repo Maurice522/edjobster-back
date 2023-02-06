@@ -1,6 +1,7 @@
 from email.policy import default
 from django.db import models
 from common.models import Country, State, NoteType
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import Q
 from job.models import Job, Account
 from django.contrib.postgres.fields import JSONField
@@ -64,8 +65,8 @@ class Candidate(models.Model):
     street = models.CharField(max_length=100, null=True, blank=True)
     pincode = models.CharField(max_length=10, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
-    #state = models.CharField(max_length=10, null=True, blank=True)
-    #country = models.CharField(max_length=50, null=True, blank=True)
+    # state = models.CharField(max_length=10, null=True, blank=True)
+    # country = models.CharField(max_length=50, null=True, blank=True)
     state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
     country = models.ForeignKey(Country, default=None, null=True, verbose_name='Country', on_delete=models.SET_NULL)
   
@@ -80,6 +81,8 @@ class Candidate(models.Model):
     qualification = models.CharField(max_length=10, choices=QUALIFICATIONS, default=GRADUATION, blank = True, null = True)
     cur_job = models.CharField(max_length=100, null=True, blank=True)
     cur_employer = models.CharField(max_length=100, null=True, blank=True)
+    pipeline_stage_status = models.CharField(max_length=100, null=True, blank=True)
+    pipeline_stage = models.CharField(max_length=100, null=True, blank=True)
     certifications = models.TextField(null=True, blank=True)
     fun_area = models.TextField(null=True, blank=True)
     subjects = models.TextField(null=True, blank=True)
@@ -100,8 +103,8 @@ class Candidate(models.Model):
         verbose_name_plural = 'Candidates'
 
     @staticmethod
-    def getById(id, job):
-        if Candidate.objects.filter(job=job, id=id).exists():
+    def getById(id):
+        if Candidate.objects.filter(id=id).exists():
             return Candidate.objects.get(id=id)
         return None
 
@@ -168,16 +171,12 @@ class Note(models.Model):
     id = models.AutoField(primary_key=True)
     candidate = models.ForeignKey(
         Candidate, default=None, null=False, verbose_name='Candidate', on_delete=models.CASCADE)
-    added_by = models.ForeignKey(
-        Account, default=None, null=True, verbose_name='Added by', on_delete=models.SET_NULL)
-    type = models.ForeignKey(
-        NoteType, default=None, null=True, verbose_name='Type', on_delete=models.SET_NULL)
     note = models.TextField(max_length=1000, null=True, blank=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.candidate)+' '+str(self.added_by)[:20]
+        return str(self.candidate)+' '+str(self.candidate)[:20]
 
     class Meta:
         verbose_name = 'Note'
@@ -209,7 +208,7 @@ class Note(models.Model):
 
 class ResumeFiles(models.Model):
     id = models.AutoField(primary_key=True)
-    resume = models.FileField(upload_to='media/temp/', default=None, null=True, blank=True)  
+    resume = models.FileField(upload_to='media/resume/', default=None, null=True, blank=True)  
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -218,3 +217,22 @@ class ResumeFiles(models.Model):
     class Meta:
         verbose_name = 'Note'
         verbose_name_plural = 'Notes'
+
+class ApplicantWebForm(models.Model):
+    id = models.AutoField(primary_key=True)
+    job = models.ForeignKey(Job, verbose_name='Job', on_delete=models.CASCADE)
+    candidate = models.ForeignKey(Candidate, verbose_name='Candidate', on_delete=models.CASCADE)
+    webform = ArrayField(models.CharField(max_length=1000), blank=True, null=True)
+    assingment = ArrayField(models.CharField(max_length=1000), blank=True, null=True)
+
+    form = JSONField(null=True, default=None)
+
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'ApplicantWebForm'
+        verbose_name_plural = 'ApplicantWebForms'
+
+    def __str__(self):
+        return str(self.job)+str(self.id)[:20]
