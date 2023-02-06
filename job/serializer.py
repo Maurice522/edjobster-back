@@ -47,7 +47,78 @@ class JobsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = "__all__"
+    
+    def get_department(self, obj):
+        if obj.department:
+            print(f"The department is {obj.department}, of company {obj.company}")
+            department = Department.getById(obj.department, obj.company)
+            if department:
+                return DepartmentSerializer(department).data
+        return None   
 
+    def get_educations(self, obj):
+        if obj.educations:
+            print(f"The Education is {obj.educations}, of company {obj.company}")
+            educations = Degree.getByIds(obj.educations, obj.company)
+            if educations:
+                return DegreeSerializer(educations, many=True).data
+        return []                     
+
+    def get_owner(self, obj):
+        if obj.owner:
+            return AccountSerializer(obj.owner).data
+        return None    
+
+    def get_members(self, obj):
+        if obj.members:
+            members = []
+            for memberId in obj.members:
+                account = Account.getById(memberId)
+                if account:
+                    members.append(AccountSerializer(account).data)
+            return members
+        return None  
+
+    def get_assesment(self, obj):
+        if obj.assesment:
+            assess = Assesment.getByAssessmentId(obj.assesment)
+            return AssesmentSerializer(assess).data
+        return None            
+
+    def get_document(self, obj):
+        if obj.document:
+            return settings.JOB_DOC_FILE_URL+obj.document.name[11:]
+        return None           
+
+    # def get_state(self, obj):
+    #     if obj.state:
+    #         return StateSerializer(obj.state).data
+    #     return None  
+
+    # def get_country(self, obj):
+    #     if obj.country:
+    #         return CountrySerializer(obj.country).data
+    #     return None          
+
+    def get_pipeline(self, obj):
+        if obj.pipeline:
+            print(f"One of the member is {obj.pipeline}")
+            pipeline = Pipeline.getById(obj.pipeline, obj.company)
+            if pipeline:
+                return PipelineSerializer(pipeline).data
+        return None  
+
+    def get_webform(self, obj):
+        if obj.webform:
+            print(f"Webform is {obj.webform}")
+            return WebformDataSerializer(obj.webform).data
+        return None        
+
+    def get_location(self, obj):
+        if obj.location:
+            print(f"Location is {obj.location}")
+            return LocationSerializer(obj.location).data
+        return None
 
 class JobListSerializer(serializers.ModelSerializer):
 
@@ -107,7 +178,8 @@ class JobDetailsSerializer(serializers.ModelSerializer):
              'id', 'title', 'vacancies', 'department', 'owner', 'assesment', 'members', 'type', 'nature', 'educations', 'speciality', 'description',
              'exp_min', 'exp_max', 'salary_min', 'salary_max', 'salary_type', 'currency', 'location', 'created_by', 'document', 
              'job_boards', 'pipeline', 'active', 'updated', 'created', 'webform']
-
+        depth=1
+    
     def get_department(self, obj):
         if obj.department:
             print(f"The department is {obj.department}, of company {obj.company}")
