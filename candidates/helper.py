@@ -784,55 +784,55 @@ def createCandidate(request):
         response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(apiParserBody))
         
         if response.status_code == 200:
-                res = response.json()
-                if 'error' in res:
-                    error = res.get('error')
-                    print("Resume parsing API didn't return a valid response")
-                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+            res = response.json()
+            if 'error' in res:
+                error = res.get('error')
+                print("Resume parsing API didn't return a valid response")
+                return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+            else:
+                if getCandidateFromResumeJson(res)['code'] == 200:
+                    candidate = getCandidateFromResumeJson(res)['candidate']
                 else:
-                    if getCandidateFromResumeJson(res)['code'] == 200:
-                        candidate = getCandidateFromResumeJson(res)['candidate']
-                    else:
+                    return {
+                        'code': 400,
+                        'msg': 'Something went wrong while parsing data from JSON'
+                    }
+                candidate.job = job
+                candidate.resume = resume
+                candidate.resume_parse_data = res
+                candidateExperiences = getCandidateExperiencesFromResumeJson(res)
+                try:
+                    with transaction.atomic():
+                        filled_webform.save()
+                        candidate.webform = filled_webform
+                        candidate.email = email
+                        candidateExperiences = getCandidateExperiencesFromResumeJson(res)
+                        candidateQualifications = getCandidateQualificationsFromResumeJson(res)
+                        candidate.save()
+
+                        for candidateExperience in candidateExperiences:
+                            candidateExperience.candidate = candidate
+                            candidateExperience.save()
+                        
+                        for candidateQualification in candidateQualifications:
+                            candidateQualification.candidate = candidate
+                            candidateQualification.save()
+                        
+                        candidateSerialized = CandidateDetailsSerializer(candidate)
+                        candidateExperiencesSerialized = CandidateExperienceSerializer(candidateExperiences,many = True)
+                        candidateQualificationsSerialized = CandidateQualificationSerializer(candidateQualifications,many = True)
                         return {
-                            'code': 400,
-                            'msg': 'Something went wrong while parsing data from JSON'
+                            'code': 200,
+                            'msg': 'Candidate created successfully',
+                            'candidate': candidateSerialized.data,
+                            'candidateExp':  candidateExperiencesSerialized.data,
+                            'candidateQual': candidateQualificationsSerialized.data
                         }
-                    candidate.job = job
-                    candidate.resume = resume
-                    candidate.resume_parse_data = res
-                    candidateExperiences = getCandidateExperiencesFromResumeJson(res)
-                    try:
-                        with transaction.atomic():
-                            filled_webform.save()
-                            candidate.webform = filled_webform
-                            candidate.email = email
-                            candidateExperiences = getCandidateExperiencesFromResumeJson(res)
-                            candidateQualifications = getCandidateQualificationsFromResumeJson(res)
-                            candidate.save()
 
-                            for candidateExperience in candidateExperiences:
-                                candidateExperience.candidate = candidate
-                                candidateExperience.save()
-                            
-                            for candidateQualification in candidateQualifications:
-                                candidateQualification.candidate = candidate
-                                candidateQualification.save()
-                            
-                            candidateSerialized = CandidateDetailsSerializer(candidate)
-                            candidateExperiencesSerialized = CandidateExperienceSerializer(candidateExperiences,many = True)
-                            candidateQualificationsSerialized = CandidateQualificationSerializer(candidateQualifications,many = True)
-                            return {
-                                'code': 200,
-                                'msg': 'Candidate created successfully',
-                                'candidate': candidateSerialized.data,
-                                'candidateExp':  candidateExperiencesSerialized.data,
-                                'candidateQual': candidateQualificationsSerialized.data
-                            }
-
-                    except Exception as e:
-                        print("some error occurred while saving the candidate")
-                        print(e)
-                        return getErrorResponse('Failed to parse resume and create candidate' + str(e))
+                except Exception as e:
+                    print("some error occurred while saving the candidate")
+                    print(e)
+                    return getErrorResponse('Failed to parse resume and create candidate' + str(e))
 
         return getErrorResponse("Resume parsing API didn't return a valid response")
     return getErrorResponse('Resume required!')
