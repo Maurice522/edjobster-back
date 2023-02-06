@@ -56,8 +56,8 @@ class CandidateDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Candidate
-        # fields = '__all__'
-        exclude = ('resume_parse_data',)
+        fields = '__all__'
+        # exclude = ('resume_parse_data',)
 
     def get_resume(self, obj):
         if obj.resume:
