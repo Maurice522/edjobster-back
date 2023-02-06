@@ -84,7 +84,8 @@ class JobsList(mixins.ListModelMixin,
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
+    
+from rest_framework.response import Response
 class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -93,7 +94,12 @@ class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
     serializer_class = JobsSerializer
 
     def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        job = self.get_object()
+        serializer = self.get_serializer(job)
+        data = serializer.data
+        data['department'] = serializer.get_department(job)
+        data['members'] = serializer.get_members(job)
+        return Response(data)
 
 class JobApi(APIView):
 
