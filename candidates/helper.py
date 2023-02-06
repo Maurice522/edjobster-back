@@ -979,7 +979,7 @@ def createCandidate(request):
                             'msg': 'Something went wrong while parsing data from JSON'
                         }
                     candidate.job = job
-                    candidate.resume = resume
+                    candidate.resume = file
                     candidate.resume_parse_data = res
                     candidateExperiences = getCandidateExperiencesFromResumeJson(res)
                     try:
@@ -1013,7 +1013,7 @@ def createCandidate(request):
                     except Exception as e:
                         print("some error occurred while saving the candidate")
                         print(e)
-                        return getErrorResponse('Failed to parse resume and create candidate' + str(e))
+                        return getErrorResponse('Failed to parse resume and create candidate ' + str(e))
 
         return getErrorResponse("Resume parsing API didn't return a valid response")
     return getErrorResponse('Resume required!')
