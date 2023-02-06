@@ -1537,7 +1537,7 @@ def assignJob(request):
             'code': 400,
             'data': 'Candidate not found!'
         }
-    job = Job(id=job_id)
+    job = Job.getById(int(job_id))
     if not job:
         return {
             'code': 400,
@@ -1545,7 +1545,8 @@ def assignJob(request):
         }
     
     candidate.job = job
-    
+    candidate.save()
+
     return {
         'code': 200,
         'msg': 'Updated Job of the candidate',
