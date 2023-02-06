@@ -191,3 +191,11 @@ class ApplicationWebFormCreateApi(APIView):
     def post(self, request):
         data = helper.saveApplicantWebForms(request)
         return makeResponse(data)
+
+class AssignJob(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        data = helper.assignJob(request)
+        return makeResponse(data)

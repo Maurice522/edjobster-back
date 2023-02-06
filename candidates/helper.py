@@ -1516,3 +1516,38 @@ def saveApplicantWebForms(request):
         'code': 200,
         'msg': 'Applicant webform created successfully',
     }
+
+def assignJob(request):
+    account = request.user
+
+    # Paranoid validation :p
+    company = Company.getById(account.company_id)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Company not found!'
+        }
+    
+    job_id = request.data.get('job', None)   
+    candidate_id = request.data.get('candidate', None) 
+
+    candidate = Candidate.getByIdAndCompany(id=candidate_id, company=company)
+    if not candidate:
+        return {
+            'code': 400,
+            'data': 'Candidate not found!'
+        }
+    job = Job(id=job_id)
+    if not job:
+        return {
+            'code': 400,
+            'msg': 'Job does not exist'
+        }
+    
+    candidate.job = job
+    
+    return {
+        'code': 200,
+        'msg': 'Updated Job of the candidate',
+    }
+    
