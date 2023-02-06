@@ -41,7 +41,7 @@ class PipelineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pipeline
         fields = "__all__"
-        depth=1
+        depth=2
 
 class PipelineStagListSerializer(serializers.ModelSerializer):
     pipeline = serializers.SerializerMethodField()
