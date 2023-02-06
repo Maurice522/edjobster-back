@@ -215,6 +215,7 @@ EMAIL_HOST_PASSWORD = "Edjobster202@"
 
 #RESUME PARSE
 RESUME_PARSE_URL = "https://rest.rchilli.com/RChilliParser/Rchilli/parseResume"
+RESUME_PARSE_BINARY_URL = "https://rest.rchilli.com/RChilliParser/Rchilli/parseResumeBinary"
 RESUME_PARSE_USER = "Syed Hamid Hasan"
 RESUME_PARSE_KEY = "NFSF6Y36"
 RESUME_PARSE_VERSION = "8.0.0"

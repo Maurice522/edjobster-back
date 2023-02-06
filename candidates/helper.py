@@ -1,6 +1,7 @@
 from collections import namedtuple
 import email
 from math import degrees
+import base64
 import re
 from unicodedata import category
 from venv import create
@@ -41,8 +42,23 @@ def applyJob(request):
     last_name = data.get('last_name', None)
     job_id = data.get('job_id', None)
     phone = data.get('phone', None)
+
+    # Making phone compulsary
     mobile = data.get('mobile', None)
+    if mobile is None or len(mobile)!=10:
+        return getErrorResponse("Please provide candidate Mobile No.")
+
+    if Candidate.objects.filter(mobile = mobile).exists():
+        return getErrorResponse("Canidate with this Mobile No. is already registered")
+
+    # removing duplicate entries
     email = data.get('email', None)
+    if email is None or len(str(email).strip())==0:
+        return getErrorResponse("Please provide candidate email")
+
+    if Candidate.objects.filter(email=email).exists() or Candidate.objects.filter(email_alt=email).exists():
+        return getErrorResponse("Canidate with this email is already registered")
+    
     email_alt = data.get('email_alt', None)
     marital_status = data.get('marital_status', None)
     date_of_birth = data.get('date_of_birth', None)
@@ -130,6 +146,63 @@ def applyJob(request):
         if 'resume' in request.FILES:
             resume = request.FILES['resume']
             candidate.resume = resume
+            url = ''
+            filename = ''
+            if candidate == None:
+                resume = ResumeFiles()
+                resume.resume = resume
+                resume.save()
+                # For production
+                # url = settings.RESUME_FILE_URL+resume.resume.name[11:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(resume.resume.name)
+                filename = resume.resume.name
+
+            else:
+                # For production
+                # url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(candidate.resume.name)
+                filename = candidate.resume.name
+
+                
+            # For production
+            # parse = {
+            #     "url": url,
+            #     "userkey": settings.RESUME_PARSE_KEY,
+            #     "version": settings.RESUME_PARSE_VERSION,
+            #     "subuserid": settings.RESUME_PARSE_USER,
+            # }
+
+            with open(url, "rb") as pdf_file:
+                encoded_resume = base64.b64encode(pdf_file.read())
+
+            encoded_resume = str(encoded_resume)
+            encoded_resume = encoded_resume[2:len(encoded_resume)-1]
+
+            # For development
+            parse = {
+                "filename": str(filename),
+                "filedata": str(encoded_resume),
+                "userkey": settings.RESUME_PARSE_KEY,
+                "version": settings.RESUME_PARSE_VERSION,
+                "subuserid": settings.RESUME_PARSE_USER,
+            }
+
+            response = requests.post(settings.RESUME_PARSE_BINARY_URL, data=json.dumps(parse))
+
+            if response.status_code == 200:
+                res = response.json()
+                if 'error' in res:
+                    error = res.get('error')
+                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+
+                candidate.resume_parse_data = res
+                
+            else:
+                return getErrorResponse('Failed to parse resume')
 
     candidate.first_name = first_name
     candidate.last_name = last_name
@@ -344,7 +417,65 @@ def updateApplication(request):
         print(request.FILES)
         if 'resume' in request.FILES:
             resume = request.FILES['resume']
-            candidate.resume = resume    
+            candidate.resume = resume
+            url = ''
+            filename = ''
+            if candidate == None:
+                resume = ResumeFiles()
+                resume.resume = resume
+                resume.save()
+                # For production
+                # url = settings.RESUME_FILE_URL+resume.resume.name[11:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(resume.resume.name)
+                filename = resume.resume.name
+
+            else:
+                # For production
+                # url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(candidate.resume.name)
+                filename = candidate.resume.name
+
+                
+            # For production
+            # parse = {
+            #     "url": url,
+            #     "userkey": settings.RESUME_PARSE_KEY,
+            #     "version": settings.RESUME_PARSE_VERSION,
+            #     "subuserid": settings.RESUME_PARSE_USER,
+            # }
+
+            with open(url, "rb") as pdf_file:
+                encoded_resume = base64.b64encode(pdf_file.read())
+
+            encoded_resume = str(encoded_resume)
+            encoded_resume = encoded_resume[2:len(encoded_resume)-1]
+
+            # For development
+            parse = {
+                "filename": str(filename),
+                "filedata": str(encoded_resume),
+                "userkey": settings.RESUME_PARSE_KEY,
+                "version": settings.RESUME_PARSE_VERSION,
+                "subuserid": settings.RESUME_PARSE_USER,
+            }
+
+            response = requests.post(settings.RESUME_PARSE_BINARY_URL, data=json.dumps(parse))
+
+            if response.status_code == 200:
+                res = response.json()
+                if 'error' in res:
+                    error = res.get('error')
+                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+
+                candidate.resume_parse_data = res
+                
+            else:
+                return getErrorResponse('Failed to parse resume')
+
 
     candidate.first_name = first_name            
     candidate.last_name = last_name            
@@ -429,7 +560,7 @@ def parseResume(request, candidate=None):
                 resume = ResumeFiles()
                 resume.resume = file
                 resume.save()
-                url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[11:]
+                url = settings.RESUME_FILE_URL+resume.resume.name[11:]
             else:
                 url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
 
