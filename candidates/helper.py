@@ -1167,13 +1167,13 @@ def parseResume(request, candidate=None):
 
 def createCandidatewithoutResumeParser(request):
 
-    # account = request.user
-    account = request.data.get('company')
+    account = request.user
+    # account = request.data.get('company')
     # account = Company.getById(account)
 
     # Paranoid validation :p
-    # company = Company.getById(account.company_id)
-    company = Company.getById(account)
+    company = Company.getById(account.company_id)
+    # company = Company.getById(account)
     if not company:
         return {
             'code': 400,
