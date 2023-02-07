@@ -192,3 +192,13 @@ class JobNotesApi(APIView):
     def delete(self, request):
         data = helper.deleteNote(request)
         return makeResponse(data)
+
+
+class JobStats(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getJobStats(request)
+        return makeResponse(data)
