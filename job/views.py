@@ -101,6 +101,33 @@ class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
         data = serializer.data
         data['department'] = serializer.get_department(job)
         data['members'] = serializer.get_members(job)
+        
+        # Giving the pipeline stage info as well 
+        
+        candidates = Candidate.getByJob(job=job)
+
+        pipeline_stage_stats = {}
+        pipeline_stage_status_stats = {}
+
+        for candidate in candidates:
+
+            # For pipeline stage list
+            if candidate.pipeline_stage:
+                if str(candidate.pipeline_stage).lower() in pipeline_stage_stats.keys():
+                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] += 1
+                else:
+                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] = 1
+
+            # For pipeline stage status
+            if candidate.pipeline_stage_status:
+                if str(candidate.pipeline_stage_status).lower() in pipeline_stage_status_stats.keys():
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] += 1
+                else:
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
+        
+        data["pipeline_stage_stats"] = pipeline_stage_stats
+        data["pipeline_stage_status_stats"] = pipeline_stage_status_stats
+        
         return Response(data)
     
 class JobsCandidates(mixins.RetrieveModelMixin, generics.GenericAPIView):    

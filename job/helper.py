@@ -356,7 +356,33 @@ def getJobDetails(request):
         return getErrorResponse('Job not found')
 
     serializer = JobDetailsSerializer(job, many=False)
-    data = serializer.data
+    data = {} 
+
+    data["job info"] = serializer.data
+
+    candidates = Candidate.getByJob(job=job)
+
+    pipeline_stage_stats = {}
+    pipeline_stage_status_stats = {}
+
+    for candidate in candidates:
+
+        # For pipeline stage list
+        if candidate.pipeline_stage:
+            if str(candidate.pipeline_stage).lower() in pipeline_stage_stats.keys():
+                pipeline_stage_stats[str(candidate.pipeline_stage).lower()] += 1
+            else:
+                pipeline_stage_stats[str(candidate.pipeline_stage).lower()] = 1
+
+        # For pipeline stage status
+        if candidate.pipeline_stage_status:
+            if str(candidate.pipeline_stage_status).lower() in pipeline_stage_status_stats.keys():
+                pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] += 1
+            else:
+                pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
+    
+    data["pipeline_stage_stats"] = pipeline_stage_stats
+    data["pipeline_stage_status_stats"] = pipeline_stage_status_stats
     
     return {
         'code': 200,
