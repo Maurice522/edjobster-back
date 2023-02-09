@@ -200,3 +200,44 @@ def interviewDetails(request):
         'data': serializer.data
     }
 
+def latestInterviewDetails(request):
+
+    company = Company.getByUser(request.user)
+
+    if not company:
+        getErrorResponse('Company not found')
+
+    # top 5 values as of now
+    top = 5
+    
+    interviews = Interview.getByCompany(company).order_by('-date','time_start')[:top]
+
+    if not interviews:
+        return {
+            'code': 200,
+            'data': 'No scheduled Interviews'
+        }
+
+    result = []
+
+    for inteview in interviews:
+        i = {}
+        i["candidate_name"] = str(inteview.candidate.first_name)+" "+str(inteview.candidate.last_name)
+        i["job_title"] = str(inteview.job.title)
+        i["start_time"] = inteview.time_start
+        i["end_time"] = inteview.time_end
+        i["date"] = inteview.date
+        interviewers_list = []
+        i["interviewers"] = interviewers_list
+        if inteview.interviewers:
+            print(inteview.interviewers)
+            i["interviewers"].extend(inteview.interviewers)
+            
+        result.append(i)
+
+    return {
+        'code': 200,
+        'data': result
+    }   
+
+
