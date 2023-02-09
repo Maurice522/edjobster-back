@@ -416,4 +416,54 @@ class Webform(models.Model):
 
     @staticmethod
     def getAll():
-        return Webform.objects.all()         
+        return Webform.objects.all()    
+
+
+class Contacts(models.Model):
+    id = models.AutoField(primary_key=True)
+    company = models.ForeignKey(Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    mobile = models.CharField(max_length=10, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True, blank=True)
+
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = 'Contact'
+        verbose_name_plural = 'Contacts'
+
+    @staticmethod
+    def getByName(name, company):
+        return Contacts.objects.filter(company=company, name=name).exists()
+
+    @staticmethod
+    def getById(id, company):
+        if Contacts.objects.filter(id=id, company=company).exists():
+            return Contacts.objects.get(id=id)
+        return None
+    
+    @staticmethod
+    def getByContactId(id):
+        if Contacts.objects.filter(id=id).exists():
+            return Contacts.objects.get(id=id)
+        return None
+
+    @staticmethod
+    def getByEmailId(email, company):
+        return Contacts.objects.filter(company=company, email=email).exists()
+
+    @staticmethod
+    def getByMobile(mobile, company):
+        return Contacts.objects.filter(company=company, mobile=mobile).exists()     
+
+    @staticmethod
+    def getForCompany(company):
+        return Contacts.objects.filter(company=company)
+
+    @staticmethod
+    def getAll():
+        return Contacts.objects.all()         

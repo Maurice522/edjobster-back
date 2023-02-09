@@ -273,3 +273,20 @@ class WebformFieldsApi(APIView):
     def get(self, request):
         data = helper.getWebformFields(request)
         return makeResponse(data)        
+
+class ContactsApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getContacts(request)
+        return makeResponse(data)
+
+    def post(self, request):
+        data = helper.saveContacts(request)
+        return makeResponse(data)
+
+    def delete(self, request):
+        data = helper.deleteContacts(request)
+        return makeResponse(data) 
