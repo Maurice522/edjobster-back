@@ -254,3 +254,11 @@ class JobStats(APIView):
     def get(self, request):
         data = helper.getJobStats(request)
         return makeResponse(data)
+
+class DashboardJobStats(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getDashboardJobStats(request)
+        return makeResponse(data)

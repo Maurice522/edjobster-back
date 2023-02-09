@@ -17,6 +17,7 @@ urlpatterns = [
     path('job-notes/', views.JobNotesApi.as_view(), name='job-notes'),
     path('all-job-candidate/',views.JobCandidateList.as_view(), name='all-job-candidate' ), 
     path('job-stats/',views.JobStats.as_view(), name='job-stats'),
+    path('dashboard-stats/',views.DashboardJobStats.as_view(), name='dashboard-stats'),
     path('a',views.CreateJobApi.as_view(), name = "a"),
 ]
 urlpatterns += static(settings.JOB_DOC_URL, document_root=settings.JOB_DOC_URL_ROOT)

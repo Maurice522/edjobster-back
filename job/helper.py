@@ -774,3 +774,44 @@ def getJobStats(request):
     }
 
         
+def getDashboardJobStats(request):
+    # paranoid company check 
+    company = Company.getByUser(request.user)
+
+    if not company: 
+        return getErrorResponse("Company not found!!")
+
+    jobs = Job.getForCompany(company)
+
+    if not jobs:
+        return getErrorResponse("Company has no registered jobs!!")
+
+    for job in jobs:
+        candidates = Candidate.getByJob(job=job)
+        pipeline_stage_stats = {}
+        pipeline_stage_status_stats = {}
+
+        for candidate in candidates:
+
+            # For pipeline stage list
+            if candidate.pipeline_stage:
+                if str(candidate.pipeline_stage).lower() in pipeline_stage_stats.keys():
+                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] += 1
+                else:
+                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] = 1
+
+            # For pipeline stage status
+            if candidate.pipeline_stage_status:
+                if str(candidate.pipeline_stage_status).lower() in pipeline_stage_status_stats.keys():
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] += 1
+                else:
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
+
+        results = {}
+        results['pipeline_stage_stats'] = pipeline_stage_stats
+        results['pipeline_stage_status_stats'] = pipeline_stage_status_stats
+
+    return {
+        'code': 200,
+        'data': results
+    }
