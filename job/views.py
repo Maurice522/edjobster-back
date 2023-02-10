@@ -13,6 +13,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from settings.models import Webform
 from .models import Job, Assesment
 from .serializer import AssesmentSerializer
+from candidates.models import Candidate
+from candidates.serializer import CandidateDetailsSerializer
 
 class AssesmentCategoryApi(APIView):
 
@@ -84,7 +86,8 @@ class JobsList(mixins.ListModelMixin,
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
+    
+from rest_framework.response import Response
 class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -93,7 +96,62 @@ class JobsDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
     serializer_class = JobsSerializer
 
     def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        job = self.get_object()
+        serializer = self.get_serializer(job)
+        data = serializer.data
+        data['department'] = serializer.get_department(job)
+        data['members'] = serializer.get_members(job)
+        
+        # Giving the pipeline stage info as well 
+        
+        candidates = Candidate.getByJob(job=job)
+
+        pipeline_stage_stats = {}
+        pipeline_stage_status_stats = {}
+
+        for candidate in candidates:
+
+            # For pipeline stage list
+            if candidate.pipeline_stage:
+                if str(candidate.pipeline_stage).lower() in pipeline_stage_stats.keys():
+                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] += 1
+                else:
+                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] = 1
+
+            # For pipeline stage status
+            if candidate.pipeline_stage_status:
+                if str(candidate.pipeline_stage_status).lower() in pipeline_stage_status_stats.keys():
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] += 1
+                else:
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
+        
+        data["pipeline_stage_stats"] = pipeline_stage_stats
+        data["pipeline_stage_status_stats"] = pipeline_stage_status_stats
+        
+        return Response(data)
+    
+class JobsCandidates(mixins.RetrieveModelMixin, generics.GenericAPIView):    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Job.objects.all()
+    serializer_class = JobsSerializer
+
+    def get_candidate(self, job):
+        if job:
+            candidate = Candidate.objects.filter(job=job.id)
+            return candidate
+        return None
+    
+    def get(self, request, *args, **kwargs):
+        job = self.get_object()
+        candidates = self.get_candidate(job)
+       
+        candidate_data=[] 
+        for candidate in candidates:
+            data = CandidateDetailsSerializer(candidate).data
+            candidate_data.append(data)
+        return Response(candidate_data)
 
 class JobApi(APIView):
 
@@ -185,4 +243,22 @@ class JobNotesApi(APIView):
 
     def delete(self, request):
         data = helper.deleteNote(request)
+        return makeResponse(data)
+
+
+class JobStats(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getJobStats(request)
+        return makeResponse(data)
+
+class DashboardJobStats(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getDashboardJobStats(request)
         return makeResponse(data)

@@ -11,8 +11,8 @@ from common.encoder import decode
 from common.utils import isValidUuid, getDomainFromEmail
 from common.models import Country, State, City
 import json
-from .models import Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStage, Webform
-from .serializer import DegreeSerializer, PipelineStagListSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineSerializer, PipelineStageSerializer, WebformDataSerializer, WebformListSerializer
+from .models import Contacts, Degree, Department, Designation, EmailCategory, EmailFields, EmailTemplate, Location, Pipeline, PipelineStage, Webform
+from .serializer import ContactsDataSerializer, DegreeSerializer, PipelineStagListSerializer, DepartmentSerializer, DesignationSerializer, EmailCategorySerializer, EmailFieldSerializer, EmailTemplateSerializer, LocationSerializer, PipelineSerializer, PipelineStageSerializer, WebformDataSerializer, WebformListSerializer
 
 
 def getCompanyByUser(user):
@@ -1001,3 +1001,106 @@ def getWebformFields(request):
             }
         ]
     }     
+
+
+def getContacts(request):
+    company = Company.getByUser(request.user)
+
+    id = request.GET.get('id', None)
+
+    if id:
+        contact = Contacts.getById(id, company)
+        if not contact:
+            return {
+                'code': 400,
+                'msg': 'Form not found'
+            }
+        serializer = ContactsDataSerializer(contact)
+
+    else:
+        contacts = Contacts.getForCompany(company)
+        serializer = ContactsDataSerializer(contacts, many=True)
+
+    return {
+        'code': 200,
+        'data': serializer.data
+    }    
+
+def saveContacts(request):
+
+    company = Company.getByUser(request.user)    
+    
+    data = request.data 
+    id = data.get('id', None)
+    name = data.get('name', None)
+    mobile = data.get('mobile', None)    
+    email = data.get('email', None)
+
+    # For update function
+    if id:  
+        # See whatever data is coming, else ryuk cries :)
+        contact = Contacts.getById(id, company)
+        if not contact:
+            return{
+                'code': 400,
+                'msg': 'Contact not found'
+            }
+        if name: 
+            contact.name = name
+        if mobile: 
+            contact.mobile = mobile
+        if email: 
+            contact.email = email
+    
+    # For creating new contact
+    else:
+        if mobile and Contacts.getByMobile(mobile,company):
+            return{
+                    'code': 400,
+                    'msg': 'Contact already exists with same mobile number'
+                }
+        if email and Contacts.getByEmailId(email,company):
+            return{
+                    'code': 400,
+                    'msg': 'Contact already exists with same email'
+                }
+        contact = Contacts()
+        contact.company = company
+        contact.name = name
+        contact.mobile = mobile
+        contact.email = email
+    
+    # Save changes
+    contact.save()
+    
+    return {
+        'code': 200,
+        'msg': 'Contact saved successfully!'
+    }
+    
+
+        
+
+def deleteContacts(request):
+    id = request.GET.get('id', None)
+    company = Company.getByUser(request.user)
+
+    if id:
+        contact = Contacts.getById(id, company)
+
+        if not contact:
+            return {
+                'code': 400,
+                'msg': 'Contact not found'
+            }
+
+        contact.delete()
+        return {
+            'code': 200,
+            'msg': 'Contact deleted succesfully!',
+        }
+
+    return {
+        'code': 400,
+        'msg': 'Invalid request'
+    }    

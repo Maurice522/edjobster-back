@@ -33,3 +33,11 @@ class InterviewDetailsApi(APIView):
     def get(self, request):
         data = helper.interviewDetails(request)
         return makeResponse(data)
+
+class LatestInterviewDetailsApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.latestInterviewDetails(request)
+        return makeResponse(data)
