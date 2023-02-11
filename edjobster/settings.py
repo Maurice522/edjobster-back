@@ -25,7 +25,7 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'zczznka#5b3qntonf@ywy_q@5mapn_8jjjw51g-q0bdaw1w&j-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'http://localhost:3000']
 
@@ -69,7 +69,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
-    '*'
 ]
 
 
@@ -105,8 +104,8 @@ DATABASES = {
         'NAME':  'hr',
         'USER': 'app',
         'PASSWORD': 'app@1508',
-        'HOST': 'postgresql://postgres:4pF8w123gwRLEkc1IMbz@containers-us-west-170.railway.app:7859/railway',
-        'PORT': '7859',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
     # 'db2': {
     #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
