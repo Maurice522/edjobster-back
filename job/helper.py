@@ -735,7 +735,7 @@ def getJobStats(request):
     if not company: 
         return getErrorResponse("Company not found!!")
 
-    job_id = request.data.get('job')
+    job_id = request.GET.get('job')
     if not job_id:
         return getErrorResponse('Invalid request')
     
