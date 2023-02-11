@@ -23,4 +23,8 @@ urlpatterns = [
     path('webform/', views.WebformApi.as_view(), name='webform'),
     path('webform-fields/', views.WebformFieldsApi.as_view(), name='webform-fields'),
     path('contacts/', views.ContactsApi.as_view(), name='contacts'),
-]
+
+    path('testimonials/', views.TestimonialsCView.as_view(), name='testimonials-c'),
+    path('testimonials/<int:pk>', views.TestimonialsRUDView.as_view(), name='testimonials-crud'),
+
+    ]

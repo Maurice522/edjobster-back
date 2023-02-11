@@ -124,8 +124,9 @@ def saveAssesment(request):
         }
 
     category = AssesmentCategory.getById(cat_id, company)
-    if not category:
-        return getErrorResponse( 'Assesment category not found')
+    # Making category optional
+    # if not category:
+    #     return getErrorResponse( 'Assesment category not found')
 
     id = data.get('id', None)
 
@@ -134,18 +135,19 @@ def saveAssesment(request):
         if not assesment:
             return getErrorResponse('Assesment not found')
 
-        if assesment.name != name and Assesment.getByNameAndCategory(name=name, category=category):
+        if assesment.name != name and Assesment.getByName(name=name, company=company):
             return getErrorResponse('Assesment with name '+name+' already exists.')
     else:
-        if Assesment.getByNameAndCategory(name=name, category=category):
+        if Assesment.getByName(name=name, company=company):
             return getErrorResponse('Assesment with name '+name+' already exists.')
 
         assesment = Assesment()   
         assesment.company = company
 
     assesment.name = name
-    assesment.category = category
-    print(form)
+    if category:
+        assesment.category = category
+    # print(form)
     assesment.form = form
     assesment.save()
 
@@ -733,7 +735,7 @@ def getJobStats(request):
     if not company: 
         return getErrorResponse("Company not found!!")
 
-    job_id = request.data.get('job')
+    job_id = request.GET.get('job')
     if not job_id:
         return getErrorResponse('Invalid request')
     

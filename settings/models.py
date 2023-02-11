@@ -467,3 +467,15 @@ class Contacts(models.Model):
     @staticmethod
     def getAll():
         return Contacts.objects.all()         
+    
+class Testimonials(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    testimonials = models.CharField(max_length=1000, null=True, blank=True)
+
+    def __str__(self):
+        return  f"{str(self.company)} {str(self.name)}"
+
+    class Meta:
+        verbose_name = 'Testimonial'
+        verbose_name_plural = 'Testimonials'

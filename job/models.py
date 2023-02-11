@@ -42,7 +42,7 @@ class AssesmentCategory(models.Model):
 class Assesment(models.Model):
     id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company, default=None, null=False, verbose_name='Company', on_delete=models.CASCADE)
-    category = models.ForeignKey(AssesmentCategory, default=None, null=False, verbose_name='Category', on_delete=models.CASCADE)
+    category = models.ForeignKey(AssesmentCategory, default=None, null=True, blank = True,verbose_name='Category', on_delete=models.SET_NULL)
     name = models.CharField(max_length=50, null=True, blank=True)
     form = JSONField(null=True, default=None)
     created_by =  models.ForeignKey(Account, default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
