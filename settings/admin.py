@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Contacts, Location, Degree, Department, Designation, EmailCategory, EmailTemplate, Pipeline, PipelineStage, EmailFields , Webform
-my_modules = [Location, Degree, Designation, EmailCategory, EmailTemplate, EmailFields , Webform]
+from .models import Contacts, Location, Degree, Department, Designation, EmailCategory, EmailTemplate, Pipeline, PipelineStage, EmailFields , Webform, Testimonials
+my_modules = [Location, Degree, Designation, EmailCategory, EmailTemplate, EmailFields , Webform, Testimonials]
 
 class PipelineAdmin(admin.ModelAdmin):
     list_display=('id',)
