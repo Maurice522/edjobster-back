@@ -435,6 +435,7 @@ def saveJob(request):
     pipeline_id = data.get('pipeline', None)   
     active = data.get('active', None)
     webform_id = data.get('webform', None)
+    status = data.get('status', None)
     
     if not title:
         return getErrorResponse('Job title required')
@@ -554,6 +555,9 @@ def saveJob(request):
     job.active = active
     job.job_boards = job_board_ids
     job.webform_id = webform_id
+
+    if status:
+        job.job_status = status
 
     if request.FILES != None:
         print("files")
@@ -749,6 +753,7 @@ def getJobStats(request):
 
     pipeline_stage_stats = {}
     pipeline_stage_status_stats = {}
+    no_of_candidates = 0
 
     for candidate in candidates:
 
@@ -766,9 +771,13 @@ def getJobStats(request):
             else:
                 pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
 
+        no_of_candidates += 1
+        
     results = {}
+    pipeline_stage_status_stats['no_of_candidates'] = no_of_candidates
     results['pipeline_stage_stats'] = pipeline_stage_stats
     results['pipeline_stage_status_stats'] = pipeline_stage_status_stats
+    results['job_status'] = job.job_status
 
     return {
         'code': 200,
@@ -792,6 +801,7 @@ def getDashboardJobStats(request):
         candidates = Candidate.getByJob(job=job)
         pipeline_stage_stats = {}
         pipeline_stage_status_stats = {}
+        no_of_candidates = 0
 
         for candidate in candidates:
 
@@ -809,7 +819,10 @@ def getDashboardJobStats(request):
                 else:
                     pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
 
+            no_of_candidates += 1
+
         results = {}
+        pipeline_stage_status_stats['no_of_candidates'] = no_of_candidates
         results['pipeline_stage_stats'] = pipeline_stage_stats
         results['pipeline_stage_status_stats'] = pipeline_stage_status_stats
 
@@ -817,3 +830,33 @@ def getDashboardJobStats(request):
         'code': 200,
         'data': results
     }
+
+def getJobStatusStats(request):
+    # paranoid company check 
+    company = Company.getByUser(request.user)
+
+    if not company: 
+        return getErrorResponse("Company not found!!")
+
+    jobs = Job.getForCompany(company)
+
+    if not jobs:
+        return getErrorResponse("Company has no registered jobs!!")
+    
+    results = []
+
+    for job in jobs:
+        data = {}
+        data["job_status"] = job.job_status
+        data["job_id"] = job.id
+        data["job_name"] = job.title
+        data["job_vacancies"] = job.vacancies
+
+        # appending data
+        results.append(data)
+
+    return {
+        'code': 200,
+        'data': results
+    }
+    
