@@ -37,3 +37,8 @@ class NotesApi(APIView):
     def get(self, request):
         data = helper.getNoteTypes(request)
         return makeResponse(data)
+
+class CompanyTagsApi(APIView):
+    def get(self, request):
+        data = helper.getCompanyTags(request)
+        return makeResponse(data)
