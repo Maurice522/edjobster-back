@@ -354,6 +354,7 @@ def updateCompanyInfo(request):
     locLon = data.get('loc_lon', None)
     address = data.get('address', None)
     landmark = data.get('landmark', None)
+    tag = data.get('tag', None)
     cityId = data.get('city', None)
 
     print('info', companyName, pincode, address, landmark, cityId)
@@ -378,6 +379,7 @@ def updateCompanyInfo(request):
     mState = mCity.state
     mCountry = mState.country
 
+    company.tag = tag
     company.name = companyName
     company.website = website
     company.description = description

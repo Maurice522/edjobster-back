@@ -101,6 +101,7 @@ class Company(models.Model):
     gst_no = models.CharField(max_length=15, null=True, blank=True)
     website = models.CharField(max_length=100, null=True, blank=True, default=None)
     description = models.TextField(max_length=5000, blank=True, null=True, default=None)
+    tag = models.CharField(max_length=100, blank=True, null=True)
     phone = models.CharField(max_length=15, null=False, blank=False)
     email = models.CharField(max_length=50, null=False, blank=False)
     address = models.TextField(max_length=500, blank=False, null=False)
