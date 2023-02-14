@@ -1,10 +1,16 @@
 from rest_framework import serializers
-from .models import Country, NoteType, State, City
+from .models import Country, NoteType, State, City, CompanyTags
 from django.conf import settings
 
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
+        fields = ['id', 'name']
+
+
+class CompanyTagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyTags
         fields = ['id', 'name']
 
 

@@ -1,6 +1,30 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+class CompanyTags(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.name)[:20]
+
+    class Meta:
+        verbose_name = 'Company Tag'
+        verbose_name_plural = 'Company Tags'
+
+    @staticmethod
+    def getById(id):
+        if CompanyTags.objects.filter(id=id).exists():
+            return CompanyTags.objects.get(id=id)
+        return None
+
+    @staticmethod
+    def getAll():
+        return CompanyTags.objects.all()
+
+
 
 class Country(models.Model):
     id = models.AutoField(primary_key=True)
