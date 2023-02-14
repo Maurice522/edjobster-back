@@ -12,7 +12,7 @@ from rest_framework.authtoken.models import Token
 from common.mail_utils import EmailVerificationMailer, ResetPasswordMailer
 from common.encoder import decode
 from common.utils import isValidUuid, getDomainFromEmail
-from common.models import Country, State, City
+from common.models import Country, State, City, CompanyTags
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 import os
 
@@ -336,6 +336,7 @@ def updateCompanyInfo(request):
         }
 
     company = Company.getById(account.company_id)
+    
     if not company:
         return {
             'code': 400,
@@ -379,7 +380,10 @@ def updateCompanyInfo(request):
     mState = mCity.state
     mCountry = mState.country
 
-    company.tag = tag
+    if tag:
+        tag = CompanyTags.getById(tag)
+        company.tag = tag
+        
     company.name = companyName
     company.website = website
     company.description = description

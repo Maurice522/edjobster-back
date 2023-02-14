@@ -1524,7 +1524,7 @@ def saveApplicantWebForms(request):
 
                 question["eval"] = marks
                 assingment_updated.append(question)
-            print(assingment_updated)
+            
             if question_type == 'C':
                 
                 answer = question["answer"]
