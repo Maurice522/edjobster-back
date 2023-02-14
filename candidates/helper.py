@@ -1518,13 +1518,13 @@ def saveApplicantWebForms(request):
                 options = question["options"]
                 candidateAnswer = question["candidateAnswer"]
 
-                idx = options.index(candidateAnswer[0])
+                idx = options.index(candidateAnswer)
 
                 marks = answer[idx]
 
                 question["eval"] = marks
                 assingment_updated.append(question)
-
+            print(assingment_updated)
             if question_type == 'C':
                 
                 answer = question["answer"]
@@ -1553,7 +1553,7 @@ def saveApplicantWebForms(request):
                 options = question["options"]
                 candidateAnswer = question["candidateAnswer"]
 
-                idx = options.index(candidateAnswer[0])
+                idx = options.index(candidateAnswer)
 
                 marks = answer[idx]
 
