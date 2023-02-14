@@ -17,6 +17,7 @@ urlpatterns = [
     path('job-notes/', views.JobNotesApi.as_view(), name='job-notes'),
     path('all-job-candidate/',views.JobCandidateList.as_view(), name='all-job-candidate' ), 
     path('job-stats/',views.JobStats.as_view(), name='job-stats'),
+    path('job-status-stats/',views.JobStatusStats.as_view(), name='job-status-stats'),
     path('dashboard-stats/',views.DashboardJobStats.as_view(), name='dashboard-stats'),
     path('a',views.CreateJobApi.as_view(), name = "a"),
 ]

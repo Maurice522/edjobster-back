@@ -198,10 +198,10 @@ class CreateJobApi(APIView):
         job_boards = data['job_boards']
         pipeline = data['pipeline']
         active = data['active']
-
+        status = data['status']
         webform_id = data['webform_id']
 
-        job = Job(title= title,vacancies = vacancies, department = department, owner = owner, assesment = assesment , type = type , nature = nature ,speciality = speciality , description = description , exp_max = exp_max , exp_min = exp_min , salary_min = salary_min , salary_max = salary_max , salary_type = salary_type , currency = currency , city = city , state = state ,job_boards = job_boards , pipeline = pipeline ,active = active , webform_id = webform_id )
+        job = Job(title= title,vacancies = vacancies, department = department, owner = owner, assesment = assesment , type = type , nature = nature ,speciality = speciality , description = description , exp_max = exp_max , exp_min = exp_min , salary_min = salary_min , salary_max = salary_max , salary_type = salary_type , currency = currency , city = city , state = state ,job_boards = job_boards , pipeline = pipeline ,active = active , webform_id = webform_id, job_status = status )
         job.save()
 
         return makeResponse(data)
@@ -261,4 +261,12 @@ class DashboardJobStats(APIView):
 
     def get(self, request):
         data = helper.getDashboardJobStats(request)
+        return makeResponse(data)
+
+class JobStatusStats(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getJobStatusStats(request)
         return makeResponse(data)
