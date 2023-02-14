@@ -54,7 +54,7 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = ['id', 'logo', 'name', 'domain', 'website', 'description', 'admin_id', 'admin_first_name',
                   'admin_last_name', 'admin_email', 'address', 'landmark', 'pincode', 'loc_lat', 'loc_lon', 'city_id', 'city_name', 'state_id', 'state_name',
-                  'country_id', 'country_name']
+                  'country_id', 'country_name', 'tag']
 
     def get_logo(self, obj):
         if obj.logo:
