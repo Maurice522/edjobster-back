@@ -22,6 +22,8 @@ urlpatterns = [
     path('applicant-update/<int:pk>', views.ApplicationWebFormUpdateApi.as_view(), name='applicant-update'),
     path('applicant-delete/<int:pk>', views.ApplicationWebFormDeleteApi.as_view(), name='applicant-delete'),
     path('applicant/', views.ApplicationWebFormCreateApi.as_view(), name='applicant-create'),
+    
+    path('assign-job/',  views.AssignJob.as_view(), name='assign-job'),
 ]
 
 urlpatterns += static(settings.RESUME_URL, document_root=settings.RESUME_URL_ROOT)

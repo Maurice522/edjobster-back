@@ -156,7 +156,7 @@ def applyJob(request):
                 # url = settings.RESUME_FILE_URL+resume.resume.name[11:]
 
                 # For developement
-                url = settings.RESUME_URL_ROOT+str(resume.resume.name)
+                url = str(resume.resume.path)
                 filename = resume.resume.name
 
             else:
@@ -554,23 +554,52 @@ def parseResume(request, candidate=None):
         print(request.FILES)
         if 'resume' in request.FILES:
             file = request.FILES['resume']
-
             url = ''
+            filename = ''
             if candidate == None:
                 resume = ResumeFiles()
                 resume.resume = file
                 resume.save()
-                url = settings.RESUME_FILE_URL+resume.resume.name[11:]
-            else:
-                url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+                # For production
+                # url = settings.RESUME_FILE_URL+resume.resume.name[11:]
 
+                # For developement
+                url = str(resume.resume.path)
+                filename = resume.resume.name
+
+            else:
+                # For production
+                # url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+
+                # For developement
+                url = settings.RESUME_URL_ROOT+str(candidate.resume.name)
+                filename = candidate.resume.name
+
+                
+            # For production
+            # parse = {
+            #     "url": url,
+            #     "userkey": settings.RESUME_PARSE_KEY,
+            #     "version": settings.RESUME_PARSE_VERSION,
+            #     "subuserid": settings.RESUME_PARSE_USER,
+            # }
+
+            with open(url, "rb") as pdf_file:
+                encoded_resume = base64.b64encode(pdf_file.read())
+
+            encoded_resume = str(encoded_resume)
+            encoded_resume = encoded_resume[2:len(encoded_resume)-1]
+
+            # For development
             parse = {
-                "url": url,
+                "filename": str(filename),
+                "filedata": str(encoded_resume),
                 "userkey": settings.RESUME_PARSE_KEY,
                 "version": settings.RESUME_PARSE_VERSION,
                 "subuserid": settings.RESUME_PARSE_USER,
             }
-            response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
+
+            response = requests.post(settings.RESUME_PARSE_BINARY_URL, data=json.dumps(parse))
 
             if response.status_code == 200:
                 res = response.json()
@@ -581,8 +610,10 @@ def parseResume(request, candidate=None):
                 return {
                     'code': 200,
                     'data': res
-                } 
-            return getErrorResponse('Failed to parse resume')
+               } 
+                
+            else:
+                return getErrorResponse('Failed to parse resume')
 
     return getErrorResponse('Resume required!')          
 
@@ -899,20 +930,39 @@ def createCandidate(request):
         else:    
             return getErrorResponse('Please provide filled form data')
 
-    if request.FILES['resume']:#TO-DO imporve if check
-        resume = request.FILES['resume']
-        url = settings.RESUME_FILE_URL+resume.name
-        fs = FileSystemStorage(settings.RESUME_URL_ROOT)
-        filename = fs.save(resume.name, resume)
+    if request.FILES['resume']:
+        file = request.FILES['resume']
+        url = ''
+        filename = ''
+        resume = ResumeFiles()
+        resume.resume = file
+        resume.save()
+        # For production
+        # url = settings.RESUME_FILE_URL+resume.resume.name[11:]
+
+        # For developement
+        url = str(resume.resume.path)
+        filename = resume.resume.name
+
         # url = 'https://196034-584727-raikfcquaxqncofqfm.stackpathdns.com/wp-content/uploads/2022/02/Stockholm-Resume-Template-Simple.pdf'
-        print(url)
-        apiParserBody = {
-            "url": url,
+        
+        with open(url, "rb") as pdf_file:
+                encoded_resume = base64.b64encode(pdf_file.read())
+
+        encoded_resume = str(encoded_resume)
+        encoded_resume = encoded_resume[2:len(encoded_resume)-1]
+
+        # For development
+        parse = {
+            "filename": str(filename),
+            "filedata": str(encoded_resume),
             "userkey": settings.RESUME_PARSE_KEY,
             "version": settings.RESUME_PARSE_VERSION,
             "subuserid": settings.RESUME_PARSE_USER,
         }
-        response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(apiParserBody))
+
+        response = requests.post(settings.RESUME_PARSE_BINARY_URL, data=json.dumps(parse))
+        # response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(apiParserBody))
         
         if response.status_code == 200:
                 res = response.json()
@@ -929,7 +979,7 @@ def createCandidate(request):
                             'msg': 'Something went wrong while parsing data from JSON'
                         }
                     candidate.job = job
-                    candidate.resume = resume
+                    candidate.resume = file
                     candidate.resume_parse_data = res
                     candidateExperiences = getCandidateExperiencesFromResumeJson(res)
                     try:
@@ -963,7 +1013,7 @@ def createCandidate(request):
                     except Exception as e:
                         print("some error occurred while saving the candidate")
                         print(e)
-                        return getErrorResponse('Failed to parse resume and create candidate' + str(e))
+                        return getErrorResponse('Failed to parse resume and create candidate ' + str(e))
 
         return getErrorResponse("Resume parsing API didn't return a valid response")
     return getErrorResponse('Resume required!')
@@ -997,12 +1047,12 @@ def getCandidateFromResumeJson(res):
         if res["ResumeParserData"]["DateOfBirth"]:
             candidate.date_of_birth = datetime.strptime(res["ResumeParserData"]["DateOfBirth"], "%d/%m/%Y").strftime("%Y-%m-%d")
 
-        if len(res["ResumeParserData"]["Address"]) > 0:
-            candidate.street = res["ResumeParserData"]["Address"][0]["Street"]
-            candidate.pincode = res["ResumeParserData"]["Address"][0]["ZipCode"]
-            candidate.city = res["ResumeParserData"]["Address"][0]["City"]
-            candidate.state = res["ResumeParserData"]["Address"][0]["State"]
-            candidate.country = res["ResumeParserData"]["Address"][0]["Country"]
+        # if len(res["ResumeParserData"]["Address"]) > 0:
+        #     candidate.street = res["ResumeParserData"]["Address"][0]["Street"]
+        #     candidate.pincode = res["ResumeParserData"]["Address"][0]["ZipCode"]
+        #     candidate.city = res["ResumeParserData"]["Address"][0]["City"]
+        #     candidate.state = res["ResumeParserData"]["Address"][0]["State"]
+        #     candidate.country = res["ResumeParserData"]["Address"][0]["Country"]
 
         if res["ResumeParserData"]["WorkedPeriod"]:
             try:
@@ -1123,57 +1173,57 @@ def getCandidateQualificationsFromResumeJson(res):
         return qualifications
                       
 
-def parseResume(request, candidate=None):
+# def parseResume(request, candidate=None):
 
-    if request.FILES != None:
-        print("files")
-        print(request.FILES)
-        if 'resume' in request.FILES:
-            file = request.FILES['resume']
+#     if request.FILES != None:
+#         print("files")
+#         print(request.FILES)
+#         if 'resume' in request.FILES:
+#             file = request.FILES['resume']
 
-            url = ''
-            if candidate == None:
-                resume = ResumeFiles()
-                resume.resume = file
-                resume.save()
-                url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[11:]
-            else:
-                url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
+#             url = ''
+#             if candidate == None:
+#                 resume = ResumeFiles()
+#                 resume.resume = file
+#                 resume.save()
+#                 url = settings.RESUME_TEMP_FILE_URL+resume.resume.name[11:]
+#             else:
+#                 url = settings.RESUME_FILE_URL+candidate.resume.name[13:]
 
-            parse = {
-                "url": url,
-                "userkey": settings.RESUME_PARSE_KEY,
-                "version": settings.RESUME_PARSE_VERSION,
-                "subuserid": settings.RESUME_PARSE_USER,
-            }
-            response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
+#             parse = {
+#                 "url": url,
+#                 "userkey": settings.RESUME_PARSE_KEY,
+#                 "version": settings.RESUME_PARSE_VERSION,
+#                 "subuserid": settings.RESUME_PARSE_USER,
+#             }
+#             response = requests.post(settings.RESUME_PARSE_URL, data=json.dumps(parse))
 
-            if response.status_code == 200:
-                res = response.json()
-                if 'error' in res:
-                    error = res.get('error')
-                    return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
+#             if response.status_code == 200:
+#                 res = response.json()
+#                 if 'error' in res:
+#                     error = res.get('error')
+#                     return getErrorResponse(str(error.get('errorcode'))+": "+error.get('errormsg'))
 
-                return {
-                    'code': 200,
-                    'data': res
-                } 
-            return getErrorResponse('Failed to parse resume')
+#                 return {
+#                     'code': 200,
+#                     'data': res
+#                 } 
+#             return getErrorResponse('Failed to parse resume')
 
-    return getErrorResponse('Resume required!') 
+#     return getErrorResponse('Resume required!') 
 
 
 # creating a Candidate using the online Form only and not the Resume Parser
 
 def createCandidatewithoutResumeParser(request):
 
-    # account = request.user
-    account = request.data.get('company')
+    account = request.user
+    # account = request.data.get('company')
     # account = Company.getById(account)
 
     # Paranoid validation :p
-    # company = Company.getById(account.company_id)
-    company = Company.getById(account)
+    company = Company.getById(account.company_id)
+    # company = Company.getById(account)
     if not company:
         return {
             'code': 400,
@@ -1400,11 +1450,10 @@ def saveApplicantWebForms(request):
     data = request.data    
     job_id = data.get('job', None)   
     candidate_id = data.get('candidate', None)   
-    # webform = data.get('webform', None)   
+    webform = data.get('webform', None)   
     assingment = data.get('assingment', None)
     form = data.get('form', None)   
 
-    print('info', data)
     if not candidate_id:
         return {
             'code': 400,
@@ -1417,20 +1466,22 @@ def saveApplicantWebForms(request):
             'msg': 'Job required'
         }
 
-    if  not assingment:
-        return {
-            'code': 400,
-            'msg': 'Invalid request'
-        }        
+    # if  not assingment:
+    #     return {
+    #         'code': 400,
+    #         'msg': 'Invalid request'
+    #     }        
 
     if not form:
         return {
             'code': 400,
             'msg': 'Invalid request'
         }
+    
     temp_form= json.dumps(form)
     form = json.loads(temp_form)
     job = Job(id=job_id)
+
     if not job:
         return {
             'code': 400,
@@ -1451,18 +1502,110 @@ def saveApplicantWebForms(request):
     # if form:
     #     instance.form = json.loads(form)
     if assingment:
-        temp_assignment= json.dumps(assingment)
-        instance.assingment = json.loads(temp_assignment)
+        temp_assignment = json.dumps(assingment)
+
+        assingment = json.loads(temp_assignment)
+
+        assingment_updated = []
+        for question in assingment:
+            question_type = question["type"]
+            
+            marks = 0
+            
+            if question_type == 'R':
+                
+                answer = question["answer"]
+                options = question["options"]
+                candidateAnswer = question["candidateAnswer"]
+
+                idx = options.index(candidateAnswer)
+
+                marks = answer[idx]
+
+                question["eval"] = marks
+                assingment_updated.append(question)
+            
+            if question_type == 'C':
+                
+                answer = question["answer"]
+                options = question["options"]
+                candidateAnswer = question["candidateAnswer"]
+
+                marks = 0
+                for cid in candidateAnswer:
+                    idx = options.index(cid)
+                    marks += int(answer[idx])
+
+                question["eval"] = marks
+                assingment_updated.append(question)
+            
+            if question_type == 'T':
+
+                if len(question["candidateAnswer"][0])>0:
+                    marks = question["marks"]
+                
+                question["eval"] = marks
+                assingment_updated.append(question)
+
+            if question_type == 'S':
+                
+                answer = question["answer"]
+                options = question["options"]
+                candidateAnswer = question["candidateAnswer"]
+
+                idx = options.index(candidateAnswer)
+
+                marks = answer[idx]
+
+                question["eval"] = marks
+                assingment_updated.append(question)
+
+        instance.assingment = assingment_updated
+
+    if webform:
+        temp_webform = json.dumps(webform)
+        instance.webform = json.loads(temp_webform)
+
     instance.form = form
     instance.save()
     
-    # except:
-    #     return {
-    #         'code': 200,
-    #         'msg': 'Something went wrong :(',
-    #     }
-
     return {
         'code': 200,
         'msg': 'Applicant webform created successfully',
     }
+
+def assignJob(request):
+    account = request.user
+
+    # Paranoid validation :p
+    company = Company.getById(account.company_id)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Company not found!'
+        }
+    
+    job_id = request.data.get('job', None)   
+    candidate_id = request.data.get('candidate', None) 
+
+    candidate = Candidate.getByIdAndCompany(id=candidate_id, company=company)
+    if not candidate:
+        return {
+            'code': 400,
+            'data': 'Candidate not found!'
+        }
+    job = Job.getById(int(job_id))
+    if not job:
+        return {
+            'code': 400,
+            'msg': 'Job does not exist'
+        }
+    
+    candidate.job = job
+    candidate.save()
+
+    return {
+        'code': 200,
+        'msg': 'Updated Job of the candidate',
+    }
+    

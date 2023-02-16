@@ -4,8 +4,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from .import helper
-from .models import EmailTemplate
-from .serializer import EmailTemplateSerializer
+from .models import EmailTemplate, Testimonials
+from .serializer import EmailTemplateSerializer, TestimonialsSerializer
 from common.utils import makeResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -273,3 +273,37 @@ class WebformFieldsApi(APIView):
     def get(self, request):
         data = helper.getWebformFields(request)
         return makeResponse(data)        
+
+class ContactsApi(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getContacts(request)
+        return makeResponse(data)
+
+    def post(self, request):
+        data = helper.saveContacts(request)
+        return makeResponse(data)
+
+    def delete(self, request):
+        data = helper.deleteContacts(request)
+        return makeResponse(data) 
+    
+class TestimonialsRUDView(generics.RetrieveUpdateDestroyAPIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Testimonials.objects.all()
+    serializer_class = TestimonialsSerializer
+
+
+class TestimonialsCView(generics.ListCreateAPIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Testimonials.objects.all()
+    serializer_class = TestimonialsSerializer

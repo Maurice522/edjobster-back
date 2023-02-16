@@ -42,7 +42,7 @@ class AssesmentCategory(models.Model):
 class Assesment(models.Model):
     id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company, default=None, null=False, verbose_name='Company', on_delete=models.CASCADE)
-    category = models.ForeignKey(AssesmentCategory, default=None, null=False, verbose_name='Category', on_delete=models.CASCADE)
+    category = models.ForeignKey(AssesmentCategory, default=None, null=True, blank = True,verbose_name='Category', on_delete=models.SET_NULL)
     name = models.CharField(max_length=50, null=True, blank=True)
     form = JSONField(null=True, default=None)
     created_by =  models.ForeignKey(Account, default=None, null=True, verbose_name='Created By', on_delete=models.SET_NULL)
@@ -199,6 +199,19 @@ class Job(models.Model):
         (YEARLY, 'Yearly'),
     ]
 
+    # Change here for changes status
+    IN_PROGRESS = 'In Progress'
+    FILLED = 'Filled'
+    HOLD = 'On Hold'
+    CLOSED = 'Closed'
+
+    STATUS = [
+        (IN_PROGRESS,'In Progress'),
+        (FILLED,'Filled'),
+        (HOLD, 'On Hold'),
+        (CLOSED, 'Closed')
+    ]
+
     id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company, default=None, null=True, verbose_name='Company', on_delete=models.CASCADE)
     title = models.CharField(max_length=50, null=True, blank=True)
@@ -221,6 +234,10 @@ class Job(models.Model):
     salary_max = models.CharField(max_length=50, null=True, blank=True, default='')
     salary_type = models.CharField(max_length=1, choices=PAY_TYPE, default=MONTHY)
     currency = models.CharField(max_length=10, null=True, blank=True)
+
+    # Status feild 
+    job_status =  models.CharField(max_length=50, null=True, blank=True, choices=STATUS, default =IN_PROGRESS)
+
     # city = models.CharField(max_length=50, null=True, blank=True)
     # state = models.ForeignKey(State, default=None, null=True, verbose_name='State', on_delete=models.SET_NULL)
     # state =  models.CharField(max_length=50, null=True, blank=True)

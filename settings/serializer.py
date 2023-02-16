@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Location, Department, Designation, Degree, Pipeline, PipelineStage, EmailCategory, EmailTemplate, EmailFields, Webform
+from .models import Contacts, Location, Department, Designation, Degree, Pipeline, PipelineStage, EmailCategory, EmailTemplate, EmailFields, Webform, Testimonials
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -43,6 +43,16 @@ class PipelineStageSerializer(serializers.ModelSerializer):
     def get_pipeline(self, obj):
         if obj.pipeline:
             return PipelineSerializer(obj.pipeline).data
+        return None 
+
+class TestimonialsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testimonials
+        fields = "__all__"
+
+    def get_testimonials(self, obj):
+        if obj.testimonials:
+            return TestimonialsSerializer(obj.testimonials).data
         return None 
 
 class PipelineSerializer(serializers.ModelSerializer):
@@ -104,4 +114,15 @@ class WebformDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Webform
-        fields = ['id', 'name', 'form', 'created', 'updated']                                                  
+        fields = ['id', 'name', 'form', 'created', 'updated']
+
+class ContactsDataSerializer(serializers.ModelSerializer):
+    company_name = serializers.SerializerMethodField()
+    class Meta:
+        model = Contacts
+        fields = ['id', 'name', 'email', 'mobile', 'company_name']
+
+    def get_company_name(self, obj):
+        if obj.company:
+            return obj.company.name
+        return None 

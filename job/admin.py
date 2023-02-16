@@ -5,7 +5,7 @@ from .models import Job, Assesment, AssesmentQuestion, AssesmentCategory, JobNot
 my_modules = [Job, Assesment, AssesmentQuestion, AssesmentCategory, JobNotes]
 
 class JobAdmin(admin.ModelAdmin):
-    list_display=('id','company','vacancies')
+    list_display=('id','company','vacancies', 'job_status')
     list_filter=('id',)
 admin.site.register(Job,JobAdmin)
 
