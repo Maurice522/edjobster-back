@@ -26,5 +26,4 @@ urlpatterns = [
 
     path('testimonials/', views.TestimonialsCView.as_view(), name='testimonials-c'),
     path('testimonials/<int:pk>', views.TestimonialsRUDView.as_view(), name='testimonials-crud'),
-
-    ]
+]
