@@ -471,7 +471,10 @@ class Contacts(models.Model):
 class Testimonials(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
-    testimonials = models.CharField(max_length=1000, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True,blank=True)
+    designation = models.CharField(max_length=100,null=True,blank=True)
+    testimonials = models.TextField(max_length=2000, null=True, blank=True)
+    Profile_picture = models.ImageField(upload_to='media/users/photos', default=None, null=True, blank=True)
 
     def __str__(self):
         return  f"{str(self.company)} {str(self.name)}"
