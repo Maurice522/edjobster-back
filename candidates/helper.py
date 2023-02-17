@@ -1450,11 +1450,10 @@ def saveApplicantWebForms(request):
     data = request.data    
     job_id = data.get('job', None)   
     candidate_id = data.get('candidate', None)   
-    # webform = data.get('webform', None)   
+    webform = data.get('webform', None)   
     assingment = data.get('assingment', None)
     form = data.get('form', None)   
 
-    print('info', data)
     if not candidate_id:
         return {
             'code': 400,
@@ -1467,20 +1466,22 @@ def saveApplicantWebForms(request):
             'msg': 'Job required'
         }
 
-    if  not assingment:
-        return {
-            'code': 400,
-            'msg': 'Invalid request'
-        }        
+    # if  not assingment:
+    #     return {
+    #         'code': 400,
+    #         'msg': 'Invalid request'
+    #     }        
 
     if not form:
         return {
             'code': 400,
             'msg': 'Invalid request'
         }
+    
     temp_form= json.dumps(form)
     form = json.loads(temp_form)
     job = Job(id=job_id)
+
     if not job:
         return {
             'code': 400,
@@ -1501,17 +1502,73 @@ def saveApplicantWebForms(request):
     # if form:
     #     instance.form = json.loads(form)
     if assingment:
-        temp_assignment= json.dumps(assingment)
-        instance.assingment = json.loads(temp_assignment)
+        temp_assignment = json.dumps(assingment)
+
+        assingment = json.loads(temp_assignment)
+
+        assingment_updated = []
+        for question in assingment:
+            question_type = question["type"]
+            
+            marks = 0
+            
+            if question_type == 'R':
+                
+                answer = question["answer"]
+                options = question["options"]
+                candidateAnswer = question["candidateAnswer"]
+
+                idx = options.index(candidateAnswer)
+
+                marks = answer[idx]
+
+                question["eval"] = marks
+                assingment_updated.append(question)
+            
+            if question_type == 'C':
+                
+                answer = question["answer"]
+                options = question["options"]
+                candidateAnswer = question["candidateAnswer"]
+
+                marks = 0
+                for cid in candidateAnswer:
+                    idx = options.index(cid)
+                    marks += int(answer[idx])
+
+                question["eval"] = marks
+                assingment_updated.append(question)
+            
+            if question_type == 'T':
+
+                if len(question["candidateAnswer"][0])>0:
+                    marks = question["marks"]
+                
+                question["eval"] = marks
+                assingment_updated.append(question)
+
+            if question_type == 'S':
+                
+                answer = question["answer"]
+                options = question["options"]
+                candidateAnswer = question["candidateAnswer"]
+
+                idx = options.index(candidateAnswer)
+
+                marks = answer[idx]
+
+                question["eval"] = marks
+                assingment_updated.append(question)
+
+        instance.assingment = assingment_updated
+
+    if webform:
+        temp_webform = json.dumps(webform)
+        instance.webform = json.loads(temp_webform)
+
     instance.form = form
     instance.save()
     
-    # except:
-    #     return {
-    #         'code': 200,
-    #         'msg': 'Something went wrong :(',
-    #     }
-
     return {
         'code': 200,
         'msg': 'Applicant webform created successfully',

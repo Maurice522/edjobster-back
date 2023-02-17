@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 from common.utils import isValidUuid
-from common.models import Country, State, City
+from common.models import Country, State, City, CompanyTags
 from datetime import datetime, timedelta
 
 
@@ -101,6 +101,7 @@ class Company(models.Model):
     gst_no = models.CharField(max_length=15, null=True, blank=True)
     website = models.CharField(max_length=100, null=True, blank=True, default=None)
     description = models.TextField(max_length=5000, blank=True, null=True, default=None)
+    tag = models.ForeignKey(CompanyTags, blank=True, null=True, on_delete=models.SET_NULL)
     phone = models.CharField(max_length=15, null=False, blank=False)
     email = models.CharField(max_length=50, null=False, blank=False)
     address = models.TextField(max_length=500, blank=False, null=False)
