@@ -3,6 +3,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 import threading
 from common.encoder import encode
+import json
 
 URL_RESET_PSWD = "http://app.edjobster.com/auth/reset-password/"
 URL_EMAIL_VERIFY = "http://app.edjobster.com/auth/activate?token="
@@ -76,6 +77,31 @@ class EmailActivationMailer(threading.Thread):
             "Activate Account",
             "faimsoft@gmail.com",
             [self.token.user.email],
+            html_message=msg_html,
+            fail_silently=False,
+        )
+
+class CandidateMailer(threading.Thread):
+    def __init__(self, body, emails):
+        threading.Thread.__init__(self)
+        self.body = body
+        self.emails = emails
+
+    def run(self):
+        print("===========send mail=========")
+        body = self.body
+        data = json.dumps(body)
+
+        emails = self.emails
+        print(emails, 'email email')
+        
+        msg_html = render_to_string("candidate-mail.html", {"data": data})
+
+        send_mail(
+            "Edjobster| Candidate Mail",
+            "Candidate Mail",
+            "info@edjobster.com",
+            emails,
             html_message=msg_html,
             fail_silently=False,
         )

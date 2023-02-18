@@ -351,6 +351,7 @@ class EmailFields(models.Model):
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, null=True, blank=True)
+    email_template = models.ForeignKey(EmailTemplate, null=True, blank=True, on_delete=models.CASCADE)
     value = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):

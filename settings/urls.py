@@ -26,5 +26,6 @@ urlpatterns = [
 
     path('testimonials/', views.TestimonialsCView.as_view(), name='testimonials-c'),
     path('testimonials/<int:pk>', views.TestimonialsRUDView.as_view(), name='testimonials-crud'),
+] 
 
-    ]
+urlpatterns += static(settings.PHOTO_URL, document_root=settings.PHOTO_URL_ROOT)
