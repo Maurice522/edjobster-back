@@ -254,6 +254,10 @@ class JobStats(APIView):
     def get(self, request):
         data = helper.getJobStats(request)
         return makeResponse(data)
+    
+    def post(self, request):
+        data = helper.updateJobStats(request)
+        return makeResponse(data)
 
 class DashboardJobStats(APIView):
     authentication_classes = [JWTAuthentication]

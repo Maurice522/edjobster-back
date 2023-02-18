@@ -117,6 +117,9 @@ def scheduleInterview(request):
     interview.title = title
     interview.job = job
     interview.candidate = candidate
+    # updating pipeline stage
+    candidate.pipeline_stage = 'Interview'
+    
     interview.date = date
     interview.time_start = time_start
     interview.time_end = time_end

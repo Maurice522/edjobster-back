@@ -46,6 +46,25 @@ class Candidate(models.Model):
         (POST_GRADUATION, 'PG'),
     ]
 
+    AS = 'Associated-Screeening' 
+    APPLIED = 'Applied' 
+    SHORTLIST = 'Shortlisted'
+    INTERVIEW = 'Interview' 
+    OFFERED = 'Offered' 
+    HIRED = 'Hired' 
+    ONBOARD = 'Onboarded'
+
+    STAGES = [
+        (AS,'Associated-Screeening' ),
+        (APPLIED,'Applied' ),
+        (SHORTLIST,'Shortlisted'),
+        (INTERVIEW,'Interview') ,
+        (OFFERED,'Offered') ,
+        (HIRED,'Hired' ),
+        (ONBOARD,'Onboarded'),
+    ]
+
+
     id = models.AutoField(primary_key=True)
     job = models.ForeignKey(Job, default=None, null=True, verbose_name='Job', on_delete=models.SET_NULL)
     webform = models.ForeignKey(Webform, default=None, null=True, verbose_name='webform', on_delete=models.SET_NULL)
@@ -82,7 +101,7 @@ class Candidate(models.Model):
     cur_job = models.CharField(max_length=100, null=True, blank=True)
     cur_employer = models.CharField(max_length=100, null=True, blank=True)
     pipeline_stage_status = models.CharField(max_length=100, null=True, blank=True)
-    pipeline_stage = models.CharField(max_length=100, null=True, blank=True)
+    pipeline_stage = models.CharField(max_length=100, null=True, blank=True,choices=STAGES, default=APPLIED)
     certifications = models.TextField(null=True, blank=True)
     fun_area = models.TextField(null=True, blank=True)
     subjects = models.TextField(null=True, blank=True)

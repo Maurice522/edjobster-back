@@ -42,3 +42,8 @@ class CompanyTagsApi(APIView):
     def get(self, request):
         data = helper.getCompanyTags(request)
         return makeResponse(data)
+
+class SendMailApi(APIView):
+    def post(self, request):
+        data = helper.sendCandidateMail(request)
+        return makeResponse(data)

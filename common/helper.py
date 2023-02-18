@@ -1,7 +1,8 @@
 from .models import Country, NoteType, State, City, CompanyTags
 from .serializer import CountrySerializer, NoteTypeSerializer, StateSerializer, CitySerializer, CompanyTagsSerializer
 from common import serializer
-
+from .mail_utils import CandidateMailer
+import json
 
 def getAllData():
 
@@ -98,4 +99,23 @@ def getCompanyTags(request):
     return {
         'code': 200,
         'types': serializer.data,
+    }
+
+def sendCandidateMail(request):
+
+    data = request.data
+    print(data, 'data')
+    emails = data.get('emails', None)
+    
+    print(emails, 'emails')
+    emails = list(emails.split(","))
+    print(emails, 'emails after')
+    print(type(emails))
+
+    sendMail = CandidateMailer(data, emails)
+    sendMail.start()
+
+    return {
+        'code': 200,
+        'message': 'mail send',
     }

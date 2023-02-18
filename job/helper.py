@@ -371,17 +371,17 @@ def getJobDetails(request):
 
         # For pipeline stage list
         if candidate.pipeline_stage:
-            if str(candidate.pipeline_stage).lower() in pipeline_stage_stats.keys():
-                pipeline_stage_stats[str(candidate.pipeline_stage).lower()] += 1
+            if str(candidate.pipeline_stage) in pipeline_stage_stats.keys():
+                pipeline_stage_stats[str(candidate.pipeline_stage)] += 1
             else:
-                pipeline_stage_stats[str(candidate.pipeline_stage).lower()] = 1
+                pipeline_stage_stats[str(candidate.pipeline_stage)] = 1
 
         # For pipeline stage status
         if candidate.pipeline_stage_status:
-            if str(candidate.pipeline_stage_status).lower() in pipeline_stage_status_stats.keys():
-                pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] += 1
+            if str(candidate.pipeline_stage_status) in pipeline_stage_status_stats.keys():
+                pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] += 1
             else:
-                pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
+                pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] = 1
     
     data["pipeline_stage_stats"] = pipeline_stage_stats
     data["pipeline_stage_status_stats"] = pipeline_stage_status_stats
@@ -760,17 +760,17 @@ def getJobStats(request):
 
         # For pipeline stage list
         if candidate.pipeline_stage:
-            if str(candidate.pipeline_stage).lower() in pipeline_stage_stats.keys():
-                pipeline_stage_stats[str(candidate.pipeline_stage).lower()] += 1
+            if str(candidate.pipeline_stage) in pipeline_stage_stats.keys():
+                pipeline_stage_stats[str(candidate.pipeline_stage)] += 1
             else:
-                pipeline_stage_stats[str(candidate.pipeline_stage).lower()] = 1
+                pipeline_stage_stats[str(candidate.pipeline_stage)] = 1
 
         # For pipeline stage status
         if candidate.pipeline_stage_status:
-            if str(candidate.pipeline_stage_status).lower() in pipeline_stage_status_stats.keys():
-                pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] += 1
+            if str(candidate.pipeline_stage_status) in pipeline_stage_status_stats.keys():
+                pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] += 1
             else:
-                pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
+                pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] = 1
 
         no_of_candidates += 1
         
@@ -808,22 +808,22 @@ def getDashboardJobStats(request):
 
             # For pipeline stage list
             if candidate.pipeline_stage:
-                if str(candidate.pipeline_stage).lower() in pipeline_stage_stats.keys():
-                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] += 1
+                if str(candidate.pipeline_stage) in pipeline_stage_stats.keys():
+                    pipeline_stage_stats[str(candidate.pipeline_stage)] += 1
                 else:
-                    pipeline_stage_stats[str(candidate.pipeline_stage).lower()] = 1
+                    pipeline_stage_stats[str(candidate.pipeline_stage)] = 1
 
             # For pipeline stage status
             if candidate.pipeline_stage_status:
-                if str(candidate.pipeline_stage_status).lower() in pipeline_stage_status_stats.keys():
-                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] += 1
+                if str(candidate.pipeline_stage_status) in pipeline_stage_status_stats.keys():
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] += 1
                 else:
-                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status).lower()] = 1
+                    pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] = 1
 
             no_of_candidates += 1
 
         results = {}
-        pipeline_stage_status_stats['no_of_candidates'] = no_of_candidates
+        pipeline_stage_stats['no_of_candidates'] = no_of_candidates
         results['pipeline_stage_stats'] = pipeline_stage_stats
         results['pipeline_stage_status_stats'] = pipeline_stage_status_stats
 
@@ -861,3 +861,36 @@ def getJobStatusStats(request):
         'data': results
     }
     
+def updateJobStats(request):
+    # paranoid company check 
+    company = Company.getByUser(request.user)
+
+    if not company: 
+        return getErrorResponse("Company not found!!")
+
+    job_id = request.data.get('job')
+    
+    if not job_id:
+        return getErrorResponse('Invalid request')
+    
+    # getting job 
+    job = Job.getByIdAndCompany(job_id, company)
+
+    if not job: 
+        return getErrorResponse("Job not found!!")
+
+    job_status = request.data.get('status')
+
+    if job_status not in ['In Progress', 'Filled', 'On Hold', 'Closed']:
+        return {
+            'code': 400,
+            'msg': 'Invalid status'
+        }
+
+    job.job_status = job_status
+    job.save()
+
+    return {
+        'code': 200,
+        'data': "Updated job status successfully"
+    }
