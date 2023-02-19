@@ -199,3 +199,11 @@ class AssignJob(APIView):
     def post(self, request):
         data = helper.assignJob(request)
         return makeResponse(data)
+
+class UpdateCandidateStatusApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        data = helper.updateCandidatePipelineStage(request)
+        return makeResponse(data)
