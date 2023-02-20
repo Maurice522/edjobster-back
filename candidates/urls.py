@@ -24,7 +24,7 @@ urlpatterns = [
     path('applicant-delete/<int:pk>', views.ApplicationWebFormDeleteApi.as_view(), name='applicant-delete'),
     path('applicant/', views.ApplicationWebFormCreateApi.as_view(), name='applicant-create'),
 
-
+    path('update-candidate-status/', views.UpdateCandidateStatusApi.as_view(), name='update-candidate-status'),
     path('assign-job/',  views.AssignJob.as_view(), name='assign-job'),
 ]
 

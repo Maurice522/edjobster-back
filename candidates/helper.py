@@ -1653,3 +1653,42 @@ def getJobStats(request):
         'code': 200,
         'data': results
     }
+def updateCandidatePipelineStage(request):
+    account = request.user
+    # Paranoid validation :p
+    company = Company.getById(account.company_id)
+    if not company:
+        return {
+            'code': 400,
+            'msg': 'Company not found!'
+        }
+    
+    data = request.data
+
+    # Validating the candidate id 
+    candidate_id = data.get('id')
+
+    if not candidate_id: 
+        return getErrorResponse('Bad request')
+
+    candidate = Candidate.getByIdAndCompany(id=candidate_id, company=company)
+    if not candidate:
+        return {
+            'code': 400,
+            'data': 'Candidate not found!'
+        }
+    
+    # Provide valid options from front end
+    status = data.get('status')
+    # Need validation
+    # 1. Selected pipeline stage status already exists and same with pipeline stage
+    if status not in ["Associated-Screeening", "Applied", "Shortlisted", "Interview", "Offered", "Hired", "Onboarded"]:
+        return getErrorResponse("Status is not valid, please select among \nAssociated-Screeening, Applied, Shortlisted, Interview, Offered, Hired, Onboarded\n")
+
+    candidate.pipeline_stage = status
+    candidate.save()
+
+    return {
+        'code': 200, 
+        'data': "Candidate Status Updated Successfully!!"
+    }

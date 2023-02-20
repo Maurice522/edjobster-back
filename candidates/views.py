@@ -209,3 +209,10 @@ class CandidateStats(APIView):
         data = helper.getJobStats(request)
         return makeResponse(data)
     
+class UpdateCandidateStatusApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        data = helper.updateCandidatePipelineStage(request)
+        return makeResponse(data)
