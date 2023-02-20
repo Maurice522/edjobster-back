@@ -199,3 +199,13 @@ class AssignJob(APIView):
     def post(self, request):
         data = helper.assignJob(request)
         return makeResponse(data)
+
+class CandidateStats(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = helper.getJobStats(request)
+        return makeResponse(data)
+    

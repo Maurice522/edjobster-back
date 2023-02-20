@@ -1608,4 +1608,48 @@ def assignJob(request):
         'code': 200,
         'msg': 'Updated Job of the candidate',
     }
+
+
+def getJobStats(request):
+
+    # paranoid company check 
+    company = Company.getByUser(request.user)
+
+    # company = request.GET.get('company')
+    # company = Company.getById(company)
+
+    if not company: 
+        return getErrorResponse("Company not found!!")
+
+    candidate = request.GET.get('candidate')
+    candidate = Candidate.getById(candidate)
+    if not candidate:
+        return getErrorResponse('Invalid request')
     
+
+    pipeline_stage_stats = {}
+    pipeline_stage_status_stats = {}
+
+    # For pipeline stage list
+    if candidate.pipeline_stage:
+        if str(candidate.pipeline_stage) in pipeline_stage_stats.keys():
+            pipeline_stage_stats[str(candidate.pipeline_stage)] += 1
+        else:
+            pipeline_stage_stats[str(candidate.pipeline_stage)] = 1
+
+    # For pipeline stage status
+    if candidate.pipeline_stage_status:
+        if str(candidate.pipeline_stage_status) in pipeline_stage_status_stats.keys():
+            pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] += 1
+        else:
+            pipeline_stage_status_stats[str(candidate.pipeline_stage_status)] = 1
+
+    results = {}
+
+    results['pipeline_stage_stats'] = pipeline_stage_stats
+    results['pipeline_stage_status_stats'] = pipeline_stage_status_stats
+
+    return {
+        'code': 200,
+        'data': results
+    }

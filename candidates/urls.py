@@ -16,13 +16,15 @@ urlpatterns = [
     path('notes-update/<int:pk>', views.NotesUpdateApi.as_view(), name='notes-update'),
     path('create-candidate/', views.CreateCandidateUsingResume.as_view(), name='create-candidate'),
     path('create-candidate-web/', views.CreateCandidateUsingWebForm.as_view(), name='create-candidate-web'),
+    path('candidate-stats/', views.CandidateStats.as_view(), name='candidate-stats'),
     path('update-candidate-pipeline-status/',views.UpdateCandidatePipelineStatus.as_view(), name='update-candidate-pipeline-status'),
 
     path('applicant-get/<str:lookup_field>/<str:lookup_value>/', views.ApplicationWebFormByJobApi.as_view(), name='applicant-get'),
     path('applicant-update/<int:pk>', views.ApplicationWebFormUpdateApi.as_view(), name='applicant-update'),
     path('applicant-delete/<int:pk>', views.ApplicationWebFormDeleteApi.as_view(), name='applicant-delete'),
     path('applicant/', views.ApplicationWebFormCreateApi.as_view(), name='applicant-create'),
-    
+
+
     path('assign-job/',  views.AssignJob.as_view(), name='assign-job'),
 ]
 
