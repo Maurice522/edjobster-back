@@ -206,7 +206,7 @@ class CandidateStats(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        data = helper.getJobStats(request)
+        data = helper.getCandidateStats(request)
         return makeResponse(data)
     
 class UpdateCandidateStatusApi(APIView):

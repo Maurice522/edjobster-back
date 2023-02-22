@@ -1610,7 +1610,7 @@ def assignJob(request):
     }
 
 
-def getJobStats(request):
+def getCandidateStats(request):
 
     # paranoid company check 
     company = Company.getByUser(request.user)
