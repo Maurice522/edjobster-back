@@ -1514,7 +1514,7 @@ def saveApplicantWebForms(request):
             
             if question_type == 'R':
                 
-                answer = question["answer"]
+                answer = str(question["answer"])
                 options = question["options"]
                 candidateAnswer = question["candidateAnswer"]
 
@@ -1527,7 +1527,7 @@ def saveApplicantWebForms(request):
             
             if question_type == 'C':
                 
-                answer = question["answer"]
+                answer = str(question["answer"])
                 options = question["options"]
                 candidateAnswer = question["candidateAnswer"]
 
@@ -1549,7 +1549,7 @@ def saveApplicantWebForms(request):
 
             if question_type == 'S':
                 
-                answer = question["answer"]
+                answer = str(question["answer"])
                 options = question["options"]
                 candidateAnswer = question["candidateAnswer"]
 
