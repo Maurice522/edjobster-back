@@ -110,8 +110,8 @@ def scheduleInterview(request):
     if request.FILES != None:
         print("files")
         print(request.FILES)
-        if 'document' in request.FILES:
-            document = request.FILES['document']
+        if 'attachment' in request.FILES:
+            document = request.FILES['attachment']
             interview.document = document    
 
     interview.title = title

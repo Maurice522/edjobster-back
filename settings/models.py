@@ -3,7 +3,7 @@ from django.db import models
 from account.models import Company
 from django.contrib.postgres.fields import ArrayField
 from common.models import Country, State, City
-from common.utils import generateFileName
+from common.utils import generateFileName, generateTemplateFileName
 from django.contrib.postgres.fields import JSONField
 
 
@@ -177,6 +177,7 @@ class PipelineStage(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, null=True, blank=True)
     status = ArrayField(models.CharField(max_length=50), blank=True, default=list) 
+    active_status = models.IntegerField(verbose_name="active status integer", default=0)
     active = models.BooleanField(default=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -254,13 +255,26 @@ from django.dispatch import receiver
 def create_pipeline_stages(sender, instance, created, **kwargs):
     if created:
         stage_list = ["Associated-Screeening", "Applied", "Shortlisted", "Interview", "Offered", "Hired", "Onboarded"]
+        stage_status = [["Associated", "Contacted", "Unqualified", "Contact in future", "Not-Contacted", "Junk Candidate", "Attempted to contact", "Candidate not interested"],
+                        [],
+                        ["Qualified", "Under review", "Waiting for evaluation", "Suitable for other openings"],
+                        ["Interview to be scheduled", "Interview Scheduled", "Interview in progress", "On-Hold", "Rejected for interview"],
+                        ["To be offered", "Offer Made", "Offer Accepted", "Offer Withdrawn", "Offer declined"],
+                        ["Hired", "Joined", "No Show", "Forward to onboarding", "Converted-Employee"],
+                        []]
         i = 1
         for stage in stage_list:
             stage_instance = PipelineStage.objects.create(name=stage)
             print(stage_instance)
+
+            stage_instance.status = stage_status[i-1]
             cmd =  f"instance.stage{i} = stage_instance"
+            
             exec(cmd)
+            
             i+=1
+            
+            stage_instance.save()
             instance.save()    
 
 # Email
@@ -317,7 +331,7 @@ class EmailTemplate(models.Model):
     subject = models.TextField(max_length=500, null=False, blank=False)
     message = models.TextField(max_length=5000, null=False, blank=False)
     attachment = models.FileField(
-        upload_to=generateFileName, default=None, null=True, blank=True)
+        upload_to=generateTemplateFileName, default=None, null=True, blank=True)
     updated = models.DateTimeField(auto_now=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 

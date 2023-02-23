@@ -52,6 +52,10 @@ def generateFileName(self, filename):
     url = "media/docs/%s/%s" % (self.domain, filename)
     return url
 
+def generateTemplateFileName(self, filename):
+    url = "media/docs/%s/%s" % (self.company.domain, filename)
+    return url
+
 def parseDate(date):
     try:
         return datetime.strptime(date, "%Y-%m-%d").date()

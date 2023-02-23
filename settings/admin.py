@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Contacts, Location, Degree, Department, Designation, EmailCategory, EmailTemplate, Pipeline, PipelineStage, EmailFields , Webform, Testimonials
-my_modules = [Location, Degree, Designation, EmailCategory, EmailTemplate, EmailFields , Webform, Testimonials]
+my_modules = [Location, Degree, Designation, EmailTemplate, EmailFields , Webform, Testimonials]
 
 class PipelineAdmin(admin.ModelAdmin):
     list_display=('id',)
@@ -14,7 +14,7 @@ class ContactsAdmin(admin.ModelAdmin):
     def company_name(self, contacts):
         return contacts.company.name
 
-
+admin.site.register(EmailCategory, PipelineAdmin)
 admin.site.register(Department, PipelineAdmin)
 admin.site.register(Pipeline, PipelineAdmin)
 admin.site.register(PipelineStage, PipelineAdmin)

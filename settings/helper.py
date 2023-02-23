@@ -663,8 +663,13 @@ def getEmailTemplates(request):
 
 def saveEmailTemplate(request):
 
-    company = Company.getByUser(request.user)    
-    
+    company = Company.getByUser(request.user)
+         
+    # company = request.data.get('company')
+    # print(company, 'company')
+    # company = Company.getById(company)
+    # print(company, 'company')
+
     data = request.data    
     type = data.get('type', None)   
     category = data.get('category', None)   
